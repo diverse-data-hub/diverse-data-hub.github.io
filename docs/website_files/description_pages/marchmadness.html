@@ -479,13 +479,13 @@ Yes
 <h3 class="anchored" data-anchor-id="key-features-of-the-data-set">Key Features of the Data Set</h3>
 <p>Each row represents a single team’s appearance in a specific tournament year and includes information such as:</p>
 <ul>
-<li><p><strong>Tournament Seed</strong> – Seed assigned to the team</p></li>
-<li><p><strong>Tournament Results</strong> – Number of wins, losses, and how far the team advanced</p></li>
-<li><p><strong>Bid Type</strong> – Whether the team received an automatic bid or was selected at-large.</p></li>
-<li><p><strong>Season Records</strong> – Regular season, conference, and total win/loss stats and percentages</p></li>
-<li><p><strong>Conference Information</strong> – Team’s conference name, record, and rank within the conference</p></li>
-<li><p><strong>Division</strong> – Regional placement in the tournament bracket (e.g., East, West)</p></li>
-<li><p><strong>Home Game Indication</strong> – Whether the team played its first game at home</p></li>
+<li><p><strong>Tournament Seed</strong> (<code>seed</code>) – Seed assigned to the team.</p></li>
+<li><p><strong>Tournament Results</strong> (<code>tourney_wins</code>, <code>tourney_losses</code>, <code>tourney_finish</code>) – Number of wins, losses, and how far the team advanced.</p></li>
+<li><p><strong>Bid Type</strong> (<code>bid</code>) – Whether the team received an automatic bid or was selected at-large.</p></li>
+<li><p><strong>Season Records</strong> (<code>reg_wins</code>, <code>reg_losses</code>, <code>reg_wins_pct</code>, <code>conf_wins</code>, <code>conf_losses</code>, <code>conf_wins_pct</code>, <code>total_wins</code>, <code>total_losses</code>, <code>total_wins_pct</code>) – Regular season, conference, and total win/loss stats and percentages.</p></li>
+<li><p><strong>Conference Information</strong> (<code>conference</code>, <code>conf_wins</code>, <code>conf_losses</code>, <code>conf_wins_pct</code>, <code>conf_rank</code>) – Team’s conference name, record, and rank within the conference.</p></li>
+<li><p><strong>Division</strong> (<code>division</code>) – Regional placement in the tournament bracket (e.g., East, West).</p></li>
+<li><p><strong>Home Game Indication</strong> (<code>first_game_at_home</code>) – Whether the team played its first game at home.</p></li>
 </ul>
 </section>
 <section id="purpose-and-use-cases" class="level3">

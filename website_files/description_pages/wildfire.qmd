@@ -82,7 +82,7 @@ In particular, Alberta experiences some of the most severe and frequent wildfire
 :::
 :::
 
-{{< include ../notebooks/wildfire.qmd >}}
+{{< include ../notebooks/wildfire.qmd >}} 
 
 ## Attribution
 

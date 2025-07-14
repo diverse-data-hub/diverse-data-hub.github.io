@@ -489,11 +489,11 @@ Yes
 <h3 class="anchored" data-anchor-id="key-features-of-the-data-set">Key Features of the Data Set</h3>
 <p>Each row in the data set represents an individual subject and includes the following selected variables:</p>
 <ul>
-<li><p><strong>Subject demographics</strong>: age, sex, ethnicity, education level, income level, and employment status</p></li>
-<li><p><strong>Relationship context</strong>: whether the subject is part of a same-sex relationship, whether they are married, the duration of the relationship and how many children are in the household.</p></li>
-<li><p><strong>Couple behavior indicators</strong>: sex, flirting and fighting frequency.</p></li>
-<li><p><strong>Pandemic Variables</strong>: interpreted impact of the pandemic in the relationship, income change during the pandemic, if the subject and their partner were sick with COVID-19 and if they were vaccinated.</p></li>
-<li><p><strong>Quality of the relationship</strong>: variable used to measure the subject’s perceived quality of their relationship.</p></li>
+<li><p><strong>Subject demographics</strong> (<code>subject_age</code>, <code>subject_sex</code>, <code>subject_ethnicity</code>, <code>subject_education</code>, <code>subject_income_category</code>, <code>subject_employment_status</code>): age, sex, ethnicity, education level, income level, and employment status</p></li>
+<li><p><strong>Relationship context</strong> (<code>same_sex_couple</code>, <code>married</code>, <code>relationship_duration</code>, <code>children</code>): whether the subject is part of a same-sex relationship, whether they are married, the duration of the relationship and how many children are in the household.</p></li>
+<li><p><strong>Couple behavior indicators</strong> (<code>sex_frequency</code>, <code>flirts_with_partner</code>, <code>fights_with_partner</code>): sex, flirting and fighting frequency.</p></li>
+<li><p><strong>Pandemic variables</strong> (<code>rel_change_during_pandemic</code>, <code>inc_change_during_pandemic</code>, <code>subject_had_covid</code>, <code>partner_had_covid</code>, <code>subject_vaccinated</code>, <code>partner_vaccinated</code>, <code>agree_covid_approach</code>): interpreted impact of the pandemic in the relationship, income change during the pandemic, if the subject and their partner were sick with COVID-19 and if they were vaccinated.</p></li>
+<li><p><strong>Quality of the relationship</strong> (<code>relationship_quality</code>): variable used to measure the subject’s perceived quality of their relationship.</p></li>
 </ul>
 </section>
 <section id="purpose-and-use-cases" class="level3">
@@ -928,9 +928,9 @@ occur. Because of that, the test results might be invalid.</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Omnibus</td>
-<td style="text-align: right;">92.43</td>
+<td style="text-align: right;">92.40</td>
 <td style="text-align: right;">96</td>
-<td style="text-align: right;">0.58</td>
+<td style="text-align: right;">0.59</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">same_sex_coupleYes</td>
