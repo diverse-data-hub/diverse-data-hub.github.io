@@ -9,23 +9,14 @@
 
 Each row represents a single wildfire incident and includes information such as:
 
--   **temperature** – The recorded air temperature (°C) at or near the fire location; higher temperatures often increase fire intensity and spread.
+- **Environmental conditions** (`temperature`, `wind_speed`, `relative_humidity`) -- Air temperature (°C), wind speed (km/h) and relative humidity (%) near the fire; influence fire intensity and spread.
 
--   **wind_speed** – Speed of wind (km/h) during the fire; stronger winds can accelerate fire spread and complicate suppression.
+- **Fire behavior metrics** (`fire_spread_rate`, `fire_type`, `fuel_type`) -- Fire expansion rate (ha/h), behavior class (surface, crown) and dominant fuel; determine growth and management.
 
--   **relative_humidity** – The percentage of moisture in the air; lower humidity typically increases fire risk by drying out vegetation.
+- **Access difficulty** (`ia_access`) -- Ease of crew access; low access delays response.
 
--   **fire_spread_rate** – The rate at which the fire expanded (e.g., hectares/hour); reflects the fire’s growth dynamics.
+- **Location coordinates** (`latitude`, `longitude`) -- Decimal degrees of fire origin; used for mapping and spatial analysis.
 
--   **fire_type** – Classification of fire behavior (e.g., surface, crown); influences how fires are managed and controlled.
-
--   **fuel_type** – The dominant type of vegetation or material burned (e.g., grass, timber); determines fire intensity and burn characteristics.
-
--   **ia_access** – Indicator of how easily suppression crews could access the fire location; limited access can delay response.
-
--   **latitude** – Geographic latitude coordinate of the fire’s origin; used for spatial analysis and regional modeling.
-
--   **longitude** – Geographic longitude coordinate of the fire’s origin; used alongside latitude for location-specific insights.
 
 ### Purpose and Use Cases
 

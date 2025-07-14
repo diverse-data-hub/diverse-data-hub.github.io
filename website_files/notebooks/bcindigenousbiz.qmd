@@ -9,21 +9,21 @@
 
 The data set offers rich, structured information about Indigenous-owned businesses in British Columbia. The key fields are:
 
--   **Business Name:** The official name of the business. It serves as the primary identifier for each entry in the data set.
+-   **Business Name** (`business_name`) – The official name of the business. It serves as the primary identifier for each entry in the data set.
 
--   **City:** The city or town where the business is physically located.
+-   **City** (`city`) – The city or town where the business is physically located.
 
--   **Latitude & Longitude:** Geographic coordinates that allow for mapping and spatial analysis. Useful for geo visualizations and regional studies.
+-   **Latitude & Longitude** (`latitude`, `longitude`) – Geographic coordinates that allow for mapping and spatial analysis. Useful for geo visualizations and regional studies.
 
--   **Region:** A broader classification of the business’s location within British Columbia (e.g., Northeast, Thompson/Okanagan). Helps in regional economic analysis.
+-   **Region** (`region`)  – A broader classification of the business’s location within British Columbia (e.g., Northeast, Thompson/Okanagan). Helps in regional economic analysis.
 
--   **Type:** Indicates the business ownership or structure, such as "Private Company," "Community owned" etc
+-   **Type** (`type`) – Indicates the business ownership or structure, such as "Private Company," "Community owned" etc
 
--   **Industry Sector:** The NAICS (North American Industry Classification System) code and description that categorize the business’s industry.
+-   **Industry Sector** (`industry_sector`) – The NAICS (North American Industry Classification System) code and description that categorize the business’s industry.
 
--   **Year Formed:** The year the business was established, which can be used to analyze trends in Indigenous entrepreneurship over time.
+-   **Year Formed** (`year_formed`) – The year the business was established, which can be used to analyze trends in Indigenous entrepreneurship over time.
 
--   **Number of Employees:** A range representing the workforce size, such as "1 to 4" or "5 to 9". This gives a sense of business scale and economic impact.
+-   **Number of Employees** (`number_of_employees`)  – A range representing the workforce size, such as "1 to 4" or "5 to 9". This gives a sense of business scale and economic impact.
 
 ### Purpose and Use Case
 
