@@ -1,4 +1,4 @@
-<div class="grid-item" data-featured="false" data-tags="r">
+<div class="grid-item" data-featured="true" data-tags="r">
   <img src="/website_files/img/bcindigenousbiz.png" width="20px" height="20px">
   <h3>BC Indigenous Businesses</h3>
   <p>
