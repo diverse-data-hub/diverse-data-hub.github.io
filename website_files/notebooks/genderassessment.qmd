@@ -2,21 +2,8 @@
 
 Each row represents a single company's gender assessment in a given year and includes organizational details, overall scores, and performance on various gender-related indicators:
 
--   **company** – The name of the company assessed for gender equity practices.
-
--   **country** – The headquarters location of the company, used for geographical grouping.
-
--   **region** – Broader geographical area of the company's location (e.g., North America, Europe), used for regional comparisons.
-
--   **industry** – Sector to which the company belongs (e.g., Chemicals,Electronics), used to evaluate industry-wise performance.
-
--   **ownership** – Type of ownership structure (e.g., Public, Private), used to study differences in scores by governance type.
-
--   **year** – The year in which the assessment was conducted, allowing for temporal comparisons.
-
--   **score** – The overall gender assessment score reflecting the company’s total performance.
-
--   **percent_score** – The overall gender assessment score expressed as a percentage for easier comparison.
+- **Organizational details** (`company`, `country`, `region`, `industry`, `ownership`, `year`) -- Company name, headquarters location, region, industry sector, ownership structure, and assessment year.
+- **Assessment scores** (`score`, `percent_score`) -- Overall gender assessment score and percentage for comparison.
 
 ### Gender Assessment Score Components
 

@@ -9,15 +9,15 @@
 
 Each row in the data set represents an individual subject and includes the following selected variables:
 
--   **Subject demographics**: age, sex, ethnicity, education level, income level, and employment status
+-   **Subject demographics** (`subject_age`, `subject_sex`, `subject_ethnicity`, `subject_education`, `subject_income_category`, `subject_employment_status`): age, sex, ethnicity, education level, income level, and employment status
 
--   **Relationship context**: whether the subject is part of a same-sex relationship, whether they are married, the duration of the relationship and how many children are in the household.
+-   **Relationship context** (`same_sex_couple`, `married`, `relationship_duration`, `children`): whether the subject is part of a same-sex relationship, whether they are married, the duration of the relationship and how many children are in the household.
 
--   **Couple behavior indicators**: sex, flirting and fighting frequency.
+-   **Couple behavior indicators** (`sex_frequency`, `flirts_with_partner`, `fights_with_partner`): sex, flirting and fighting frequency.
 
--   **Pandemic Variables**: interpreted impact of the pandemic in the relationship, income change during the pandemic, if the subject and their partner were sick with COVID-19 and if they were vaccinated.
+-   **Pandemic variables** (`rel_change_during_pandemic`, `inc_change_during_pandemic`, `subject_had_covid`, `partner_had_covid`, `subject_vaccinated`, `partner_vaccinated`, `agree_covid_approach`): interpreted impact of the pandemic in the relationship, income change during the pandemic, if the subject and their partner were sick with COVID-19 and if they were vaccinated.
 
--   **Quality of the relationship**: variable used to measure the subject's perceived quality of their relationship.
+-   **Quality of the relationship** (`relationship_quality`): variable used to measure the subject's perceived quality of their relationship.
 
 ### Purpose and Use Cases
 

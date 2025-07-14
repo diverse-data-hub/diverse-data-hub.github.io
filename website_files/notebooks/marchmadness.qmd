@@ -9,19 +9,19 @@
 
 Each row represents a single team's appearance in a specific tournament year and includes information such as:
 
--   **Tournament Seed** – Seed assigned to the team
+-   **Tournament Seed** (`seed`) – Seed assigned to the team.
 
--   **Tournament Results** – Number of wins, losses, and how far the team advanced
+-   **Tournament Results** (`tourney_wins`, `tourney_losses`, `tourney_finish`) – Number of wins, losses, and how far the team advanced.
 
--   **Bid Type** – Whether the team received an automatic bid or was selected at-large.
+-   **Bid Type** (`bid`) – Whether the team received an automatic bid or was selected at-large.
 
--   **Season Records** – Regular season, conference, and total win/loss stats and percentages
+-   **Season Records** (`reg_wins`, `reg_losses`, `reg_wins_pct`, `conf_wins`, `conf_losses`, `conf_wins_pct`, `total_wins`, `total_losses`, `total_wins_pct`) – Regular season, conference, and total win/loss stats and percentages.
 
--   **Conference Information** – Team's conference name, record, and rank within the conference
+-   **Conference Information** (`conference`, `conf_wins`, `conf_losses`, `conf_wins_pct`, `conf_rank`) – Team's conference name, record, and rank within the conference.
 
--   **Division** – Regional placement in the tournament bracket (e.g., East, West)
+-  **Division** (`division`) – Regional placement in the tournament bracket (e.g., East, West).
 
--   **Home Game Indication** – Whether the team played its first game at home
+-  **Home Game Indication** (`first_game_at_home`) – Whether the team played its first game at home.
 
 ### Purpose and Use Cases
 

@@ -1,6 +1,6 @@
 ::: {.hero-banner}
 
-**Diverse Data Hub** is an open educational resource offering curated data sets focused on equity, diversity, inclusion, and other socially relevant topics. It is designed to support students, educators, and researchers in accessing and working with meaningful data in their teaching, learning, and analysis.
+**Diverse Data Hub** is an open educational resource offering curated data sets focused on equity, diversity, inclusion, and other socially relevant topics. It is designed to support students, educators, and researchers in accessing and working with meaningful data.
 
 Data sets are available through the `diversedata` R package, allowing for straightforward integration into data science workflows. Each data set includes detailed documentation and contextual background to support informed exploration and connection to real-world topics. Example case studies are also included to illustrate practical applications.
 
@@ -16,11 +16,11 @@ Data sets are available through the `diversedata` R package, allowing for straig
 <!-- These are the featured data sets -->
 
 {{< include website_files/grid_items/marchmadness.qmd >}}
-{{< include website_files/grid_items/bcindigenousbiz.qmd >}}
+{{< include website_files/grid_items/hcmst.qmd >}}
 
 <!-- These are NOT featured data sets -->
 
-{{< include website_files/grid_items/hcmst.qmd >}}
+{{< include website_files/grid_items/bcindigenousbiz.qmd >}}
 {{< include website_files/grid_items/wildfire.qmd >}}
 {{< include website_files/grid_items/genderassessment.qmd >}}
 {{< include website_files/grid_items/globalrights.qmd >}}

@@ -2,23 +2,13 @@
 
 Each row represents a single country’s record for a specific year and includes information such as GDP per capita, education spending, and the legal status of various LGBTQ+ rights and protections.
 
--   `year`: Year of observation
-
--   `country`, `country-code`: Country name and ISO code
-
--   `gdp-per-capita`: GDP per capita (constant international-\$)
-
--   `education-spending-gdp`: Government expenditure on education (% of GDP)
-
--   `same-sex-marriage`: Legal status of same-sex marriage
-
--   `lgbtq-censorship`: Whether LGBTQ+ topics are censored
-
--   `employment-discrimination`: Laws against discrimination in employment
-
--   `gender-affirming-care`: Legal and medical access to gender-affirming care
-
--   `legal-gender`: Rights around legal gender marker change
+- **Identifiers** (`year`, `country`, `country-code`) -- Year of observation, country name, and ISO code.
+- **Economic and education metrics** (`gdp-per-capita`, `education-spending-gdp`) -- GDP per capita (constant international-$) and government expenditure on education (% of GDP).
+- **Marriage rights** (`same-sex-marriage`) -- Legal status of same-sex marriage.
+- **Censorship policies** (`lgbtq-censorship`) -- Whether LGBTQ+ topics are censored.
+- **Anti-discrimination laws** (`employment-discrimination`) -- Protections against discrimination in employment based on sexual orientation or gender identity.
+- **Healthcare access** (`gender-affirming-care`) -- Legal and medical access to gender-affirming care.
+- **Legal gender recognition** (`legal-gender`) -- Rights around changing one’s legal gender marker.
 
 ### **Purpose and Use Cases**
 
