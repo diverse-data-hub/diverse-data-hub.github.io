@@ -367,15 +367,13 @@ Yes
 <h3 class="anchored" data-anchor-id="key-features-of-the-data-set"><strong>Key Features of the Data Set</strong></h3>
 <p>Each row represents a single country’s record for a specific year and includes information such as GDP per capita, education spending, and the legal status of various LGBTQ+ rights and protections.</p>
 <ul>
-<li><p><code>year</code>: Year of observation</p></li>
-<li><p><code>country</code>, <code>country-code</code>: Country name and ISO code</p></li>
-<li><p><code>gdp-per-capita</code>: GDP per capita (constant international-$)</p></li>
-<li><p><code>education-spending-gdp</code>: Government expenditure on education (% of GDP)</p></li>
-<li><p><code>same-sex-marriage</code>: Legal status of same-sex marriage</p></li>
-<li><p><code>lgbtq-censorship</code>: Whether LGBTQ+ topics are censored</p></li>
-<li><p><code>employment-discrimination</code>: Laws against discrimination in employment</p></li>
-<li><p><code>gender-affirming-care</code>: Legal and medical access to gender-affirming care</p></li>
-<li><p><code>legal-gender</code>: Rights around legal gender marker change</p></li>
+<li><strong>Identifiers</strong> (<code>year</code>, <code>country</code>, <code>country-code</code>) – Year of observation, country name, and ISO code.</li>
+<li><strong>Economic and education metrics</strong> (<code>gdp-per-capita</code>, <code>education-spending-gdp</code>) – GDP per capita (constant international-$) and government expenditure on education (% of GDP).</li>
+<li><strong>Marriage rights</strong> (<code>same-sex-marriage</code>) – Legal status of same-sex marriage.</li>
+<li><strong>Censorship policies</strong> (<code>lgbtq-censorship</code>) – Whether LGBTQ+ topics are censored.</li>
+<li><strong>Anti-discrimination laws</strong> (<code>employment-discrimination</code>) – Protections against discrimination in employment based on sexual orientation or gender identity.</li>
+<li><strong>Healthcare access</strong> (<code>gender-affirming-care</code>) – Legal and medical access to gender-affirming care.</li>
+<li><strong>Legal gender recognition</strong> (<code>legal-gender</code>) – Rights around changing one’s legal gender marker.</li>
 </ul>
 </section>
 <section id="purpose-and-use-cases" class="level3">
@@ -504,23 +502,33 @@ Yes
 </figure>
 </div>
 </div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Click in in the left margin to switch to the previous variable or in the right margin to switch to the next variable.
+To regain use of the VIM GUI and the R console, click anywhere else in the graphics window.</code></pre>
+</div>
 </div>
 <p>The spine plot shows that missing values in <code>gdp-per-capita</code> are not distributed evenly across the levels of <code>same-sex-marriage</code> recognition. Between seven categories, missingness is most frequent in countries where same-sex marriages are Unrecognized, followed by those where same-sex marriage is Banned, and then in countries where it is Legal.</p>
 <p>This pattern suggests that the missingness in GDP is likely not completely at random, and may be associated with marriage recognition status, indicating a Missing At Random (MAR) mechanism. Recognizing this pattern is important, as it can guide the selection of appropriate imputation strategies that account for such relationships.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize missingness in education spending across legal gender categories</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>) <span class="sc">+</span> <span class="fl">0.1</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">spineMiss</span>(cleaned_rights[, <span class="fu">c</span>(<span class="st">"same_sex_marriage"</span>, <span class="st">"edu_spend"</span>)],</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"gray85"</span>, <span class="st">"skyblue"</span>),</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">cex.axis =</span> <span class="fl">0.7</span>,         </span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">las =</span> <span class="dv">2</span>,                </span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">xlab =</span> <span class="st">"Same Sex Marriage"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize missingness in education spending across legal gender categories</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>) <span class="sc">+</span> <span class="fl">0.1</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">spineMiss</span>(cleaned_rights[, <span class="fu">c</span>(<span class="st">"same_sex_marriage"</span>, <span class="st">"edu_spend"</span>)],</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"gray85"</span>, <span class="st">"skyblue"</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">cex.axis =</span> <span class="fl">0.7</span>,         </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">las =</span> <span class="dv">2</span>,                </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">xlab =</span> <span class="st">"Same Sex Marriage"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="globalrights_files/figure-html/spineplot-edu-by-marriage-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Click in in the left margin to switch to the previous variable or in the right margin to switch to the next variable.
+To regain use of the VIM GUI and the R console, click anywhere else in the graphics window.</code></pre>
 </div>
 </div>
 <p>The spine plot for <code>edu-spend</code> across <code>same-sex-marriage</code> categories reveals that missing values are present in all levels of marriage recognition, unlike <code>gdp</code>, where missingness was more concentrated. Again between seven categories, missingness is most frequent in countries where same-sex marriages are Unrecognized, followed by those where same-sex marriage is Banned, and then in countries where it is Legal. We can also see that the Civil union or other partnership category has missing values</p>
@@ -534,20 +542,20 @@ Yes
 <p>To handle multiple variables with missing values, we applied the MICE algorithm, which builds a separate model for each incomplete variable using relevant predictors like marriage status, employment protection, and legal gender. This approach allows for flexible and iterative imputation, especially effective when missingness is spread across several variables.</p>
 <p>Finally, MICE generates multiple imputed data sets, which supports transparent and reproducible analysis while accounting for uncertainty in the missing data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>impute_df <span class="ot">&lt;-</span> cleaned_rights <span class="sc">|&gt;</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(gdp_per_capita, edu_spend, same_sex_marriage, lgbtq_censorship, employment, affirming_care, legal_gender)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>impute_df <span class="ot">&lt;-</span> impute_df <span class="sc">|&gt;</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">marriage =</span> <span class="fu">as.factor</span>(same_sex_marriage),</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">censorship =</span> <span class="fu">as.factor</span>(lgbtq_censorship),</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">employment =</span> <span class="fu">as.factor</span>(employment),</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">affirming_care =</span> <span class="fu">as.factor</span>(affirming_care),</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">legal_gender =</span> <span class="fu">as.factor</span>(legal_gender)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>imputed <span class="ot">&lt;-</span> <span class="fu">mice</span>(impute_df, <span class="at">method =</span> <span class="st">"pmm"</span>, <span class="at">m =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>impute_df <span class="ot">&lt;-</span> cleaned_rights <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(gdp_per_capita, edu_spend, same_sex_marriage, lgbtq_censorship, employment, affirming_care, legal_gender)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>impute_df <span class="ot">&lt;-</span> impute_df <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">marriage =</span> <span class="fu">as.factor</span>(same_sex_marriage),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">censorship =</span> <span class="fu">as.factor</span>(lgbtq_censorship),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">employment =</span> <span class="fu">as.factor</span>(employment),</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">affirming_care =</span> <span class="fu">as.factor</span>(affirming_care),</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">legal_gender =</span> <span class="fu">as.factor</span>(legal_gender)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>imputed <span class="ot">&lt;-</span> <span class="fu">mice</span>(impute_df, <span class="at">method =</span> <span class="st">"pmm"</span>, <span class="at">m =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
  iter imp variable
@@ -582,16 +590,16 @@ Yes
 <section id="visual-comparison-for-before-and-after-imputation" class="level4">
 <h4 class="anchored" data-anchor-id="visual-comparison-for-before-and-after-imputation"><strong>5.</strong> Visual Comparison for Before and After Imputation</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plot_before <span class="ot">&lt;-</span> <span class="fu">densityplot</span>(<span class="sc">~</span> gdp_per_capita, <span class="at">data =</span> cleaned_rights,</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">main =</span> <span class="st">"Distribution of GDP (Original Data)"</span>,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                           <span class="at">xlab =</span> <span class="st">"GDP per Capita"</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>plot_after <span class="ot">&lt;-</span> <span class="fu">densityplot</span>(imputed, <span class="sc">~</span> gdp_per_capita,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">main =</span> <span class="st">"Distribution of GDP (Imputed vs. Observed)"</span>,</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                          <span class="at">xlab =</span> <span class="st">"GDP per Capita"</span>)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrange the two plots vertically</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.arrange</span>(plot_before, plot_after, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plot_before <span class="ot">&lt;-</span> <span class="fu">densityplot</span>(<span class="sc">~</span> gdp_per_capita, <span class="at">data =</span> cleaned_rights,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">main =</span> <span class="st">"Distribution of GDP (Original Data)"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                           <span class="at">xlab =</span> <span class="st">"GDP per Capita"</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>plot_after <span class="ot">&lt;-</span> <span class="fu">densityplot</span>(imputed, <span class="sc">~</span> gdp_per_capita,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">main =</span> <span class="st">"Distribution of GDP (Imputed vs. Observed)"</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                          <span class="at">xlab =</span> <span class="st">"GDP per Capita"</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrange the two plots vertically</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.arrange</span>(plot_before, plot_after, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -601,16 +609,16 @@ Yes
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plot_before <span class="ot">&lt;-</span> <span class="fu">densityplot</span>(<span class="sc">~</span> edu_spend, <span class="at">data =</span> cleaned_rights,</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">main =</span> <span class="st">"Distribution of GDP (Original Data)"</span>,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                           <span class="at">xlab =</span> <span class="st">"GDP per Capita"</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>plot_after <span class="ot">&lt;-</span> <span class="fu">densityplot</span>(imputed, <span class="sc">~</span> edu_spend,</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">main =</span> <span class="st">"Distribution of GDP (Imputed vs. Observed)"</span>,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                          <span class="at">xlab =</span> <span class="st">"GDP per Capita"</span>)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrange the two plots vertically</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.arrange</span>(plot_before, plot_after, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plot_before <span class="ot">&lt;-</span> <span class="fu">densityplot</span>(<span class="sc">~</span> edu_spend, <span class="at">data =</span> cleaned_rights,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">main =</span> <span class="st">"Distribution of GDP (Original Data)"</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                           <span class="at">xlab =</span> <span class="st">"GDP per Capita"</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>plot_after <span class="ot">&lt;-</span> <span class="fu">densityplot</span>(imputed, <span class="sc">~</span> edu_spend,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">main =</span> <span class="st">"Distribution of GDP (Imputed vs. Observed)"</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                          <span class="at">xlab =</span> <span class="st">"GDP per Capita"</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrange the two plots vertically</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.arrange</span>(plot_before, plot_after, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">

@@ -4,6 +4,8 @@ toc: true
 toc-depth: 4
 toc-location: right
 sidebar: false
+execute:
+  cache: false
 ---
 
 ## About the Data
@@ -71,7 +73,7 @@ This analysis contributes to discussions around partnership resilience, healthy 
 :::
 :::
 
-{{< include ../notebooks/hcmst.qmd >}}
+{{< include ../notebooks/hcmst.qmd >}} 
 
 ## Attribution
 

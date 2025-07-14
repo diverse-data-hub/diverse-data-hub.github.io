@@ -67,7 +67,7 @@ Analyzing NCAA Women's March Madness results and promoting visibility of women i
 :::
 :::
 
-{{< include ../notebooks/marchmadness.qmd >}}
+{{< include ../notebooks/marchmadness.qmd >}} 
 
 ## Attribution
 

@@ -106,7 +106,7 @@ Yes
 :::
 :::
 
-{{< include ../notebooks/bcindigenousbiz.qmd >}}
+{{< include ../notebooks/bcindigenousbiz.qmd >}}  
 
 ## Attribution
 

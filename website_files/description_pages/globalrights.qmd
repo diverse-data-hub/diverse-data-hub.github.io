@@ -55,7 +55,7 @@ This data set provides yearly, country-level information on LGBTQ+ rights, econo
 :::
 :::
 
-{{< include ../notebooks/globalrights.qmd >}}
+{{< include ../notebooks/globalrights.qmd >}} 
 
 ## Attribution
 
