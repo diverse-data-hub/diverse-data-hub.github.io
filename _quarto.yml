@@ -41,6 +41,7 @@ website:
             href: "https://github.com/diverse-data-hub/diversedata/issues"
           - text: "Python Package"
             href: "https://github.com/diverse-data-hub/diversedata-py/issues"
+  google-analytics: "G-4QQCPMY56L"
 
 
 format:
