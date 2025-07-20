@@ -25,11 +25,11 @@ Data sets are available through the `diversedata` R package, allowing for straig
 
 ## Install `diversedata`
 
-To install the `diversedata` packages from GitHub, follow the instructions below:
+To install the `diversedata` packages, follow the instructions below:
 
 ::: {.panel-tabset}
 
-### R
+### R Package
 
 #### Prerequisites
 
@@ -65,11 +65,11 @@ data(package = "diversedata")
 data("wildfire")
 ```
 
-### Python
+### Python Package
 
 #### Prerequisites
 
-- `Python` (>= 3.8) & `pip`: Download from [python.org](https://www.python.org/) (use a virtual environment)
+- `Python` (>= 3.8) & `pip`: Download from [python.org](https://www.python.org/)
 
 - `pandas` (>= 2.3.1)  
   ```bash
