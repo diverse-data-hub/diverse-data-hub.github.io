@@ -1,12 +1,8 @@
----
-title: "Citation"
----
-
 Burak K, Khoda E (2025). diversedata: Diverse Data Hub. R Package Version 1.0.0, [https://github.com/diverse-data-hub/diversedata](https://github.com/diverse-data-hub/diversedata)
 
 ```bash
 @Manual{diversedata,
-  title  = {diversedata: Diverse Dataset Hub},
+  title  = {diversedata: Diverse Dataset Hub R package},
   author = {Burak K, Khoda E},
   year   = {2025},
   note   = {R Package Version 1.0.0},
@@ -14,6 +10,17 @@ Burak K, Khoda E (2025). diversedata: Diverse Data Hub. R Package Version 1.0.0,
 }
 ```
 
+Burak K, Khoda E (2025). diversedata‑py: Diverse Data Hub Python Package. Python Package Version 1.0.0, [https://github.com/diverse-data-hub/diversedata-py](https://github.com/diverse-data-hub/diversedata-py)
+
+```bash
+@Manual{diversedatapy,
+  title  = {diversedata-py: Diverse Data Hub Python Package},
+  author = {Burak K and Khoda E},
+  year   = {2025},
+  note   = {Python Package Version 1.0.0},
+  url    = {https://github.com/diverse-data-hub/diversedata-py},
+}
+```
 
 
 

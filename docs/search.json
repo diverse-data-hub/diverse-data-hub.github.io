@@ -170,9 +170,9 @@
   {
     "objectID": "website_files/citation.html",
     "href": "website_files/citation.html",
-    "title": "Citation",
+    "title": "Diverse Data Hub",
     "section": "",
-    "text": "Burak K, Khoda E (2025). diversedata: Diverse Data Hub. R Package Version 1.0.0, https://github.com/diverse-data-hub/diversedata\n@Manual{diversedata,\n  title  = {diversedata: Diverse Dataset Hub},\n  author = {Burak K, Khoda E},\n  year   = {2025},\n  note   = {R Package Version 1.0.0},\n  url    = {https://github.com/diverse-data-hub/diversedata},\n}"
+    "text": "Burak K, Khoda E (2025). diversedata: Diverse Data Hub. R Package Version 1.0.0, https://github.com/diverse-data-hub/diversedata\n@Manual{diversedata,\n  title  = {diversedata: Diverse Dataset Hub R package},\n  author = {Burak K, Khoda E},\n  year   = {2025},\n  note   = {R Package Version 1.0.0},\n  url    = {https://github.com/diverse-data-hub/diversedata},\n}\nBurak K, Khoda E (2025). diversedata‑py: Diverse Data Hub Python Package. Python Package Version 1.0.0, https://github.com/diverse-data-hub/diversedata-py\n@Manual{diversedatapy,\n  title  = {diversedata-py: Diverse Data Hub Python Package},\n  author = {Burak K and Khoda E},\n  year   = {2025},\n  note   = {Python Package Version 1.0.0},\n  url    = {https://github.com/diverse-data-hub/diversedata-py},\n}"
   },
   {
     "objectID": "website_files/grid_items/bcindigenousbiz.html",
