@@ -25,19 +25,22 @@ Data sets are available through the `diversedata` R package, allowing for straig
 
 ## Install `diversedata`
 
-To install the `diversedata` R package from GitHub, follow these steps:
+To install the `diversedata` packages from GitHub, follow the instructions below:
 
-### Prerequisites
+::: {.panel-tabset}
 
-- Ensure you have R installed (download from [CRAN](https://cran.r-project.org/))
+### R
 
-- Install `devtools` package, if needed:
+#### Prerequisites
 
-```r
-install.packages("devtools")
-```
+- `R` (>= 3.5): Download from [CRAN](https://cran.r-project.org/)
 
-### Installation
+- `devtools` (R package)  
+  ```r
+  install.packages("devtools")
+  ```
+
+#### Installation
 
 Install `diversedata` directly from GitHub using:
 
@@ -45,19 +48,13 @@ Install `diversedata` directly from GitHub using:
 devtools::install_github("diverse-data-hub/diversedata")
 ```
 
-### Loading the Package
-
-After installation, load the package into your R session:
-
-``` r
-library(diversedata)
-```
-
-### Usage
+#### Usage
 
 Once installed, you can explore the available data sets and their documentation:
 
 ``` r
+library(diversedata)
+
 # List available data sets
 data(package = "diversedata")
 
@@ -67,6 +64,43 @@ data(package = "diversedata")
 # To load a data set into the environment:
 data("wildfire")
 ```
+
+### Python
+
+#### Prerequisites
+
+- `Python` (>= 3.8) & `pip`: Download from [python.org](https://www.python.org/) (use a virtual environment)
+
+- `pandas` (>= 2.3.1)  
+  ```bash
+  pip install pandas>=2.3.1
+  ```
+
+#### Installation
+
+The `diversedata` Python package can be installed via pip:
+
+```bash
+$ pip install diversedata
+```
+
+#### Usage
+
+Once installed, you can explore the available data sets and their documentation:
+
+```python
+import diversedata as dd
+
+# List available datasets
+dd.list_available_datasets()
+
+# View documentation for a specific dataset
+dd.print_data_description('wildfire')
+
+# To load a dataset and save it to an object:
+df = dd.load_data('wildfire')
+```
+:::
 
 ## License
 
