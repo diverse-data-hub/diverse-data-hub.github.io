@@ -1,0 +1,54 @@
+# Get Involved!
+
+:::: {.columns}
+::: {.column width="33%"}
+::: callout-info
+### 🔗 Website
+
+Submit site issues or suggest improvements:
+
+[Open an issue →](https://github.com/diverse-data-hub/diverse-data-hub.github.io/issues)
+:::
+:::
+
+::: {.column width="33%"}
+::: callout-info
+### 🐘 R Package
+
+Report bugs or request features for the R package:
+
+[Open an issue →](https://github.com/diverse-data-hub/diversedata/issues)
+:::
+:::
+
+::: {.column width="33%"}
+::: callout-info
+### 🐍 Python Package
+
+Report bugs or request features for the Python package:
+
+[Open an issue →](https://github.com/diverse-data-hub/diversedata-py/issues)
+:::
+:::
+::::
+
+## Development Team
+
+:::: {.columns}
+::: {.column}
+**Owners**
+
+- [Katie Burak PhD](https://github.com/katieburak)
+- [Elham E Khoda PhD](https://github.com/elhamekhoda)
+:::
+
+::: {.column}
+**Collaborators**
+
+- [Azin Piran](https://github.com/AzinPiran)
+- [Francisco Ramirez](https://github.com/fraramfra)
+- [Siddarth Subrahmanian](https://github.com/siddart-1)
+- [Stephanie Ta](https://github.com/Stephanie-Ta)
+- [Jade Chen](https://github.com/jadeeechen)
+:::
+::::

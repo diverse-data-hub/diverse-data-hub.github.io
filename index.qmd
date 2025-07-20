@@ -25,8 +25,6 @@ Data sets are available through the `diversedata` R and Python package, allowing
 
 ## Install `diversedata`
 
-To install the `diversedata` packages, follow the instructions below:
-
 ::: {.panel-tabset}
 
 ### R Package
@@ -107,19 +105,6 @@ df = dd.load_data('wildfire')
 CC BY 4.0
 
 [Full License](https://github.com/diverse-data-hub/diverse-data-hub.github.io/blob/main/LICENSE)
-
-## Development Team
-
-### Owners
-
-- [Katie Burak PhD](https://github.com/katieburak)
-- [Elham E Khoda PhD](https://github.com/elhamekhoda)
-
-### Collaborators
-
-- [Azin Piran](https://github.com/AzinPiran)
-- [Francisco Ramirez](https://github.com/fraramfra)
-- [Siddarth Subrahmanian](https://github.com/siddart-1)
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
