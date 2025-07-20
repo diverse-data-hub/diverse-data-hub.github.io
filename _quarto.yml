@@ -13,7 +13,11 @@ website:
   navbar:
     left:
       - href: website_files/datasets.qmd
-        text: Data Sets
+        text: Datasets
+      - href: website_files/citation.qmd
+        text: Citation
+      - href: website_files/collaborate.qmd
+        text: Collaborate
 
   page-footer:
     right: "This page is built with [Quarto](https://quarto.org/)."
@@ -29,18 +33,6 @@ website:
       - icon: github
         href: https://github.com/diverse-data-hub
     collapse-level: 1
-
-    contents:
-      - text: "Citation"
-        href: "https://diverse-data-hub.github.io/website_files/citation.html"
-      - section: "Collaborate"
-        contents:
-          - text: "Website"
-            href: "https://github.com/diverse-data-hub/diverse-data-hub.github.io/issues"
-          - text: "R Package"
-            href: "https://github.com/diverse-data-hub/diversedata/issues"
-          - text: "Python Package"
-            href: "https://github.com/diverse-data-hub/diversedata-py/issues"
   google-analytics: "G-4QQCPMY56L"
 
 

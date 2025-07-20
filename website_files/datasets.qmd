@@ -1,7 +1,3 @@
----
-sidebar: false
----
-
 <!-- Use the following line to enable filtering data sets by Python or R -->
 <!-- {{< include description_pages/_filters.qmd >}} -->
 
