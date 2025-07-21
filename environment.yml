@@ -21,7 +21,7 @@ dependencies:
   - pandas=2.2.3
   - altair=5.5.0
   - jupyterlab=4.4.1
-  - python=3.13.3
+  - python=3.12
   - matplotlib=3.10.1
   - seaborn=0.13.2
   - r-base>=4.2         # for interactive binder: R base packages
