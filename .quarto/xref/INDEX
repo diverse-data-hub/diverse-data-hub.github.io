@@ -196,5 +196,29 @@
   },
   "website_files/notebooks/genderassessment.qmd": {
     "genderassessment.html": "62b0ad9d"
+  },
+  "website_files/collaborate.qmd": {
+    "collaborate.html": "f9d013d0"
+  },
+  "website_files/interactiveplayground.qmd": {
+    "interactiveplayground.html": "6520be00"
+  },
+  "notebooks/bcindigenousbiz.ipynb": {
+    "bcindigenousbiz.html": "a4c83c24"
+  },
+  "notebooks/hcmst.ipynb": {
+    "hcmst.html": "c23ed627"
+  },
+  "notebooks/womensmarchmadness.ipynb": {
+    "womensmarchmadness.html": "0348f650"
+  },
+  "notebooks/globalrights.ipynb": {
+    "globalrights.html": "ae418205"
+  },
+  "notebooks/wildfire.ipynb": {
+    "wildfire.html": "a2e0b29e"
+  },
+  "notebooks/genderassessment.ipynb": {
+    "genderassessment.html": "068abcfe"
   }
 }

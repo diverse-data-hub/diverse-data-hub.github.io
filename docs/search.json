@@ -1,5 +1,26 @@
 [
   {
+    "objectID": "notebooks/genderassessment.html",
+    "href": "notebooks/genderassessment.html",
+    "title": "Diverse Data Hub",
+    "section": "",
+    "text": "library(diversedata)\n\n\ngenderassessment &lt;- genderassessment\n\n\nhead(genderassessment)"
+  },
+  {
+    "objectID": "notebooks/globalrights.html",
+    "href": "notebooks/globalrights.html",
+    "title": "Diverse Data Hub",
+    "section": "",
+    "text": "library(diversedata)\n\n\nglobalrights &lt;- globalrights\n\n\nhead(globalrights)"
+  },
+  {
+    "objectID": "notebooks/hcmst.html",
+    "href": "notebooks/hcmst.html",
+    "title": "Diverse Data Hub",
+    "section": "",
+    "text": "library(diversedata)\n\n\nhcmst &lt;- hcmst\n\n\nhead(hcmst)"
+  },
+  {
     "objectID": "website_files/description_pages/genderassessment.html",
     "href": "website_files/description_pages/genderassessment.html",
     "title": "Gender Assessment Data",
@@ -126,46 +147,18 @@
     "text": "Case Study\n\nObjective\nWhich regions in British Columbia have the highest density of Indigenous-owned businesses, and how do industry sectors vary across these clusters?\nThe goal is to explore the geographic and economic distribution of Indigenous businesses using attributes such as region, city, and industry sector. We apply clustering techniques to identify natural groupings of businesses based on their geo spatial coordinates and sectoral attributes. This helps reveal regional concentrations, uncover potential economic hubs, and provide insights for targeted policy or investment strategies.\n\n\nAnalysis\nLoading Libraries\n\nlibrary(diversedata) \nlibrary(tidyverse)  # Loads dplyr, tidyr, stringr, ggplot2, etc.\nlibrary(infer)      # For chi-square test\nlibrary(dbscan)     # For clustering\nlibrary(leaflet)    # For interactive maps\nlibrary(treemapify) # For creating treemaps\n\n\n1. Data Cleaning & Processing\nTo ensure the quality and consistency of the data set, several pre-processing steps were done:\n\nRemoved records with missing geographic coordinates: These records were excluded since latitude and longitude are crucial for spatial mapping and regional distribution analysis.\nStandardized the format of region names: Region names were converted to title case to ensure consistent grouping and filtering.\nConverted field types: The Industry Sector column was converted to a factor for categorical analysis, and Year Formed was converted to integer to allow for chronological trends and filtering.\n\n\n# Load and clean the data\nindigenousbiz_data &lt;- bcindigenousbiz |&gt;\n  filter(!is.na(latitude) & !is.na(longitude)) |&gt;\n  mutate(\n    region = str_to_title(region),\n    industry_sector = as_factor(industry_sector),\n    year_formed = as.integer(year_formed)\n  )\n\n# Preview cleaned data\nindigenousbiz_data |&gt; \n  head()\n\n# A tibble: 6 × 9\n  business_name            city  latitude longitude region type  industry_sector\n  &lt;chr&gt;                    &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt; &lt;fct&gt;          \n1 Ellipsis Energy Inc      Mobe…     55.8     -122. North… Priv… Mining, quarry…\n2 Indigenous Community De… Ende…     50.6     -119. Thomp… Priv… Other services…\n3 Formline Construction L… Burn…     49.3      123. Lower… Priv… Construction   \n4 Quilakwa Investments Lt… Ende…     50.5     -119. Thomp… Comm… Accommodation …\n5 Quilakwa Esso            Ende…     50.5     -119. Thomp… Comm… Retail trade   \n6 Quilakwa RV Park         Ende…     50.6     -119. Thomp… &lt;NA&gt;  Accommodation …\n# ℹ 2 more variables: year_formed &lt;int&gt;, number_of_employees &lt;chr&gt;\n\n\n\n\n2. Exploratory Data Analysis (EDA)\nBusiness count by Region\n\n# Business count by region with tidyverse style\nindigenousbiz_data |&gt;\n  count(region, sort = TRUE) |&gt;\n  ggplot(aes(\n    x = fct_reorder(region, n),  # Use forcats for reordering\n    y = n,\n    fill = n\n  )) +\n  geom_col() +\n  coord_flip() +\n  scale_fill_gradient(\n    low = \"skyblue1\",\n    high = \"skyblue4\"\n  ) +\n  labs(\n    title = \"Business Count per Region\",\n    x = \"Region\",\n    y = \"Number of Businesses\"\n  ) +\n  theme_minimal()\n\n\n\n\n\n\n\n\nMapping Businesses\n\n# Create leaflet map\nindigenousbiz_data |&gt;\n  leaflet() |&gt;\n  addTiles() |&gt;\n  setView(lng = -125, lat = 54, zoom = 4.6) |&gt;\n  addCircleMarkers(\n    lng = ~longitude,\n    lat = ~latitude,\n    label = ~business_name,\n    radius = 3,\n    color = \"#1E90FF\",\n    stroke = FALSE,\n    fillOpacity = 0.7\n  )\n\n\n\n\n\nIndustry Analysis\n\n\n\n\n\n\n\n\n\n\n\n3. Chi-Squared Test of Independence\nTo better understand the relationship between Indigenous business locations and their characteristics, we test whether type (ownership type) is independent of region using a Chi-square test.\nHypotheses\n\nNull Hypothesis (H₀): Business ownership type and region are independent. That is, the distribution of ownership types is the same across all regions.\nAlternative Hypothesis (Ha): Business ownership type and region are dependent. That is, the distribution of ownership types differs by region.\n\nChi-squared Assumption Check\n\nData in Frequency Form: The data used in this test are raw counts of business records, not percentages or proportions.\nCategorical Variables: Both variables under study, type and region are categorical and represent discrete groups.\nIndependence of Observations: Each row in the data set corresponds to a unique business. There is no duplication, satisfying the assumption of independence.\nExpected Count: The Chi-square test expects that all expected cell frequencies are ≥ 5. In our case this assumption is violated.\n\n\n## Assumptions check\n\n# Step 1: Chi-Square Assumption Check\ntype_region_table &lt;- table(indigenousbiz_data$type, indigenousbiz_data$region)\nchisq_result &lt;- chisq.test(type_region_table)\n\nWarning in chisq.test(type_region_table): Chi-squared approximation may be\nincorrect\n\nexpected_counts &lt;- chisq_result$expected\n\nmin_expected &lt;- min(expected_counts)\n\ncat(\"Chi-Square Assumptions:\\n\")\n\nChi-Square Assumptions:\n\ncat(\"- Minimum expected count:\", round(min_expected, 2), \"\\n\")\n\n- Minimum expected count: 0.01 \n\nif (min_expected &gt;= 5) {\n  cat(\"Chi-squared assumptions met. Proceeding with standard test.\\n\")\n  print(chisq_result)\n} else {\n  cat(\"Assumptions violated. Proceeding with simulation-based Chi-squared test.\\n\\n\")\n}\n\nAssumptions violated. Proceeding with simulation-based Chi-squared test.\n\n\nSimulation-based Chi-Square Test with infer\nSince the assumption regarding minimum expected cell counts was violated with at least one expected frequency falling below the threshold of 5. The Chi-squared test may yield inaccurate results. To overcome this, we use a simulation-based Chi-squared test via the infer package. This method generates a null distribution by permuting the data under the assumption of independence.\nThe simulation-based tests still require some assumptions to hold:\n- The data must represent independent observations.\n\nThe variables must be categorical.\nThe permutations assume that under the null hypothesis, the distribution of values across categories is exchangeable.\n\n\n# Generate null distribution\nnull_distribution &lt;- indigenousbiz_data |&gt;\n  specify(type ~ region) |&gt;\n  hypothesize(null = \"independence\") |&gt;\n  generate(reps = 1000, type = \"permute\") |&gt;\n  calculate(stat = \"Chisq\")\n\nWarning: Removed 136 rows containing missing values.\n\n# Observed statistic\nobserved_stat &lt;- indigenousbiz_data |&gt;\n  specify(type ~ region) |&gt;\n  hypothesize(null = \"independence\") |&gt;\n  calculate(stat = \"Chisq\")\n\nWarning: Removed 136 rows containing missing values.\n\n# Plot permutation distribution\nnull_distribution |&gt;\n  visualize() +\n  shade_p_value(obs_stat = observed_stat, direction = \"greater\")\n\n\n\n\n\n\n\n# Compute p-value\np_val &lt;- null_distribution |&gt;\n  get_p_value(obs_stat = observed_stat, direction = \"greater\")\n\nWarning: Please be cautious in reporting a p-value of 0. This result is an approximation\nbased on the number of `reps` chosen in the `generate()` step.\nℹ See `get_p_value()` (`?infer::get_p_value()`) for more information.\n\ncat(\"Simulation-based p-value:\", round(p_val$p_value, 4), \"\\n\")\n\nSimulation-based p-value: 0 \n\n\nInference\nTo assess whether there is an association between business type and region, we conducted a simulation-based chi-squared test using 1,000 permutations. The null distribution of test statistics generated under the assumption of independence shows that our observed statistic lies far in the tail of the distribution. This suggests that such an extreme result would be highly unlikely if business type and region were truly independent. Therefore, we reject the null hypothesis and conclude that business type and region are statistically dependent.\n\n\n4. Spatial Clustering of Indigenous Businesses using DBSCAN\nTo explore geographic patterns in Indigenous business, the technique of clustering based on latitude and longitude coordinates was applied. This analysis revealed several spatial clusters of Indigenous businesses across British Columbia. The treemap provided more information on which were the prominent industries in each cluster.\n\n## DBSCAN Clustering and Leaflet Map\n\ncoords &lt;- indigenousbiz_data |&gt;\n  select(longitude, latitude) |&gt;\n  as.matrix()\n\nset.seed(123)\ndb &lt;- dbscan::dbscan(coords, eps = 1.2, minPts = 8)\n\nindigenousbiz_data &lt;- indigenousbiz_data |&gt;\n  mutate(cluster = factor(db$cluster))\n\npal &lt;- colorFactor(palette = \"Set1\", domain = indigenousbiz_data$cluster)\n\ncluster_map &lt;- leaflet(data = indigenousbiz_data) |&gt;\n  addTiles() |&gt;\n  setView(lng = -125, lat = 54, zoom = 4.6) |&gt;\n  addCircleMarkers(\n    label = ~business_name,\n    radius = 3,\n    color = ~pal(cluster),\n    stroke = FALSE,\n    fillOpacity = 0.7\n  ) |&gt;\n  addLegend(\n    position = \"bottomright\",\n    pal = pal,\n    values = ~cluster,\n    title = \"Cluster\",\n    opacity = 1\n  )\n\nAssuming \"longitude\" and \"latitude\" are longitude and latitude, respectively\n\ncluster_map\n\n\n\n\n\n\n\n5. Treemap of Industry sectors within cluster\n\n## Industry Counts and Treemap Visualization\n\nindustry_cluster_counts &lt;- indigenousbiz_data |&gt;\n  count(cluster, industry_sector)\n\nranked_industries &lt;- industry_cluster_counts |&gt;\n  group_by(cluster) |&gt;\n  mutate(rank = rank(-n, ties.method = \"min\")) |&gt;\n  ungroup()\n\ntop_industries &lt;- ranked_industries |&gt;\n  mutate(\n    industry_sector = if_else(rank &lt;= 3, as.character(industry_sector), \"Other\")\n  ) |&gt;\n  group_by(cluster, industry_sector) |&gt;\n  summarise(n = sum(n), .groups = \"drop\") |&gt;\n  mutate(\n    cluster = factor(cluster),\n    industry_sector = factor(industry_sector)\n  )\n\nggplot(top_industries, aes(area = n, fill = industry_sector,\n                           label = industry_sector, subgroup = cluster)) +\n  geom_treemap() +\n  geom_treemap_subgroup_border(color = \"white\") +\n  geom_treemap_text(colour = \"white\", place = \"centre\", reflow = TRUE) +\n  facet_wrap(~ cluster) +\n  coord_cartesian(clip = \"off\") +\n  theme(\n    legend.position = \"none\",\n    plot.margin = margin(t = 10, r = 10, b = 10, l = 30)\n  ) +\n  labs(\n    title = \"Top Industry Sectors by Geo Cluster\",\n    fill = \"Industry Sector\"\n  )\n\nWarning: Removed 1 row containing missing values or values outside the scale range\n(`geom_treemap_text()`).\n\n\n\n\n\n\n\n\n\n\n\n\nDiscussion\nThis analysis provides a multi faceted view of Indigenous businesses in British Columbia. The statistical and spatial explorations reveal that both regional context and business structure are deeply intertwined with Indigenous entrepreneurship.\nThe Chi-square test of independence, supported by simulation-based inference due to assumption violations, reveals a statistically significant association between business ownership type and geographic region. This suggests that certain forms of business organization such as community-owned enterprises or private companies may be more prevalent in specific regions, potentially influenced by local governance structures, access to funding, or historical land use patterns.\nThe spatial clustering using DBSCAN further enriches this narrative by identifying natural groupings of businesses based on their latitude and longitude coordinates. These clusters likely reflect real-world economic and social hubs within the province. The treemap visualization provides a clear breakdown of dominant industry sectors within each spatial cluster, especially after aggregating less-represented sectors into an ‘Other’ category for interpretability.\nIn summary, this analysis highlights how Indigenous business patterns in British Columbia are shaped by both geographic and organizational factors. While insightful, the findings should be interpreted with caution given the cross-sectional nature of the data and sensitivity of the clustering method."
   },
   {
-    "objectID": "website_files/datasets.html",
-    "href": "website_files/datasets.html",
+    "objectID": "website_files/interactiveplayground.html",
+    "href": "website_files/interactiveplayground.html",
     "title": "Diverse Data Hub",
     "section": "",
-    "text": "Women’s March Madness\n\n\nThis data set tracks every NCAA Division I Women’s Basketball Tournament appearance since 1982 up until 2018. It includes team seeds, results, bid types, season and conference records, and regional placements. Useful for analyzing team success, seeding impact, conference strength, and historical trends in women’s college basketball over four decades.\n\n\n \n\nWildfire\n\n\nThis data set on Canadian wildfires includes data on fire size, cause, location, detection method, response, and weather. Collected from official sources, it supports wildfire risk assessment and response. It also highlights social and geographic disparities, emphasizing impacts on remote and underserved communities facing climate-related and infrastructure challenges.\n\n\n \n\nHow Couples Meet and Stay Together\n\n\nThis data set contains information from a 2022 survey of people across the U.S. to understand how couples meet and stay together. It focuses on how relationships were influenced by the COVID-19 pandemic and offers insight at modern relationships, including changes in dating habits and how couples adapted during a challenging time.\n\n\n \n\nBC Indigenous Businesses\n\n\nThe BC Indigenous Business Listings data set, compiled in 2025 by the Government of British Columbia, offers a detailed snapshot of Indigenous-owned businesses throughout the province. It includes information on the Indigenous entrepreneurship in urban and rural areas. This data set highlights economic activities across various traditional territories and sectors.\n\n\n \n\nGender Assessment\n\n\nThe Gender Assessment data set from the World Benchmarking Alliance evaluates nearly 2,000 of the world’s most influential companies on gender equality. Covering data from 2023 and 2024, the data set highlights early corporate actions and progress on gender issues. It serves as a benchmarking tool for identifying gaps and holding companies accountable for advancing gender equality.\n\n\n \n\nGlobal Rights\n\n\nThis data set provides yearly, country-level information on LGBTQ+ rights, economic indicators, and education spending. The data is compiled from Our World in Data, with primary sources including Equaldex, the World Bank, and other open-access data sets."
+    "text": "Launch live notebooks for hands‑on exploration!\n\n\nBC Indigenous Businesses\n\n\n\nLaunch Binder\n\n\n\nGender Assessment\n\n\n\nLaunch Binder\n\n\n\nGlobal Rights\n\n\n\nLaunch Binder\n\n\n\n\n\n\nHCMST\n\n\n\nLaunch Binder\n\n\n\nWildfire\n\n\n\nLaunch Binder\n\n\n\nWomen’s March Madness\n\n\n\nLaunch Binder"
   },
   {
-    "objectID": "website_files/grid_items/wildfire.html",
-    "href": "website_files/grid_items/wildfire.html",
+    "objectID": "website_files/grid_items/genderassessment.html",
+    "href": "website_files/grid_items/genderassessment.html",
     "title": "Diverse Data Hub",
     "section": "",
-    "text": "Wildfire\n\n\nThis data set on Canadian wildfires includes data on fire size, cause, location, detection method, response, and weather. Collected from official sources, it supports wildfire risk assessment and response. It also highlights social and geographic disparities, emphasizing impacts on remote and underserved communities facing climate-related and infrastructure challenges."
-  },
-  {
-    "objectID": "website_files/grid_items/globalrights.html",
-    "href": "website_files/grid_items/globalrights.html",
-    "title": "Diverse Data Hub",
-    "section": "",
-    "text": "Global Rights\n\n\nThis data set provides yearly, country-level information on LGBTQ+ rights, economic indicators, and education spending. The data is compiled from Our World in Data, with primary sources including Equaldex, the World Bank, and other open-access data sets."
-  },
-  {
-    "objectID": "website_files/grid_items/hcmst.html",
-    "href": "website_files/grid_items/hcmst.html",
-    "title": "Diverse Data Hub",
-    "section": "",
-    "text": "How Couples Meet and Stay Together\n\n\nThis data set contains information from a 2022 survey of people across the U.S. to understand how couples meet and stay together. It focuses on how relationships were influenced by the COVID-19 pandemic and offers insight at modern relationships, including changes in dating habits and how couples adapted during a challenging time."
-  },
-  {
-    "objectID": "website_files/citation.html",
-    "href": "website_files/citation.html",
-    "title": "Citation",
-    "section": "",
-    "text": "Burak K, Khoda E (2025). diversedata: Diverse Data Hub. R Package Version 1.0.0, https://github.com/diverse-data-hub/diversedata\n@Manual{diversedata,\n  title  = {diversedata: Diverse Dataset Hub},\n  author = {Burak K, Khoda E},\n  year   = {2025},\n  note   = {R Package Version 1.0.0},\n  url    = {https://github.com/diverse-data-hub/diversedata},\n}"
-  },
-  {
-    "objectID": "website_files/grid_items/bcindigenousbiz.html",
-    "href": "website_files/grid_items/bcindigenousbiz.html",
-    "title": "Diverse Data Hub",
-    "section": "",
-    "text": "BC Indigenous Businesses\n\n\nThe BC Indigenous Business Listings data set, compiled in 2025 by the Government of British Columbia, offers a detailed snapshot of Indigenous-owned businesses throughout the province. It includes information on the Indigenous entrepreneurship in urban and rural areas. This data set highlights economic activities across various traditional territories and sectors."
+    "text": "Gender Assessment\n\n\nThe Gender Assessment data set from the World Benchmarking Alliance evaluates nearly 2,000 of the world’s most influential companies on gender equality. Covering data from 2023 and 2024, the data set highlights early corporate actions and progress on gender issues. It serves as a benchmarking tool for identifying gaps and holding companies accountable for advancing gender equality."
   },
   {
     "objectID": "website_files/grid_items/marchmadness.html",
@@ -175,11 +168,60 @@
     "text": "Women’s March Madness\n\n\nThis data set tracks every NCAA Division I Women’s Basketball Tournament appearance since 1982 up until 2018. It includes team seeds, results, bid types, season and conference records, and regional placements. Useful for analyzing team success, seeding impact, conference strength, and historical trends in women’s college basketball over four decades."
   },
   {
-    "objectID": "website_files/grid_items/genderassessment.html",
-    "href": "website_files/grid_items/genderassessment.html",
+    "objectID": "website_files/grid_items/bcindigenousbiz.html",
+    "href": "website_files/grid_items/bcindigenousbiz.html",
     "title": "Diverse Data Hub",
     "section": "",
-    "text": "Gender Assessment\n\n\nThe Gender Assessment data set from the World Benchmarking Alliance evaluates nearly 2,000 of the world’s most influential companies on gender equality. Covering data from 2023 and 2024, the data set highlights early corporate actions and progress on gender issues. It serves as a benchmarking tool for identifying gaps and holding companies accountable for advancing gender equality."
+    "text": "BC Indigenous Businesses\n\n\nThe BC Indigenous Business Listings data set, compiled in 2025 by the Government of British Columbia, offers a detailed snapshot of Indigenous-owned businesses throughout the province. It includes information on the Indigenous entrepreneurship in urban and rural areas. This data set highlights economic activities across various traditional territories and sectors."
+  },
+  {
+    "objectID": "website_files/citation.html",
+    "href": "website_files/citation.html",
+    "title": "Diverse Data Hub",
+    "section": "",
+    "text": "Burak K, Khoda E (2025). diversedata: Diverse Data Hub. R Package Version 1.0.0, https://github.com/diverse-data-hub/diversedata\n@Manual{diversedata,\n  title  = {diversedata: Diverse Dataset Hub R package},\n  author = {Burak K, Khoda E},\n  year   = {2025},\n  note   = {R Package Version 1.0.0},\n  url    = {https://github.com/diverse-data-hub/diversedata},\n}\nBurak K, Khoda E (2025). diversedata‑py: Diverse Data Hub Python Package. Python Package Version 1.0.0, https://github.com/diverse-data-hub/diversedata-py\n@Manual{diversedatapy,\n  title  = {diversedata-py: Diverse Data Hub Python Package},\n  author = {Burak K and Khoda E},\n  year   = {2025},\n  note   = {Python Package Version 1.0.0},\n  url    = {https://github.com/diverse-data-hub/diversedata-py},\n}"
+  },
+  {
+    "objectID": "website_files/collaborate.html",
+    "href": "website_files/collaborate.html",
+    "title": "Get Involved!",
+    "section": "",
+    "text": "Submit site issues or suggest improvements:\nOpen an issue →\n\n\n\n\nReport bugs or request features for the R package:\nOpen an issue →\n\n\n\n\nReport bugs or request features for the Python package:\nOpen an issue →\n\n\n\n\n\n\n\nOwners\n\nKatie Burak PhD\nElham E Khoda PhD\n\n\nCollaborators\n\nAzin Piran\nFrancisco Ramirez\nSiddarth Subrahmanian\nStephanie Ta\nJade Chen"
+  },
+  {
+    "objectID": "website_files/collaborate.html#development-team",
+    "href": "website_files/collaborate.html#development-team",
+    "title": "Get Involved!",
+    "section": "",
+    "text": "Owners\n\nKatie Burak PhD\nElham E Khoda PhD\n\n\nCollaborators\n\nAzin Piran\nFrancisco Ramirez\nSiddarth Subrahmanian\nStephanie Ta\nJade Chen"
+  },
+  {
+    "objectID": "website_files/grid_items/hcmst.html",
+    "href": "website_files/grid_items/hcmst.html",
+    "title": "Diverse Data Hub",
+    "section": "",
+    "text": "How Couples Meet and Stay Together\n\n\nThis data set contains information from a 2022 survey of people across the U.S. to understand how couples meet and stay together. It focuses on how relationships were influenced by the COVID-19 pandemic and offers insight at modern relationships, including changes in dating habits and how couples adapted during a challenging time."
+  },
+  {
+    "objectID": "website_files/grid_items/globalrights.html",
+    "href": "website_files/grid_items/globalrights.html",
+    "title": "Diverse Data Hub",
+    "section": "",
+    "text": "Global Rights\n\n\nThis data set provides yearly, country-level information on LGBTQ+ rights, economic indicators, and education spending. The data is compiled from Our World in Data, with primary sources including Equaldex, the World Bank, and other open-access data sets."
+  },
+  {
+    "objectID": "website_files/grid_items/wildfire.html",
+    "href": "website_files/grid_items/wildfire.html",
+    "title": "Diverse Data Hub",
+    "section": "",
+    "text": "Wildfire\n\n\nThis data set on Canadian wildfires includes data on fire size, cause, location, detection method, response, and weather. Collected from official sources, it supports wildfire risk assessment and response. It also highlights social and geographic disparities, emphasizing impacts on remote and underserved communities facing climate-related and infrastructure challenges."
+  },
+  {
+    "objectID": "website_files/datasets.html",
+    "href": "website_files/datasets.html",
+    "title": "Diverse Data Hub",
+    "section": "",
+    "text": "Women’s March Madness\n\n\nThis data set tracks every NCAA Division I Women’s Basketball Tournament appearance since 1982 up until 2018. It includes team seeds, results, bid types, season and conference records, and regional placements. Useful for analyzing team success, seeding impact, conference strength, and historical trends in women’s college basketball over four decades.\n\n\n \n\nWildfire\n\n\nThis data set on Canadian wildfires includes data on fire size, cause, location, detection method, response, and weather. Collected from official sources, it supports wildfire risk assessment and response. It also highlights social and geographic disparities, emphasizing impacts on remote and underserved communities facing climate-related and infrastructure challenges.\n\n\n \n\nHow Couples Meet and Stay Together\n\n\nThis data set contains information from a 2022 survey of people across the U.S. to understand how couples meet and stay together. It focuses on how relationships were influenced by the COVID-19 pandemic and offers insight at modern relationships, including changes in dating habits and how couples adapted during a challenging time.\n\n\n \n\nBC Indigenous Businesses\n\n\nThe BC Indigenous Business Listings data set, compiled in 2025 by the Government of British Columbia, offers a detailed snapshot of Indigenous-owned businesses throughout the province. It includes information on the Indigenous entrepreneurship in urban and rural areas. This data set highlights economic activities across various traditional territories and sectors.\n\n\n \n\nGender Assessment\n\n\nThe Gender Assessment data set from the World Benchmarking Alliance evaluates nearly 2,000 of the world’s most influential companies on gender equality. Covering data from 2023 and 2024, the data set highlights early corporate actions and progress on gender issues. It serves as a benchmarking tool for identifying gaps and holding companies accountable for advancing gender equality.\n\n\n \n\nGlobal Rights\n\n\nThis data set provides yearly, country-level information on LGBTQ+ rights, economic indicators, and education spending. The data is compiled from Our World in Data, with primary sources including Equaldex, the World Bank, and other open-access data sets."
   },
   {
     "objectID": "website_files/notebooks/hcmst.html",
@@ -306,5 +348,26 @@
     "title": "Historical Alberta Wildfire Data",
     "section": "Attribution",
     "text": "Attribution\nData sourced from the Government of Alberta via the Government of Canada’s Open Government Portal, available under an Open Government Licence - Alberta. Original data set: Historical wildfire data: 2006-2024."
+  },
+  {
+    "objectID": "notebooks/bcindigenousbiz.html",
+    "href": "notebooks/bcindigenousbiz.html",
+    "title": "Diverse Data Hub",
+    "section": "",
+    "text": "library(diversedata)\n\n\nbcindigenousbiz &lt;- bcindigenousbiz\n\n\nhead(bcindigenousbiz)"
+  },
+  {
+    "objectID": "notebooks/womensmarchmadness.html",
+    "href": "notebooks/womensmarchmadness.html",
+    "title": "Diverse Data Hub",
+    "section": "",
+    "text": "library(diversedata)\n\n\nmarchmadness &lt;- womensmarchmadness\n\n\nhead(marchmadness)"
+  },
+  {
+    "objectID": "notebooks/wildfire.html",
+    "href": "notebooks/wildfire.html",
+    "title": "Diverse Data Hub",
+    "section": "",
+    "text": "library(diversedata)\n\n\nwildfire &lt;- wildfire\n\n\nhead(wildfire)"
   }
 ]

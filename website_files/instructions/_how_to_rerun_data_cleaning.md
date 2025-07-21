@@ -10,7 +10,7 @@ cd diverse-data-hub.github.io
 **2. Create the Conda environment from environment.yml**
 
 ```bash
-conda env create --file environment.yaml
+conda env create --file environment.yml
 ```
 
 This reads the YAML file and installs all required packages.

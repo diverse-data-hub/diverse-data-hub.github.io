@@ -2,7 +2,7 @@
 
 **Diverse Data Hub** is an open educational resource offering curated data sets focused on equity, diversity, inclusion, and other socially relevant topics. It is designed to support students, educators, and researchers in accessing and working with meaningful data.
 
-Data sets are available through the `diversedata` R package, allowing for straightforward integration into data science workflows. Each data set includes detailed documentation and contextual background to support informed exploration and connection to real-world topics. Example case studies are also included to illustrate practical applications.
+Data sets are available through the `diversedata` R and Python package, allowing for straightforward integration into data science workflows. Each data set includes detailed documentation and contextual background to support informed exploration and connection to real-world topics. Example case studies are also included to illustrate practical applications.
 :::
 
 ## Featured Data Sets 
@@ -25,19 +25,20 @@ Data sets are available through the `diversedata` R package, allowing for straig
 
 ## Install `diversedata`
 
-To install the `diversedata` R package from GitHub, follow these steps:
+::: {.panel-tabset}
 
-### Prerequisites
+### R Package
 
-- Ensure you have R installed (download from [CRAN](https://cran.r-project.org/))
+#### Prerequisites
 
-- Install `devtools` package, if needed:
+- `R` (>= 3.5): Download from [CRAN](https://cran.r-project.org/)
 
-```r
-install.packages("devtools")
-```
+- `devtools` (R package)  
+  ```r
+  install.packages("devtools")
+  ```
 
-### Installation
+#### Installation
 
 Install `diversedata` directly from GitHub using:
 
@@ -45,19 +46,13 @@ Install `diversedata` directly from GitHub using:
 devtools::install_github("diverse-data-hub/diversedata")
 ```
 
-### Loading the Package
-
-After installation, load the package into your R session:
-
-``` r
-library(diversedata)
-```
-
-### Usage
+#### Usage
 
 Once installed, you can explore the available data sets and their documentation:
 
 ``` r
+library(diversedata)
+
 # List available data sets
 data(package = "diversedata")
 
@@ -68,24 +63,48 @@ data(package = "diversedata")
 data("wildfire")
 ```
 
+### Python Package
+
+#### Prerequisites
+
+- `Python` (>= 3.8) & `pip`: Download from [python.org](https://www.python.org/)
+
+- `pandas` (>= 2.3.1)  
+  ```bash
+  pip install pandas>=2.3.1
+  ```
+
+#### Installation
+
+The `diversedata` Python package can be installed via pip:
+
+```bash
+$ pip install diversedata
+```
+
+#### Usage
+
+Once installed, you can explore the available data sets and their documentation:
+
+```python
+import diversedata as dd
+
+# List available datasets
+dd.list_available_datasets()
+
+# View documentation for a specific dataset
+dd.print_data_description('wildfire')
+
+# To load a dataset and save it to an object:
+df = dd.load_data('wildfire')
+```
+:::
+
 ## License
 
 CC BY 4.0
 
 [Full License](https://github.com/diverse-data-hub/diverse-data-hub.github.io/blob/main/LICENSE)
-
-## Development Team
-
-### Owners
-
-- [Katie Burak PhD](https://github.com/katieburak)
-- [Elham E Khoda PhD](https://github.com/elhamekhoda)
-
-### Collaborators
-
-- [Azin Piran](https://github.com/AzinPiran)
-- [Francisco Ramirez](https://github.com/fraramfra)
-- [Siddarth Subrahmanian](https://github.com/siddart-1)
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
