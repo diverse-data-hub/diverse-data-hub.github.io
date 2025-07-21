@@ -24,6 +24,7 @@ dependencies:
   - python=3.12
   - matplotlib=3.10.1
   - seaborn=0.13.2
+  - r-irkernel
   - r-base>=4.2         # for interactive binder: R base packages
   - r-essentials        # for interactive binder: IRkernel + common R packages
   - jupyterlab          # for interactive binder: JupyterLab option
