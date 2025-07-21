@@ -1,8 +1,29 @@
-name: binder
+#To create environment from scratch:
+#conda create -n mds_capstone_v1 -c conda-forge python pandas jupyterlab altair matplotlib
+
+#To create environment.yml:
+#conda env export -f environment.yaml --from-history
+
+#To create environment from yml file:
+#conda env create --file environment.yml
+
+#To delete environment:
+#conda env remove -n mds_capstone_v1
+
+#To activate environment:
+#conda activate mds_capstone_v1
+
+name: mds_capstone_v1
 channels:
   - conda-forge
+  - defaults
 dependencies:
-  - r-base>=4.2
-  - r-essentials        # IRkernel + common R packages
-  - r-devtools          # Provides devtools::install_github()
-  - jupyterlab          # if you want a JupyterLab option
+  - pandas=2.2.3
+  - altair=5.5.0
+  - jupyterlab=4.4.1
+  - python=3.13.3
+  - matplotlib=3.10.1
+  - seaborn=0.13.2
+  - r-base>=4.2         # for interactive binder: R base packages
+  - r-essentials        # for interactive binder: IRkernel + common R packages
+  - jupyterlab          # for interactive binder: JupyterLab option
