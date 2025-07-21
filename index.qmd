@@ -76,7 +76,7 @@ data("wildfire")
 The `diversedata` Python package can be installed via pip:
 
 ```bash
-$ pip install diversedata
+pip install diversedata
 ```
 
 #### Usage
