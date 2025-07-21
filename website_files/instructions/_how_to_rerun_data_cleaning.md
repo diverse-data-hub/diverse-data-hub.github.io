@@ -7,10 +7,10 @@ git clone git@github.com:diverse-data-hub/diverse-data-hub.github.io.git
 cd diverse-data-hub.github.io
 ```
 
-**2. Create the Conda environment from environment.yml**
+**2. Create the Conda environment from site-environment.yml**
 
 ```bash
-conda env create --file environment.yaml
+conda env create --file site-environment.yml
 ```
 
 This reads the YAML file and installs all required packages.

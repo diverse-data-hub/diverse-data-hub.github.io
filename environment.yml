@@ -1,0 +1,8 @@
+name: binder
+channels:
+  - conda-forge
+dependencies:
+  - r-base>=4.2
+  - r-essentials        # IRkernel + common R packages
+  - r-devtools          # Provides devtools::install_github()
+  - jupyterlab          # if you want a JupyterLab option
