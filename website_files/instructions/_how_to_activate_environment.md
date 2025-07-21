@@ -91,7 +91,7 @@ install.packages("renv")
 
 **4. Restore the project environment**
 
-Restore the environment (already created with `rev::init()`) in the R console:
+Restore the environment (already created with `renv::init()`) in the R console:
 
 ```R
 renv::restore()
@@ -105,7 +105,7 @@ In case this step throws an error like `Error: This project does not contain a l
 renv::snapshot()
 ```
 
-Following the command, restart your R session and retry the `renv::restore()` command-
+Following the command, restart your R session and retry the `renv::restore()` command.
 
 **5. Confirm renv status**
 

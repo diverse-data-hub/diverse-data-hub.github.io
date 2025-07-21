@@ -67,19 +67,16 @@ data("wildfire")
 
 #### Prerequisites
 
-- `Python` (>= 3.8) & `pip`: Download from [python.org](https://www.python.org/)
+- `Python` (>= 3.12) & `pip`: Download from [python.org](https://www.python.org/)
 
-- `pandas` (>= 2.3.1)  
-  ```bash
-  pip install pandas>=2.3.1
-  ```
+- `pandas` Python package (>= 2.3.1): This will be installed automatically when the `diversedata` Python package is installed via pip
 
 #### Installation
 
 The `diversedata` Python package can be installed via pip:
 
 ```bash
-$ pip install diversedata
+pip install diversedata
 ```
 
 #### Usage
