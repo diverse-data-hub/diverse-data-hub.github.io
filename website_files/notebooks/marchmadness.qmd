@@ -159,27 +159,10 @@ ggplot(
 
 ## Python
 ```{python eda_a_py}
-max_seed = marchmadness["seed"].max()
-tick_values = list(range(0, max_seed + 1))
-
-chart = (
-    alt.Chart(marchmadness)
-    .mark_bar(size = 12)
-    .encode(
-        x=alt.X(
-            "seed:Q",
-            title="Seed",
-            axis=alt.Axis(values=tick_values)
-        ),
-        y=alt.Y("count()", title="Number of Teams")
-    )
-    .properties(
-        title="Distribution of Tournament Seeds",
-        width="container"
-    )
-)
-
-chart
+alt.Chart(marchmadness).mark_bar().encode(
+    x=alt.X("seed:O").title("Seed"),
+    y=alt.Y("count()", title="Number of Teams"),
+).properties(title="Distribution of Tournament Seeds", width=600)
 ```
 :::
 
