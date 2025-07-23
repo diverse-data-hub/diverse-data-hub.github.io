@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>genderassessment_clean – Diverse Data Hub</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../website_files/img/favicon.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-fb4825d110a4b3699d8a3d2f85543825.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-4QQCPMY56L"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-4QQCPMY56L', { 'anonymize_ip': true});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../website_files/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Diverse Data Hub</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../website_files/datasets.html"> 
+<span class="menu-text">Datasets</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../website_files/citation.html"> 
+<span class="menu-text">Citation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../website_files/collaborate.html"> 
+<span class="menu-text">Collaborate</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../website_files/interactiveplayground.html"> 
+<span class="menu-text">Interactive Playground</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-center sidebar-header">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../website_files/img/logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+      <div class="sidebar-tools-main">
+    <a href="https://github.com/diverse-data-hub" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+</div>
+      </div>
+    
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+
+
+
+
+<p>Gender Assessment data cleaning</p>
+<div id="c331a62b-e027-4bb3-a83e-7be532778d79" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="47e35b95-8c45-4e9c-ab13-8eb0efd2f3ce" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the dataset</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"../data/raw/gender-assessment/gender_assessment.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="49ce787e-b9e1-4864-81f2-615f3f1a1a32" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect the data</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.info())</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Initial number of rows: </span><span class="sc">{</span><span class="bu">len</span>(df)<span class="sc">}</span><span class="ss">"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 2000 entries, 0 to 1999
+Data columns (total 79 columns):
+ #   Column                                                                                                                                                                                                                                                                                                                                                               Non-Null Count  Dtype  
+---  ------                                                                                                                                                                                                                                                                                                                                                               --------------  -----  
+ 0   WBA ID                                                                                                                                                                                                                                                                                                                                                               2000 non-null   object 
+ 1   Company Name                                                                                                                                                                                                                                                                                                                                                         2000 non-null   object 
+ 2   HQ Country                                                                                                                                                                                                                                                                                                                                                           2000 non-null   object 
+ 3   HQ Region                                                                                                                                                                                                                                                                                                                                                            2000 non-null   object 
+ 4   ISIN                                                                                                                                                                                                                                                                                                                                                                 1475 non-null   object 
+ 5   WBA Industry                                                                                                                                                                                                                                                                                                                                                         1995 non-null   object 
+ 6   Ownership                                                                                                                                                                                                                                                                                                                                                            1996 non-null   object 
+ 7   Year assessed                                                                                                                                                                                                                                                                                                                                                        2000 non-null   int64  
+ 8   Overall Gender Assessment Score                                                                                                                                                                                                                                                                                                                                      2000 non-null   float64
+ 9   Percentage of Total Possible Score 
+(out of 52.3)                                                                                                                                                                                                                                                                                                                    2000 non-null   int64  
+ 10  A01. Strategic action                                                                                                                                                                                                                                                                                                                                                2000 non-null   int64  
+ 11  A01.EA The company made a public commitment to gender equality and women’s empowerment (e.g. signatory to the UN Women’s Empowerment Principles, or having made another public commitment at CEO level).                                                                                                                                                             2000 non-null   object 
+ 12  A02. Gender targets                                                                                                                                                                                                                                                                                                                                                  2000 non-null   int64  
+ 13  A02.EA The company discloses one or more time-bound targets on gender equality and women’s empowerment with regard to its workplace.                                                                                                                                                                                                                                 2000 non-null   object 
+ 14  A02.EC The company discloses one or more time-bound targets on gender equality and women’s empowerment with regard  to its supply chain.                                                                                                                                                                                                                             2000 non-null   object 
+ 15  A04. Gender-responsive human rights due diligence process                                                                                                                                                                                                                                                                                                            2000 non-null   int64  
+ 16  A04.EA The company discloses what gender-related human rights impacts it has assessed and prioritised as being salient (i.e. most severe and potentially irremediable if not addressed).                                                                                                                                                                             2000 non-null   object 
+ 17  A04.EB The company consults with women or women's groups as part of the risk identification and assessment process.                                                                                                                                                                                                                                                  2000 non-null   object 
+ 18  A05. Grievance mechanisms                                                                                                                                                                                                                                                                                                                                            2000 non-null   float64
+ 19  A05.EA The company has a gender-responsive mechanism through which employees can report grievances.                                                                                                                                                                                                                                                                  2000 non-null   object 
+ 20  A05.EB The company has one or more channel(s)/mechanism(s), or participates in a shared mechanism, accessible to all external individuals and communities who may be adversely impacted by the company (or individuals or organisations acting on their behalf or who are otherwise in a position to be aware of adverse impacts), to raise complaints or concerns.  2000 non-null   object 
+ 21  A05.EC The company collects, analyses and monitors sex-disaggregated grievance data (e.g. number of grievances reported, number of grievances remediated).                                                                                                                                                                                                           2000 non-null   object 
+ 22  A06. Stakeholder engagement                                                                                                                                                                                                                                                                                                                                          2000 non-null   int64  
+ 23  A06.EA The company does employee surveys or other engagement mechanisms that specifically address gender equality &amp; women’s empowerment issues.                                                                                                                                                                                                                      2000 non-null   object 
+ 24  A07. Corrective action process                                                                                                                                                                                                                                                                                                                                       2000 non-null   float64
+ 25  A07.EA The company screens for gender-related issues among its suppliers as part of its audit process. Can score Partially Met for .5.                                                                                                                                                                                                                               2000 non-null   object 
+ 26  A07.EB The company identifies any gender-related issues as requiring corrective action to be taken by a supplier within a set period of time in order to remediate the issue.                                                                                                                                                                                        2000 non-null   object 
+ 27  B01. Gender equality in leadership                                                                                                                                                                                                                                                                                                                                   2000 non-null   int64  
+ 28  B01.EA The company maintains a gender balance (between 40-60%) at the highest governance body.                                                                                                                                                                                                                                                                       2000 non-null   object 
+ 29  B01.EB The company maintains a gender balance (between 40-60%) at the senior executive level.                                                                                                                                                                                                                                                                        2000 non-null   object 
+ 30  B01.EC The company maintains a gender balance (between 40-60%) at the senior management level.                                                                                                                                                                                                                                                                       2000 non-null   object 
+ 31  B01.ED The company maintains a gender balance (between 40-60%) at the middle/other management level.                                                                                                                                                                                                                                                                 2000 non-null   object 
+ 32  B02. Professional development and recruitment                                                                                                                                                                                                                                                                                                                        2000 non-null   int64  
+ 33  B02.EA The company offers professional development programmes (e.g. mentoring programme(s), leadership coaching, access to internal and/or external professional networks, educational programs, and formal sponsorship programmes.                                                                                                                                  2000 non-null   object 
+ 34  B02.EB The company tracks the number of women who are participating in these programmes.                                                                                                                                                                                                                                                                             2000 non-null   object 
+ 35  B03. Sex-disaggregated employee data                                                                                                                                                                                                                                                                                                                                 2000 non-null   int64  
+ 36  B03.EA The company collects sex-disaggregated data on the gender balance of its employees by occupational function.                                                                                                                                                                                                                                                  2000 non-null   object 
+ 37  B03.EB The company collects sex-disaggregated data on the percentage of employees promoted.                                                                                                                                                                                                                                                                          2000 non-null   object 
+ 38  B03.EC The company collects sex-disaggregated data on the annual turnover of employees.                                                                                                                                                                                                                                                                              2000 non-null   object 
+ 39  B03.ED The company collect sex-disaggregated data on the annual absenteeism levels of employees.                                                                                                                                                                                                                                                                     2000 non-null   object 
+ 40  B04. Gender equality leadership in the supply chain                                                                                                                                                                                                                                                                                                                  2000 non-null   int64  
+ 41  B04.EA The company collects or requires its suppliers to collect sex-disaggregated data by leadership level across the supply chain.                                                                                                                                                                                                                                 2000 non-null   object 
+ 42  B06. Enabling environment for freedom of association and collective bargaining                                                                                                                                                                                                                                                                                       2000 non-null   int64  
+ 43  B06.EB The company describes how it supports the practices of its business relationships in relation to freedom of association and collective bargaining.                                                                                                                                                                                                            2000 non-null   object 
+ 44  B07. Gender-responsive procurement                                                                                                                                                                                                                                                                                                                                   2000 non-null   int64  
+ 45  B07.EA The company made a public commitment to gender-responsive procurement.                                                                                                                                                                                                                                                                                        2000 non-null   object 
+ 46  B07.EB The company procures from women-owned businesses.                                                                                                                                                                                                                                                                                                             2000 non-null   object 
+ 47  C01. Gender pay gap                                                                                                                                                                                                                                                                                                                                                  2000 non-null   int64  
+ 48  C01.EA The company collects sex-disaggregated pay data.                                                                                                                                                                                                                                                                                                              2000 non-null   object 
+ 49  C01.EB The company collects sex-disaggregated pay data by different pay bands, occupational functions, or other financial benefits.                                                                                                                                                                                                                                  2000 non-null   object 
+ 50  C01.EC The company uses a third party to undertake/verify its pay gap analysis.                                                                                                                                                                                                                                                                                      2000 non-null   object 
+ 51  C02. Paid primary and secondary carer leave                                                                                                                                                                                                                                                                                                                          2000 non-null   float64
+ 52  C02.EA The company has a global policy of providing at least 14 weeks of paid primary carer leave offered to full-time employees.                                                                                                                                                                                                                                    2000 non-null   object 
+ 53  C02.EB The company monitors the return-to-work rate of employees after primary carer leave and their retention a year after primary carer leave.                                                                                                                                                                                                                     2000 non-null   object 
+ 54  C02.EC The company has a global policy of providing at least two weeks of paid secondary carer leave offered to full-time employees.                                                                                                                                                                                                                                 2000 non-null   object 
+ 55  C02.ED The company tracks the number of workers who take secondary carer leave.                                                                                                                                                                                                                                                                                      2000 non-null   object 
+ 56  C03. Childcare and other family support                                                                                                                                                                                                                                                                                                                              2000 non-null   int64  
+ 57  C03.EA The company offers childcare support to employees.                                                                                                                                                                                                                                                                                                            2000 non-null   object 
+ 58  C03.EB The company offers other family support to its employees.                                                                                                                                                                                                                                                                                                     2000 non-null   object 
+ 59  C04. Flexible work                                                                                                                                                                                                                                                                                                                                                   2000 non-null   int64  
+ 60  C04.EA The company offers flexible working hours to its employees (the ability to alter the start and end of the day).                                                                                                                                                                                                                                               2000 non-null   object 
+ 61  C04.EB The company collects sex-disaggregated data on the number of employees who have flexible working hour arrangements.                                                                                                                                                                                                                                           2000 non-null   object 
+ 62  C04.EC The company offers flexible work locations to its employees (the ability to work from home/telecommuting).                                                                                                                                                                                                                                                    2000 non-null   object 
+ 63  C04.ED The company collects sex-disaggregated data on the number of employees who have flexible work location arrangements.                                                                                                                                                                                                                                          2000 non-null   object 
+ 64  C06. Living wage in the supply chain                                                                                                                                                                                                                                                                                                                                 2000 non-null   int64  
+ 65  C06.EA The company requires its suppliers to pay their workers a living wage.                                                                                                                                                                                                                                                                                        2000 non-null   object 
+ 66  C06.EB The company takes specific actions to help ensure its suppliers pay their workers a living wage.                                                                                                                                                                                                                                                              2000 non-null   object 
+ 67  D01. Health, safety and well-being in the workplace                                                                                                                                                                                                                                                                                                                  2000 non-null   float64
+ 68  D01.EA The company has a publicly available policy statement committing it to respect the health and safety of its employees.                                                                                                                                                                                                                                        2000 non-null   object 
+ 69  D01.EB The company discloses sex-disaggregated information on health and safety for its employees.                                                                                                                                                                                                                                                                   2000 non-null   object 
+ 70  D01.EC The company provides coverage of the costs associated with any of the following health information and services:&nbsp;maternal health, sexual and reproductive health, and mental health. It has to provide more than two different services for a full score. Partially met if only one service is provided.                                                      2000 non-null   object 
+ 71  D02. Safe and healthy work in the supply chain                                                                                                                                                                                                                                                                                                                       2000 non-null   int64  
+ 72  D02.EA The company has a publicly available statement of policy that expects its business relationships to commit to respecting the health and safety of their workers.                                                                                                                                                                                              2000 non-null   object 
+ 73  D02.EC The company discloses how it monitors the health and safety performance of its business relationships.                                                                                                                                                                                                                                                        2000 non-null   object 
+ 74  E01. Violence and harassment prevention                                                                                                                                                                                                                                                                                                                              2000 non-null   float64
+ 75  E01.EA The company has publicly available policies in place regarding violence and harassment in the workplace (e.g., zero tolerance policy, safe transport policy, etc.). Can score Partially Met for .5.                                                                                                                                                           2000 non-null   object 
+ 76  E02. Violence and harassment remediation                                                                                                                                                                                                                                                                                                                             2000 non-null   float64
+ 77  E02.EA The company has a remediation process for addressing violence and harassment grievances in the workplace. Can score Partially Met for .5.                                                                                                                                                                                                                     2000 non-null   object 
+ 78  E02.EB The company collects, analyses and monitors sex-disaggregated data on the remediation of violence and harassment grievances.                                                                                                                                                                                                                                  2000 non-null   object 
+dtypes: float64(7), int64(17), object(55)
+memory usage: 1.2+ MB
+None
+Initial number of rows: 2000</code></pre>
+</div>
+</div>
+<div id="bea37591-49e1-44e4-973f-9081255f1b9e" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Choosing only indicator scores and removing element scores</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Drop columns with values only in ['Met', 'Unmet', 'Partially Met']</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>columns_to_drop <span class="op">=</span> []</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> df.columns:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    unique_vals <span class="op">=</span> df[col].dropna().unique()</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">all</span>(val <span class="kw">in</span> [<span class="st">'Met'</span>, <span class="st">'Unmet'</span>, <span class="st">'Partially Met'</span>] <span class="cf">for</span> val <span class="kw">in</span> unique_vals):</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        columns_to_drop.append(col)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#WBA ID and ISIN are not required in the analysis so removing</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>columns_to_drop.extend([<span class="st">'WBA ID'</span>, <span class="st">'ISIN'</span>])</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                       </span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.drop(columns<span class="op">=</span>columns_to_drop)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="a0e73de5-d722-4a32-82ff-41aa189448f9" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop rows with missing values in critical columns</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.dropna(subset<span class="op">=</span>[<span class="st">"Company Name "</span>, <span class="st">"HQ Country"</span>, <span class="st">"Overall Gender Assessment Score"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="13e3a538-bd51-40b0-9181-6e4fb1ffadcb" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#  Clean column names (convert to lowercase and replace spaces with underscores)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>df.columns <span class="op">=</span> df.columns.<span class="bu">str</span>.strip().<span class="bu">str</span>.lower().<span class="bu">str</span>.replace(<span class="st">' '</span>, <span class="st">'_'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="d77686ad-4689-45d0-9593-0e218e434459" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename long column names to shorter ones</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>rename_map <span class="op">=</span> {</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'company_name'</span>: <span class="st">'company'</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'hq_country'</span>: <span class="st">'country'</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'hq_region'</span>: <span class="st">'region'</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'wba_industry'</span>: <span class="st">'industry'</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'year_assessed'</span>: <span class="st">'year'</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'overall_gender_assessment_score'</span>: <span class="st">'score'</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'percentage_of_total_possible_score_</span><span class="ch">\n</span><span class="st">(out_of_52.3)'</span>: <span class="st">'percent_score'</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a01._strategic_action"</span>: <span class="st">"strategic_action"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a02._gender_targets"</span>: <span class="st">"gender_targets"</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a04._gender-responsive_human_rights_due_diligence_process"</span>: <span class="st">"gender_due_diligence"</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a05._grievance_mechanisms"</span>: <span class="st">"grievance_mechanisms"</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a06._stakeholder_engagement"</span>: <span class="st">"stakeholder_engagement"</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a07._corrective_action_process"</span>: <span class="st">"corrective_action"</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"b01._gender_equality_in_leadership"</span>: <span class="st">"gender_leadership"</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"b02._professional_development_and_recruitment"</span>: <span class="st">"development_recruitment"</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"b03._sex-disaggregated_employee_data"</span>: <span class="st">"employee_data_by_sex"</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"b04._gender_equality_leadership_in_the_supply_chain"</span>: <span class="st">"supply_chain_gender_leadership"</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"b06._enabling_environment_for_freedom_of_association_and_collective_bargaining"</span>: <span class="st">"enabling_environment_union_rights"</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"b07._gender-responsive_procurement"</span>: <span class="st">"gender_procurement"</span>,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"c01._gender_pay_gap"</span>: <span class="st">"gender_pay_gap"</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"c02._paid_primary_and_secondary_carer_leave"</span>: <span class="st">"carer_leave_paid"</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">'c03._childcare_and_other_family_support'</span>: <span class="st">'childcare_support'</span>,</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">'c04._flexible_work'</span>: <span class="st">'flex_work'</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">'c06._living_wage_in_the_supply_chain'</span>: <span class="st">'living_wage_supply_chain'</span>,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">'d01._health,_safety_and_well-being_in_the_workplace'</span>: <span class="st">'health_safety'</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">'d02._safe_and_healthy_work_in_the_supply_chain'</span>: <span class="st">'health_safety_supply_chain'</span>,</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">'e01._violence_and_harassment_prevention'</span>: <span class="st">'violence_prevention'</span>,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">'e02._violence_and_harassment_remediation'</span>: <span class="st">'violence_remediation'</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply renaming</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.rename(columns<span class="op">=</span>rename_map)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="2a522f72-9fff-4955-94e7-76a6324e16cc" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure 'score' and 'percent_score' are numeric</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'score'</span>] <span class="op">=</span> pd.to_numeric(df[<span class="st">'score'</span>], errors<span class="op">=</span><span class="st">'coerce'</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'percent_score'</span>] <span class="op">=</span> pd.to_numeric(df[<span class="st">'percent_score'</span>], errors<span class="op">=</span><span class="st">'coerce'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="9f089044-a79c-4b09-a00b-c1aa77ac47f0" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove duplicates</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.drop_duplicates()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="955a3d7c-a87e-436b-9914-2e7195f8ba35" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save cleaned file</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>df.to_csv(<span class="st">"../data/clean/genderassessment.csv"</span>, index<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="2a238842-bdbf-4068-b10b-3e27dacebb18" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Validate cleaned data</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>clean_data<span class="op">=</span> pd.read_csv(<span class="st">"../data/clean/genderassessment.csv"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Final cleaned dataset rows: </span><span class="sc">{</span><span class="bu">len</span>(clean_data)<span class="sc">}</span><span class="ss">"</span>)  <span class="co"># Final row count</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>clean_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Final cleaned dataset rows: 2000</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">company</th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">region</th>
+<th data-quarto-table-cell-role="th">industry</th>
+<th data-quarto-table-cell-role="th">ownership</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">score</th>
+<th data-quarto-table-cell-role="th">percent_score</th>
+<th data-quarto-table-cell-role="th">strategic_action</th>
+<th data-quarto-table-cell-role="th">gender_targets</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">gender_procurement</th>
+<th data-quarto-table-cell-role="th">gender_pay_gap</th>
+<th data-quarto-table-cell-role="th">carer_leave_paid</th>
+<th data-quarto-table-cell-role="th">childcare_support</th>
+<th data-quarto-table-cell-role="th">flex_work</th>
+<th data-quarto-table-cell-role="th">living_wage_supply_chain</th>
+<th data-quarto-table-cell-role="th">health_safety</th>
+<th data-quarto-table-cell-role="th">health_safety_supply_chain</th>
+<th data-quarto-table-cell-role="th">violence_prevention</th>
+<th data-quarto-table-cell-role="th">violence_remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>3M</td>
+<td>United States</td>
+<td>North America</td>
+<td>Chemicals</td>
+<td>Public</td>
+<td>2023</td>
+<td>11.3</td>
+<td>22</td>
+<td>1</td>
+<td>0</td>
+<td>...</td>
+<td>1</td>
+<td>0</td>
+<td>0.0</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>1.0</td>
+<td>2</td>
+<td>1.0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Asos</td>
+<td>United Kingdom</td>
+<td>Europe &amp; Central Asia</td>
+<td>Apparel &amp; Footwear</td>
+<td>Public</td>
+<td>2023</td>
+<td>16.9</td>
+<td>32</td>
+<td>1</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0.0</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>0.5</td>
+<td>2</td>
+<td>0.5</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>A.P. Moller - Maersk</td>
+<td>Denmark</td>
+<td>Europe &amp; Central Asia</td>
+<td>Freight &amp; logistics</td>
+<td>Public</td>
+<td>2024</td>
+<td>10.9</td>
+<td>21</td>
+<td>1</td>
+<td>1</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0.0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1.0</td>
+<td>2</td>
+<td>1.0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>ABB</td>
+<td>Switzerland</td>
+<td>Europe &amp; Central Asia</td>
+<td>Capital Goods</td>
+<td>Public</td>
+<td>2023</td>
+<td>12.8</td>
+<td>25</td>
+<td>1</td>
+<td>1</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>1.0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1.0</td>
+<td>2</td>
+<td>1.0</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>AbbVie</td>
+<td>United States</td>
+<td>North America</td>
+<td>Pharmaceuticals &amp; Biotechnology</td>
+<td>Public</td>
+<td>2023</td>
+<td>15.4</td>
+<td>30</td>
+<td>1</td>
+<td>0</td>
+<td>...</td>
+<td>1</td>
+<td>0</td>
+<td>0.0</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>1.0</td>
+<td>2</td>
+<td>1.0</td>
+<td>0.0</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 29 columns</p>
+</div>
+</div>
+</div>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/diverse-data-hub\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This page is built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
