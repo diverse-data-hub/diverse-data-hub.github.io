@@ -1,8 +1,10 @@
 ```{r all_flags}
-#| echo: true
+#| echo: false
 #| warning: false
 #| message: false
 #| collapse: true
+library(reticulate)
+use_condaenv("diversepy_web", required = TRUE)
 ```
 
 ### Key Features of the Data Set
@@ -55,6 +57,8 @@ Understanding these dynamics can inform fan expectations and bracket predictions
 
 We should load the necessary libraries we will be using, including the `diversedata` package.
 
+::: {.panel-tabset}
+## R
 ```{r library_load, results = "hide", warning = FALSE, message = FALSE}
 library(diversedata)
 library(tidyverse)
@@ -64,10 +68,24 @@ library(knitr)
 library(MASS)
 ```
 
+## Python
+```{python library_load_py, results = "hide", warning = FALSE, message = FALSE}
+import pandas as pd
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import altair as alt
+import numpy as np
+from scipy import stats
+# import diversedata as dd
+```
+:::
+
 #### 1. Data Cleaning & Processing
 
 First, let's load our data (`womensmarchmadness` from `diversedata` package) and remove all NA values for our variables of interest `seed` and `tourney_wins`.
 
+::: {.panel-tabset}
+## R
 ```{r data_load, warning=FALSE, message=FALSE}
 # Reading Data
 marchmadness <- womensmarchmadness
@@ -82,17 +100,45 @@ marchmadness <- marchmadness |> drop_na(seed, tourney_wins)
 nrow(marchmadness)
 ```
 
+## Python
+```{python data_load_py, warning=FALSE, message=FALSE}
+# Reading Data *** change to use package
+marchmadness = pd.read_csv("../../data/clean/womensmarchmadness.csv")
+# marchmadness = dd.load_data("womensmarchmadness")
+
+# Review total rows
+marchmadness.shape[0]
+
+# Removing NA but only in selected columns
+marchmadness = marchmadness.dropna(subset=['seed', 'tourney_wins'])
+
+# Notice no rows were removed
+marchmadness.shape[0]
+```
+:::
+
 Note that, the `seed = 0` designation in 1983 notes the eight teams that played an opening-round game to become the No.8 seed in each region. For this exercise, we will not take them into consideration. Since `seed` is an ordinal categorical variable, we can set it as an ordered factor.
 
+::: {.panel-tabset}
+## R
 ```{r seed_filter}
 marchmadness <- marchmadness |> 
   filter(seed != 0)
 ```
 
+## Python
+```{python seed_filter_py}
+marchmadness = marchmadness[marchmadness['seed'] != 0]
+```
+:::
+
+
 #### 2. Exploratory Data Analysis
 
 We can see which seeds appear more often.
 
+::: {.panel-tabset}
+## R
 ```{r eda_a}
 seed_count <- marchmadness |> 
   count(seed) |> 
@@ -110,6 +156,32 @@ ggplot(
     y = "Number of Teams") +
   theme_minimal()
 ```
+
+## Python
+```{python eda_a_py}
+max_seed = marchmadness["seed"].max()
+tick_values = list(range(0, max_seed + 1))
+
+chart = (
+    alt.Chart(marchmadness)
+    .mark_bar(size = 12)
+    .encode(
+        x=alt.X(
+            "seed:Q",
+            title="Seed",
+            axis=alt.Axis(values=tick_values)
+        ),
+        y=alt.Y("count()", title="Number of Teams")
+    )
+    .properties(
+        title="Distribution of Tournament Seeds",
+        width="container"
+    )
+)
+
+chart
+```
+:::
 
 We can also take a look at the average tournament wins for each seed:
 
