@@ -164,7 +164,7 @@ marchmadness |>
 
 #### 3. Seed Treatment: Numeric vs Factor
 
-An important decision on this analysis is whether to use `seed` as a numeric or an ordered categorical predictor. Treating `seed` as a numeric explanatory variable assumes that the effect of seed is linear on the log scaled of the amount of tourney_wins.
+An important decision on this analysis is whether to use `seed` as a numeric or an ordered categorical predictor. Treating `seed` as a numeric explanatory variable assumes that the effect of seed is linear on the log scaled of the amount of `tourney_wins`.
 
 To test if this assumption is appropriate, we can compare models that make different assumptions about `seed`. We'll create models using `seed` as both a numeric variable and a factor.
 
