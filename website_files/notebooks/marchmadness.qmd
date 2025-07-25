@@ -70,13 +70,14 @@ library(MASS)
 
 ## Python
 ```{python library_load_py, results = "hide", warning = FALSE, message = FALSE}
+# import diversedata as dd
 import pandas as pd
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 import altair as alt
 import numpy as np
 from scipy import stats
-# import diversedata as dd
+from IPython.display import Markdown
 ```
 :::
 
@@ -168,6 +169,8 @@ alt.Chart(marchmadness).mark_bar().encode(
 
 We can also take a look at the average tournament wins for each seed:
 
+::: {.panel-tabset}
+## R
 ```{r eda_b}
 marchmadness |> 
   filter(!is.na(seed), seed != 0) |> 
@@ -191,8 +194,22 @@ marchmadness |>
   theme_minimal()
 ```
 
+## Python
+```{python eda_b_py}
+avg_per_seed = marchmadness.groupby(by="seed")["tourney_wins"].mean().reset_index()
+
+alt.Chart(avg_per_seed).mark_bar().encode(
+    x=alt.X("seed:O").title("Seed"),
+    y=alt.Y("tourney_wins").title("Avg. Tourney Wins"),
+).properties(title="Average Tournament Wins by Seed", width=600)
+```
+
+:::
+
 We can note that a teams with a higher seed tend to win more tournaments! We can also see the total amount of tourney wins for each seed.
 
+::: {.panel-tabset}
+## R
 ```{r eda_c}
 seed_order <- marchmadness |> 
   filter(!is.na(seed), seed != 0) |> 
@@ -217,6 +234,31 @@ marchmadness |>
   theme_minimal()
 ```
 
+## Python
+```{python eda_c_py}
+alt.Chart(marchmadness).transform_density(
+    "tourney_wins", as_=["tourney_wins", "density"], groupby=["seed"]
+).mark_area(orient="horizontal").encode(
+    x=alt.X("density:Q")
+    .stack("center")
+    .impute(None)
+    .title(None)
+    .axis(labels=False, values=[0], grid=False, ticks=True),
+    y=alt.Y("tourney_wins").title("Tournament Wins"),
+    column=alt.Column("seed:O")
+    .spacing(0)
+    .header(titleOrient="bottom", labelOrient="bottom", labelPadding=0)
+    .title("Seed"),
+).configure_view(
+    stroke=None
+).properties(
+    width=70
+    title="Distribution of Tournament Wins by Seed"
+)
+```
+
+:::
+
 #### 3. Seed Treatment: Numeric vs Factor
 
 An important decision on this analysis is whether to use `seed` as a numeric or an ordered categorical predictor. Treating `seed` as a numeric explanatory variable assumes that the effect of seed is linear on the log scaled of the amount of `tourney_wins`.
@@ -225,6 +267,8 @@ To test if this assumption is appropriate, we can compare models that make diffe
 
 However, first, we need to encode `seed` as an ordered factor.
 
+::: {.panel-tabset}
+## R
 ```{r recode_a}
 marchmadness_factor <- marchmadness |> 
   mutate(seed = as.ordered(seed)) |> 
@@ -236,8 +280,20 @@ marchmadness_factor <- marchmadness |>
              "16")))
 ```
 
+## Python
+```{python recode_a_py}
+marchmadness_factor = marchmadness.copy()
+
+marchmadness_factor["seed"] = pd.Categorical(
+    marchmadness["seed"], categories=range(1, 17), ordered=True
+)
+```
+:::
+
 Given that we're setting `tourney_wins` as a response, our linear regression model may output negative values at high seed values. Therefore, a Poisson Regression model is better suited, considering that tourney wins is a count variable and is always non-negative.
 
+::: {.panel-tabset}
+## R
 ```{r model_fit}
 options(contrasts = c("contr.treatment", "contr.sdif"))
 
@@ -246,8 +302,35 @@ poisson_model <- glm(tourney_wins ~ seed, family = "poisson", data = marchmadnes
 poisson_model_factor <- glm(tourney_wins ~ seed, family = "poisson", data = marchmadness_factor)
 ```
 
+## Python
+
+At the moment, the `statsmodels` Python package does not support successive contrasts.
+
+In this Python analysis, seed 1 will be used as the reference seed. To change the reference seed, such as seed 2:
+
+> ```python
+> poisson_model_factor = smf.glm(
+>     "tourney_wins ~ C(seed, Treatment(reference=2))", # specify reference seed number here
+>     data=marchmadness_factor,
+>     family=sm.families.Poisson()
+> ).fit()
+> ```
+
+```{python model_fit_py}
+poisson_model = smf.glm(
+    "tourney_wins ~ seed", data=marchmadness, family=sm.families.Poisson()
+).fit()
+
+poisson_model_factor = smf.glm(
+    "tourney_wins ~ seed", data=marchmadness_factor, family=sm.families.Poisson()
+).fit()
+```
+:::
+
 We can visualize how the two models fit the data to evaluate if treating `seed` as `numeric` or `factor` would have a significant impact on our modelling process.
 
+::: {.panel-tabset}
+## R
 ```{r plot_data, warning = FALSE, message = FALSE}
 marchmadness <- marchmadness |> 
   mutate(
@@ -269,13 +352,86 @@ ggplot(plot_data, aes(x = seed, y = predicted, color = model)) +
   theme_minimal()
 ```
 
+## Python
+```{python plot_data_py, warning = FALSE, message = FALSE}
+marchmadness["Numeric_Seed"] = poisson_model.predict()
+marchmadness["Factor_Seed"] = poisson_model_factor.predict()
+
+plot_data = pd.melt(
+    marchmadness,
+    id_vars=["seed", "tourney_wins"],
+    value_vars=["Numeric_Seed", "Factor_Seed"],
+    var_name="model",
+    value_name="predicted",
+)
+
+points = alt.Chart(plot_data).mark_circle(opacity=0.3, color="black").encode(
+    x=alt.X("seed").title("Seed"),
+    y=alt.Y("tourney_wins:Q").title("Predicted Wins")
+)
+
+lines = alt.Chart(plot_data).mark_line(size=2).encode(
+    x=alt.X("seed"),
+    y="predicted:Q",
+    color=alt.Color("model:N")
+        .title("Model")
+        .scale(alt.Scale(domain=["Factor_Seed", "Numeric_Seed"],
+                         range=["salmon", "darkturquoise"]
+                        )
+              )
+).transform_loess(on="seed", loess="predicted", groupby=["model"])
+
+
+(points + lines).properties(title='Predicted Tournament Wins by Seed')
+```
+
+:::
+
+
 Visually, both models don't appear to be significantly different from each other. Now, if we wanted to formally evaluate which is the better approach we could use likelihood-based model selection tools.
 
+::: {.panel-tabset}
+## R
 ```{r table_display}
 kable(glance(poisson_model), digits = 2)
 
 kable(glance(poisson_model_factor), digits = 2)
 ```
+
+## Python
+```{python table_display_py, warning = FALSE}
+summary_poisson_model_dict = {
+    'null.deviance' : poisson_model.null_deviance,
+    'df.null' : poisson_model.nobs - 1,
+    'logLik': poisson_model.llf,
+    'AIC': poisson_model.aic,
+    'BIC': poisson_model.bic,
+    'deviance': poisson_model.deviance,
+    'df.residual': poisson_model.df_resid,
+    'nobs': poisson_model.nobs
+}
+
+summary_poisson_model_df = pd.DataFrame([summary_poisson_model_dict]).round(2)
+
+Markdown(summary_poisson_model_df)
+
+summary_poisson_model_factor_dict = {
+    'null.deviance' : poisson_model_factor.null_deviance,
+    'df.null' : poisson_model_factor.nobs - 1,
+    'logLik': poisson_model_factor.llf,
+    'AIC': poisson_model_factor.aic,
+    'BIC': poisson_model_factor.bic,
+    'deviance': poisson_model_factor.deviance,
+    'df.residual': poisson_model_factor.df_resid,
+    'nobs': poisson_model_factor.nobs
+}
+
+summary_poisson_model_factor_df = pd.DataFrame([summary_poisson_model_factor_dict]).round(2)
+
+Markdown(summary_poisson_model_factor_df)
+```
+
+:::
 
 Based on lower residual deviance, higher log-likelihood, and a lower AIC, the model that treats `seed` as a factor fits the data better. This would suggest that the relationship between tournament seed and number of wins is **not linear**, and would support using an approach that does not assume a constant effect per unit change in seed.
 
@@ -285,11 +441,35 @@ $H_0$: Model `poisson_model` fits the data better than model `poisson_model_fact
 
 $H_a$: Model `poisson_model_factor` fits the data better than model `poisson_model`
 
+::: {.panel-tabset}
+## R
+
 ```{r anova_result}
 anova_result <- tidy(anova(poisson_model, poisson_model_factor, test = "Chisq"))
 
 kable(anova_result, digits = 2) 
 ```
+
+## Python
+```{python anova_result_py}
+# manual chi sq test for GLMs:
+
+# deviance
+deviance = 2 * (poisson_model_factor.llf - poisson_model.llf)
+df_diff = poisson_model_factor.df_model - poisson_model.df_model
+p_value = stats.chi2.sf(deviance, df_diff)
+
+# results
+anova_result = pd.DataFrame({
+    "model comparison": ["poisson_model vs poisson_model_factor"],
+    "deviance": [deviance],
+    "df": [df_diff],
+    "p-value": [p_value]
+}).round(3)
+
+Markdown(anova_result)
+```
+:::
 
 These results indicate strong evidence that the model with `seed` treated as a factor fits the data significantly better than treating it as a numeric predictor. Therefore, we will proceed by using `seed` as a factor.
 
