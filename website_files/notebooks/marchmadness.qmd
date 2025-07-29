@@ -161,7 +161,7 @@ ggplot(
 ## Python
 ```{python eda_a_py}
 alt.Chart(marchmadness).mark_bar().encode(
-    x=alt.X("seed:O").title("Seed"),
+    x=alt.X("seed:O").title("Seed").axis(alt.Axis(labelAngle=0)),
     y=alt.Y("count()", title="Number of Teams"),
 ).properties(title="Distribution of Tournament Seeds", width=600)
 ```
@@ -199,11 +199,10 @@ marchmadness |>
 avg_per_seed = marchmadness.groupby(by="seed")["tourney_wins"].mean().reset_index()
 
 alt.Chart(avg_per_seed).mark_bar().encode(
-    x=alt.X("seed:O").title("Seed"),
+    x=alt.X("seed:O").title("Seed").axis(alt.Axis(labelAngle=0)),
     y=alt.Y("tourney_wins").title("Avg. Tourney Wins"),
 ).properties(title="Average Tournament Wins by Seed", width=600)
 ```
-
 :::
 
 We can note that a teams with a higher seed tend to win more tournaments! We can also see the total amount of tourney wins for each seed.
@@ -252,11 +251,10 @@ alt.Chart(marchmadness).transform_density(
 ).configure_view(
     stroke=None
 ).properties(
-    width=70
+    width=70,
     title="Distribution of Tournament Wins by Seed"
 )
 ```
-
 :::
 
 #### 3. Seed Treatment: Numeric vs Factor
@@ -304,6 +302,7 @@ poisson_model_factor <- glm(tourney_wins ~ seed, family = "poisson", data = marc
 
 ## Python
 
+:::: {.callout-note}
 At the moment, the `statsmodels` Python package does not support successive contrasts.
 
 In this Python analysis, seed 1 will be used as the reference seed. To change the reference seed, such as seed 2:
@@ -315,6 +314,8 @@ In this Python analysis, seed 1 will be used as the reference seed. To change th
 >     family=sm.families.Poisson()
 > ).fit()
 > ```
+
+::::
 
 ```{python model_fit_py}
 poisson_model = smf.glm(
@@ -382,9 +383,8 @@ lines = alt.Chart(plot_data).mark_line(size=2).encode(
 ).transform_loess(on="seed", loess="predicted", groupby=["model"])
 
 
-(points + lines).properties(title='Predicted Tournament Wins by Seed')
+(points + lines).properties(title='Predicted Tournament Wins by Seed', height=400, width=600)
 ```
-
 :::
 
 
@@ -413,7 +413,7 @@ summary_poisson_model_dict = {
 
 summary_poisson_model_df = pd.DataFrame([summary_poisson_model_dict]).round(2)
 
-Markdown(summary_poisson_model_df)
+Markdown(summary_poisson_model_df.to_markdown(index = False))
 
 summary_poisson_model_factor_dict = {
     'null.deviance' : poisson_model_factor.null_deviance,
@@ -428,9 +428,8 @@ summary_poisson_model_factor_dict = {
 
 summary_poisson_model_factor_df = pd.DataFrame([summary_poisson_model_factor_dict]).round(2)
 
-Markdown(summary_poisson_model_factor_df)
+Markdown(summary_poisson_model_factor_df.to_markdown(index = False))
 ```
-
 :::
 
 Based on lower residual deviance, higher log-likelihood, and a lower AIC, the model that treats `seed` as a factor fits the data better. This would suggest that the relationship between tournament seed and number of wins is **not linear**, and would support using an approach that does not assume a constant effect per unit change in seed.
@@ -443,7 +442,6 @@ $H_a$: Model `poisson_model_factor` fits the data better than model `poisson_mod
 
 ::: {.panel-tabset}
 ## R
-
 ```{r anova_result}
 anova_result <- tidy(anova(poisson_model, poisson_model_factor, test = "Chisq"))
 
@@ -451,7 +449,7 @@ kable(anova_result, digits = 2)
 ```
 
 ## Python
-```{python anova_result_py}
+```{python anova_result_py, warning=FALSE}
 # manual chi sq test for GLMs:
 
 # deviance
@@ -465,9 +463,9 @@ anova_result = pd.DataFrame({
     "deviance": [deviance],
     "df": [df_diff],
     "p-value": [p_value]
-}).round(3)
+}).round(2)
 
-Markdown(anova_result)
+Markdown(anova_result.to_markdown(index = False))
 ```
 :::
 
@@ -493,14 +491,51 @@ $H_a: 1 + \gamma > 1$
 
 When there is evidence of overdispersion in our data, we will reject $H_0$.
 
+::: {.panel-tabset}
+## R
 ```{r overdispersion, warning=FALSE, message=FALSE}
 kable(tidy(dispersiontest(poisson_model_factor)), digits = 2)
 ```
 
-Since the P-value (0.71) is much greater than 0.05, we fail to reject the null hypothesis. This suggests that there is no significant evidence of overdispersion in the Poisson model.
+## Python
+
+:::: {.callout-note}
+At the moment, the `statsmodels` Python package does not have a built-in hypothesis test for dispersion in count models. However, a manual Pearson chi-square test can be performed to assess whether overdispersion or underdispersion is present in the data.
+
+Note that R's `dispersiontest()` function from the `AER` package uses a score test, which is more statistically rigorous but also more complex to implement in Python.
+
+::::
+
+```{python overdispersion_py, warning=FALSE, message=FALSE}
+pearson_chi2 = np.sum(poisson_model_factor.resid_pearson**2)
+df_resid = poisson_model_factor.df_resid
+dispersion = pearson_chi2 / df_resid
+p_value = 1 - stats.chi2.cdf(pearson_chi2, df_resid)
+
+dispersion_result = pd.DataFrame({
+    "statistic": [pearson_chi2],
+    "df": [df_resid],
+    "dispersion": [dispersion],
+    "p-value": [p_value]
+}).round(2)
+
+Markdown(dispersion_result.to_markdown(index = False))
+```
+
+- A dispersion of ~1.0 indicates that the dispersion matches the Poisson assumption, in which the variance of the data is equal the mean.
+
+- A dispersion of >1.0 indicates overdispersion, in which the variance is greater than the mean.
+
+- A dispersion of <1.0 indicates underdispersion, in which the variance is less than the mean.
+
+:::
+
+Since the P-value is much greater than 0.05, we fail to reject the null hypothesis. This suggests that there is no significant evidence of overdispersion in the Poisson model.
 
 #### 5. Hypothesis Testing: Are Seed and Wins Associated?
 
+::: {.panel-tabset}
+## R
 ```{r model_output}
 summary_model <- tidy(poisson_model_factor) |> 
   mutate(exp_estimate = exp(estimate)) |> 
@@ -509,6 +544,35 @@ summary_model <- tidy(poisson_model_factor) |>
   
 kable(summary_model, digits = 2)
 ```
+
+## Python
+
+:::: {.callout-note}
+As mentioned before, the `statsmodels` Python package does not support successive contrasts at the moment.
+
+In this Python analysis, seed 1 is be used as the reference seed by default.
+
+To obtain successive differences , you can compute them manually by subtracting the corresponding coefficients. For example, the difference between seed 3 and seed 2 is $-0.66 - (-0.34) = -0.32$.
+
+You can change the reference seed (such as seed 2) when fitting the model, which would allow you to assess whether other seeds differ significantly from the new reference seed:
+
+> ```python
+> poisson_model_factor = smf.glm(
+>     "tourney_wins ~ C(seed, Treatment(reference=2))", # specify reference seed number here
+>     data=marchmadness_factor,
+>     family=sm.families.Poisson()
+> ).fit()
+> ```
+
+::::
+
+```{python model_output_py, warning=FALSE}
+poisson_model_factor_summary = poisson_model_factor.summary2().tables[1]
+poisson_model_factor_summary['Exp Coef.'] = np.exp(poisson_model_factor_summary['Coef.'])
+poisson_model_factor_summary = poisson_model_factor_summary.rename(columns={'P>|z|' : 'p.value'}).round(2)
+Markdown(poisson_model_factor_summary.to_markdown())
+```
+:::
 
 Based on these results, we can see that `seed` is significantly associated with `tourney_wins`, particularly in changes in levels between lower seeds. These results can be interpreted as:
 
@@ -528,6 +592,8 @@ Seed 2 teams are expected to win 29% fewer games than Seed 1 teams
 
 This conclusion is easier to interpret visually, so, let's plot our Poisson regression model to view the impact of `seed` on `tourney_wins`:
 
+::: {.panel-tabset}
+## R
 ```{r model_plot}
 marchmadness$predicted_wins <- predict(poisson_model_factor, type = "response")
 
@@ -541,6 +607,38 @@ model_plot <- ggplot(marchmadness, aes(x = seed, y = tourney_wins)) +
 
 model_plot
 ```
+
+## Python
+```{python model_plot_py}
+marchmadness["predicted_wins"] = poisson_model_factor.predict()
+
+result_plot_data = (
+    marchmadness
+    .groupby(['seed', 'predicted_wins', 'tourney_wins'])
+    .size()
+    .reset_index(name='count')
+)
+
+# Plot
+bubbles = alt.Chart(result_plot_data).mark_circle(opacity=0.6).encode(
+    x=alt.X("seed:N").title("Seed").axis(alt.Axis(labelAngle=0, labelPadding=10)),
+    y=alt.Y("tourney_wins:Q").title("Tournament Wins").axis(alt.Axis(format='d')),
+    size=alt.Size("count:Q").title("Count").scale(alt.Scale(range=[10, 1000])),
+    color=alt.value("black")
+)
+
+line = alt.Chart(result_plot_data).mark_line(size=3, color="skyblue").encode(
+    x=alt.X("seed:N").axis(alt.Axis(labelAngle=0, labelPadding=10)),
+    y=alt.Y("predicted_wins:Q").axis(alt.Axis(format='d')),
+)
+
+(bubbles + line).properties(
+    title="Poisson Regression: Predicted Tournament Wins by Seed",
+    width=600,
+    height=400
+)
+```
+:::
 
 ```{r plot_save, include=FALSE}
 ggsave("../img/marchmadness.png", plot = model_plot, width = 6, height = 4, dpi = 300)
