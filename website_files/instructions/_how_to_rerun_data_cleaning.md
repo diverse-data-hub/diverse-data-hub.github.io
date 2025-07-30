@@ -13,7 +13,7 @@ cd diverse-data-hub.github.io
 conda env create --file environment.yml
 ```
 
-This reads the YAML file and installs all required packages.
+This reads the YML file and installs all required packages.
 
 **3. Activate the environment**
 
