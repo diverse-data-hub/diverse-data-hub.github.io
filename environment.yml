@@ -1,7 +1,7 @@
 # To create environment from scratch:
 # conda create -n diverse_web_env -c conda-forge python pandas jupyterlab altair matplotlib ...
 
-# To create environment.yml with dependencies that were explicitly installed:
+# To create environment.yml with dependencies that were explicitly conda installed:
 # conda env export -f environment.yml --from-history
 
 # To create environment from yml file:
