@@ -8,11 +8,11 @@ The datasets will be easily accessible through an open-access website and as R a
 
 ## How to Activate the Environment
 
-Go [here](https://github.com/diverse-data-hub/diverse-data-hub.github.io/blob/main/website_files/instructions/_how_to_activate_environment.md) for instructions on how to activate the `renv` environment. This is required for other processes such as rendering the website and running independent analysis in a reproducible way.
+Go [here](https://github.com/diverse-data-hub/diverse-data-hub.github.io/blob/main/website_files/instructions/_how_to_activate_environment.md) for instructions on how to activate the `renv` environment and `conda` environment. This is required for other processes such as rendering the website and running independent analysis in a reproducible way.
 
 ## How to Render Website
 
-Go [here](https://github.com/diverse-data-hub/diverse-data-hub.github.io/blob/main/website_files/instructions/_how_to_render_website.md) for instructions on how to render website using the provided `renv` environment.
+Go [here](https://github.com/diverse-data-hub/diverse-data-hub.github.io/blob/main/website_files/instructions/_how_to_render_website.md) for instructions on how to render website using the provided `renv` environment and `conda` environment.
 
 ## How to Add a New Notebook to the Website
 
