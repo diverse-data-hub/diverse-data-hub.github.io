@@ -4,7 +4,7 @@
 #| message: false
 #| collapse: true
 library(reticulate)
-use_condaenv("diversepy_web", required = TRUE)
+use_condaenv("diverse_web_env", required = TRUE)
 ```
 
 ### Key Features of the Data Set
@@ -70,7 +70,7 @@ library(MASS)
 
 ## Python
 ```{python library_load_py, results = "hide", warning = FALSE, message = FALSE}
-# import diversedata as dd
+import diversedata as dd
 import pandas as pd
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
@@ -103,9 +103,8 @@ nrow(marchmadness)
 
 ## Python
 ```{python data_load_py, warning=FALSE, message=FALSE}
-# Reading Data *** change to use package
-marchmadness = pd.read_csv("../../data/clean/womensmarchmadness.csv")
-# marchmadness = dd.load_data("womensmarchmadness")
+# Reading Data
+marchmadness = dd.load_data("womensmarchmadness")
 
 # Review total rows
 marchmadness.shape[0]
