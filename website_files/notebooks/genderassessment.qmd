@@ -183,7 +183,7 @@ gender_by_group <- ggplot(gender_data_grouped, aes(x = reorder(industry_group, s
     title = "Overall Average Gender Assessment Score by Industry Group",
     x = "Industry Group", y = "Score"
   ) +
-  theme_minimal(base_size = 12)
+  theme_minimal()
 
 gender_by_group
 ```
@@ -272,7 +272,7 @@ ggsave("../img/genderassessment.png", plot = gender_by_group, width = 6, height 
 
 ::: {.panel-tabset}
 ## R
-```{r eda_3}
+```{r eda_3, message = FALSE, warning = FALSE}
 
 region_wide <- gender_data |> 
   filter(year %in% c(2023, 2024)) |>  # Ensure only these years are included
@@ -303,12 +303,8 @@ ggplot(region_wide, aes(x = `2023`, xend = `2024`, y = reorder(region, `2024`)))
     title = "Change in Average Score by Region (2023 to 2024)",
     x = "Average Score", y = "Region"
   ) +
-  theme_minimal(base_size = 13) +
-  theme(
-    plot.title = element_text(face = "bold"),
-    axis.title.y = element_blank(),
-    legend.position = "bottom"
-  )
+  theme_minimal() +
+  theme(axis.title.y = element_blank())
 
 
 ```
@@ -364,7 +360,8 @@ ggplot(filtered_data, aes(x = ownership, y = score, fill = ownership)) +
     "Government" = "#08306b"  # dark blue
   )) +
   labs(title = "Score by Ownership Type", x = "Ownership", y = "Score") +
-  theme_minimal()
+  theme_minimal() +
+  theme(legend.position = "none")
 
 ```
 
