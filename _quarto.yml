@@ -13,13 +13,11 @@ website:
   navbar:
     left:
       - href: website_files/datasets.qmd
-        text: Datasets
+        text: Data Sets
       - href: website_files/citation.qmd
         text: Citation
       - href: website_files/collaborate.qmd
         text: Collaborate
-      - href: website_files/interactiveplayground.qmd
-        text: Interactive Playground
 
   page-footer:
     right: "This page is built with [Quarto](https://quarto.org/)."
