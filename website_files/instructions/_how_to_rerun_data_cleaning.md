@@ -13,12 +13,12 @@ cd diverse-data-hub.github.io
 conda env create --file environment.yml
 ```
 
-This reads the YAML file and installs all required packages.
+This reads the YML file and installs all required packages.
 
 **3. Activate the environment**
 
 ```bash
-conda activate mds_capstone_v1
+conda activate diverse_web_env
 ```
 
 **4. Launch Jupyter Lab**

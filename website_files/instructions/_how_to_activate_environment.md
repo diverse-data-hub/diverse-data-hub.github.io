@@ -1,12 +1,14 @@
 ## How to activate environment:
 
-Multiple processes associated with the Diverse Data Hub require the use of a common environment for reproduciblity. For this reason, we've provided a `renv` environment:
+Multiple processes associated with the Diverse Data Hub require the use of a common environment for reproduciblity. For this reason, we've provided a `renv` and a `conda` environment.
+
+### R dependencies and `renv` environment
 
 The following R packages are used in various analyses and must be installed to render the Quarto website:
 
 ```r
 
-# Adding Data Sets form Diverse data hub For All Analysis:
+# Adding Data Sets From the Diverse Data Hub for All Analysis:
 
 library(diversedata)
 
@@ -64,7 +66,7 @@ library(FSA)
 
 ```
 
-### To use the `renv` environment included in this repository 
+#### To use the `renv` environment included in this repository 
 
 **1. Clone the repository**
 
@@ -153,3 +155,96 @@ renv::clean()
 ```
 
 This identifies unused packages and offers to remove them.
+
+### Python dependencies and `conda` environment
+
+The following Python packages are used in various analyses and must be installed to render the Quarto website:
+
+```python
+
+# Adding Data Sets From the Diverse Data Hub for All Analysis:
+
+import diversedata as dd
+
+# For `Women's March Madness`:
+
+import pandas as pd
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import altair as alt
+import numpy as np
+from scipy import stats
+from IPython.display import Markdown
+
+# For `Wildfire` (Additional to what's listed above)
+
+
+
+# For `How Couples Meet and Stay Together` (Additional to what's listed above)
+
+
+
+# For `Global Rights` (Additional to what's listed above)
+
+
+
+# For `Indigenous Business` (Additional to what's listed above)
+
+
+
+# For `Gender Assessment` (Additional to what's listed above)
+
+
+
+```
+
+#### To use the `conda` environment included in this repository 
+
+**1. Clone the repository**
+
+Using your shell terminal:
+
+```bash
+git clone git@github.com:diverse-data-hub/diverse-data-hub.github.io.git
+cd diverse-data-hub.github.io
+```
+
+**2. Create the Conda environment from environment.yml**
+
+```bash
+conda env create --file environment.yml
+```
+
+This reads the YML file and installs all required packages.
+
+**3. Activate the environment**
+
+```bash
+conda activate diverse_web_env
+```
+
+**Optional** - To Add New Dependencies
+
+To add a new dependency to the `conda` environment, use `conda install` or `pip install`.
+
+```bash
+conda install new_dependency
+# or
+pip install new_dependency
+```
+
+Check the installed version using:
+
+```bash
+conda list -f new_dependency
+```
+
+Manually add the dependency and its version to the `environment.yml` file to ensure reproducibility.
+
+Alternatively, you can run:
+
+```bash
+conda env export -f environment.yml --from-history
+```
+
+However, this command will not preserve the existing documentation in the `environment.yml` file and will not include packages that were installed via `pip`.
