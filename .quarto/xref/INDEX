@@ -220,5 +220,8 @@
   },
   "notebooks/genderassessment.ipynb": {
     "genderassessment.html": "068abcfe"
+  },
+  "website_files/notebooks/py-hcmst.ipynb": {
+    "py-hcmst.html": "8192b75b"
   }
 }
