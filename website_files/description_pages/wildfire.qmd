@@ -6,6 +6,13 @@ toc-location: right
 sidebar: false
 ---
 
+::: {.callout-note icon="terminal" title="Try it live!"}
+Use Binder to explore and run this dataset interactively in your browser.
+Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.
+
+👉 [Launch on Binder](https://mybinder.org/v2/gh/jadeeechen/diversedata-notebooks/HEAD?urlpath=lab/tree/wildfire.ipynb){target="_blank" rel="noopener"}
+:::
+
 ## About the Data
 
 This data set contains information on wildfires in Canada, compiled from official government sources under the Open Government Licence – Alberta.

@@ -4,7 +4,7 @@ The [Quarto website](https://diverse-data-hub.github.io/) is deployed through Gi
 
 Rendering the website requires `Quarto` to be installed. While Quarto is usually installed with RStudio, Quarto CLI can be downloaded [here](https://quarto.org/docs/get-started/).
 
-To preview or render the website using `quarto preview` or `quarto render` you must have all used R packages installed. For this reason, we've provided a `renv` environment for easy installation:
+To preview or render the website using `quarto preview` or `quarto render` you must have all used R packages installed. For this reason, we've provided a `renv` and a `conda` environment for easy installation:
 
 **1. Clone the repository**
 

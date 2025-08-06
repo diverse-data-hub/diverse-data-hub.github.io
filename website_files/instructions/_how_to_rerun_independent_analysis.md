@@ -2,7 +2,7 @@
 
 Any `.qmd` can be opened and ran in RStudio and as long as the used R packages are installed.
 
-However, to run it in a reproducible way, it's recommended to use the provided `renv` environment.
+However, to run it in a reproducible way, it's recommended to use the provided `renv` and `conda` environment.
 
 **1. Clone the repository**
 
