@@ -20,12 +20,16 @@ channels:
 dependencies:
 # for data cleaning notebooks in the scripts/ folder
   - python=3.12
-  - jupyterlab=4.4.1
+  - jupyterlab=4.4.1   # also for interactive binder: JupyterLab option
   - ipykernel
   - pandas=2.2.3
   - altair=5.5.0
   - matplotlib=3.10.1
   - seaborn=0.13.2
+
+# for interactive binder
+  - r-base>=4.2         # R base packages
+  - r-essentials        # IRkernel + common R packages
 
 # for the Women's March Madness analysis in addition to pandas and altair
   - statsmodels=0.14
