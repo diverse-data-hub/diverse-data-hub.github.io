@@ -6,6 +6,13 @@ toc-location: right
 sidebar: false
 ---
 
+::: {.callout-note icon="terminal" title="Try it live!"}
+Use Binder to explore and run this dataset interactively in your browser. Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.
+
+👉 [Launch on Binder](https://mybinder.org/v2/gh/jadeeechen/diversedata-notebooks/HEAD?urlpath=lab/tree/bcindigenousbiz.ipynb){target="_blank" rel="noopener"}
+
+:::
+
 ## About the Data
 
 The BC Indigenous Business Listings data set provides a detailed look at Indigenous-owned businesses operating throughout British Columbia. Compiled in 2025 by the Government of British Columbia and shared under the [Open Government Licence - British Columbia](https://www2.gov.bc.ca/gov/content/data/policy-standards/data-policies/open-data/open-government-licence-bc), this static data set reflects the state of Indigenous businesses at the time it was created and serves as a vital resource for understanding Indigenous entrepreneurship in the area.
