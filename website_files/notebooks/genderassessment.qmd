@@ -373,7 +373,7 @@ alt.Chart(filtered_data).mark_boxplot(size=80).encode(
     x=alt.X('ownership').title('Ownership').axis(alt.Axis(labelAngle=0)),
     y=alt.Y('score').title('Score'),
     color=alt.Color('ownership', legend=None)
-).properties(width=400, height=300, title="Score by Ownership Type")
+).properties(width=450, height=350, title="Score by Ownership Type")
 ```
 :::
 
@@ -488,7 +488,7 @@ kruskal.test(score ~ ownership, data = gender_data)
 kruskal_test_stat, kruskal_p_value = kruskal(*groups)
 
 print(
-    f"Kruskal-Wallis chi-squared = {kruskal_test_stat:.4f}, kruskal_p_value: {kruskal_p_value:.4e}"
+    f"Kruskal-Wallis chi-squared = {kruskal_test_stat:.4f}, p-value = {kruskal_p_value:.4e}"
 )
 ```
 :::
