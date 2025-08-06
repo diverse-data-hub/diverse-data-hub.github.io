@@ -1,4 +1,0 @@
-Rscript -e 'install.packages("remotes", repos="https://cloud.r-project.org")'
-Rscript -e 'remotes::install_github("diverse-data-hub/diversedata")'
-Rscript -e 'install.packages("IRkernel", repos="https://cloud.r-project.org")'
-Rscript -e 'IRkernel::installspec(user = FALSE)'
