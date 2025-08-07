@@ -1,3 +1,11 @@
+```{r load_env}
+#| echo: false
+#| warning: false
+#| message: false
+library(reticulate)
+use_condaenv("diverse_web_env", required = TRUE)
+```
+
 ### Key Features of the Data set
 
 Each row represents a single company's gender assessment in a given year and includes organizational details, overall scores, and performance on various gender-related indicators:
@@ -50,6 +58,8 @@ By analyzing the `score` variable across industry and ownership categories, and 
 
 **Loading Libraries**
 
+::: {.panel-tabset}
+## R
 ```{r setup, results = "hide", warning = FALSE, message = FALSE}
 library(diversedata)
 library(tidyverse)  # includes ggplot2, readr, dplyr
@@ -61,8 +71,22 @@ library(ggalt)  # For geom_dumbbell
 library(FSA) # For Dunn's test
 ```
 
+## Python
+```{python setup_py, results = "hide", warning = FALSE, message = FALSE}
+import diversedata as dd
+import pandas as pd
+import altair as alt
+import statsmodels.formula.api as smf
+from scipy.stats import shapiro, levene, kruskal
+import scikit_posthocs as sp
+from IPython.display import Markdown
+```
+:::
+
 #### 1. Data Cleaning & Processing
 
+::: {.panel-tabset}
+## R
 ```{r data_load}
 gender_data <- genderassessment |> 
   clean_names() |> 
@@ -71,14 +95,25 @@ gender_data <- genderassessment |>
     industry = as.factor(industry),
     ownership_type = as.factor(ownership)
   )
-head(gender_data)
+kable(head(gender_data))
 
 ```
+
+## Python
+```{python data_load_py}
+gender_data = dd.load_data("genderassessment").dropna(subset='score')
+gender_data['industry'] = pd.Categorical(gender_data['industry'])
+gender_data['ownership'] = pd.Categorical(gender_data['ownership'])
+Markdown(gender_data.head().to_markdown())
+```
+:::
 
 #### 2. Exploratory Data Analysis
 
 **Average Overall Assessment Score by Industry**
 
+::: {.panel-tabset}
+## R
 ```{r eda_1}
 industry_stats <- gender_data |> 
   group_by(industry) |> 
@@ -94,8 +129,22 @@ kable(industry_stats, digits = 2, caption = "Average Score by Industry")
 
 ```
 
+## Python
+```{python eda_1_py}
+#| tbl-cap: Average Score by Industry
+industry_stats = gender_data.groupby(by="industry", observed=False)["score"].agg(
+    ["mean", "median", "std", "count"]
+)
+industry_stats.columns = ["avg_score", "median_score", "sd_score", "n"]
+industry_stats = industry_stats.round(2).sort_values(by=["avg_score"])
+Markdown(industry_stats.to_markdown())
+```
+:::
+
 **Visualization: Average Overall Gender Assessment by Industry Group**
 
+::: {.panel-tabset}
+## R
 ```{r eda_2}
 
 gender_data_grouped <- gender_data |> 
@@ -134,10 +183,86 @@ gender_by_group <- ggplot(gender_data_grouped, aes(x = reorder(industry_group, s
     title = "Overall Average Gender Assessment Score by Industry Group",
     x = "Industry Group", y = "Score"
   ) +
-  theme_minimal(base_size = 12)
+  theme_minimal()
 
 gender_by_group
 ```
+
+## Python
+```{python eda_2_py_grouping}
+#| code-fold: true
+#| code-summary: "Show grouping code"
+gender_data_grouped = gender_data.copy()
+industry_group_mapping = {
+    "Apparel & Footwear": "Consumer Goods",
+    "Food Production": "Consumer Goods",
+    "Food Retailers": "Consumer Goods",
+    "Retail": "Consumer Goods",
+    "Personal & Household Products": "Consumer Goods",
+    "Agricultural Products": "Consumer Goods",
+
+    "Banks": "Finance",
+    "Insurance": "Finance",
+    "Pension Funds": "Finance",
+    "Sovereign Wealth Funds": "Finance",
+    "Alternative Asset Managers": "Finance",
+    "Traditional Asset Managers": "Finance",
+    "Investment Consultants": "Finance",
+    "Payments": "Finance",
+
+    "Pharmaceuticals & Biotechnology": "Healthcare",
+
+    "IT Software & Services": "Technology",
+    "Telecommunications": "Technology",
+    "Electronics": "Technology",
+
+    "Oil & Gas": "Energy & Utilities",
+    "Utilities": "Energy & Utilities",
+
+    "Chemicals": "Industrials",
+    "Capital Goods": "Industrials",
+    "Freight & logistics": "Industrials",
+    "Passenger Transport": "Industrials",
+    "Metals & Mining": "Industrials",
+    "Containers & Packaging": "Industrials",
+    "Motor Vehicles & Parts": "Industrials",
+    "Postal & Courier Activities": "Industrials",
+    "Waste Management": "Industrials",
+    "Paper & Forest Products": "Industrials",
+
+    "Construction & Engineering": "Real Estate",
+    "Construction Materials & Supplies": "Real Estate",
+    "Real Estate": "Real Estate",
+
+    "Development Finance Institutions": "Public Sector Finance",
+
+    "Entertainment": "Entertainment"
+}
+
+# apply groupings
+gender_data_grouped["industry_group"] = (
+    gender_data_grouped["industry"].map(industry_group_mapping).fillna("Other")
+)
+```
+
+```{python eda_2_py_viz}
+industry_group_order_by_median = (
+    gender_data_grouped.groupby(by="industry_group", observed=False, as_index=False)["score"]
+    .median()
+    .sort_values(by="score", ascending=False)["industry_group"]
+    .to_list()
+)
+
+alt.Chart(gender_data_grouped).mark_boxplot(size=20).encode(
+    x=alt.X("score").title("Score"),
+    y=alt.Y("industry_group").sort(industry_group_order_by_median).title("Industry Group"),
+).properties(
+    title="Overall Average Gender Assessment Score by Industry Group",
+    width=600,
+    height=400,
+)
+```
+:::
 
 ```{r img_save, echo = FALSE}
 ggsave("../img/genderassessment.png", plot = gender_by_group, width = 6, height = 4, dpi = 300)
@@ -145,7 +270,9 @@ ggsave("../img/genderassessment.png", plot = gender_by_group, width = 6, height 
 
 **Comparison of Average Overall Gender Assessment Scores Between 2023 vs 2024 by Region**
 
-```{r eda_3}
+::: {.panel-tabset}
+## R
+```{r eda_3, message = FALSE, warning = FALSE}
 
 region_wide <- gender_data |> 
   filter(year %in% c(2023, 2024)) |>  # Ensure only these years are included
@@ -176,20 +303,51 @@ ggplot(region_wide, aes(x = `2023`, xend = `2024`, y = reorder(region, `2024`)))
     title = "Change in Average Score by Region (2023 to 2024)",
     x = "Average Score", y = "Region"
   ) +
-  theme_minimal(base_size = 13) +
-  theme(
-    plot.title = element_text(face = "bold"),
-    axis.title.y = element_blank(),
-    legend.position = "bottom"
-  )
+  theme_minimal() +
+  theme(axis.title.y = element_blank())
 
 
 ```
+
+## Python
+```{python eda_3_py}
+region_wide = (
+    gender_data.loc[gender_data["year"].isin([2023, 2024])]
+    .groupby(["region", "year"], as_index=False)["score"]
+    .mean()
+    .rename(columns={"score": "avg_score"})
+)
+
+region_order = (
+    region_wide[region_wide["year"] == 2024]
+    .sort_values(by="avg_score", ascending=False)["region"]
+    .to_list()
+)
+
+lines = alt.Chart(region_wide).mark_line(size=3, opacity=0.4).encode(
+    x=alt.X("avg_score"),
+    y=alt.Y("region").sort(region_order),
+    detail=alt.Detail("region"),
+)
+
+points = alt.Chart(region_wide).mark_circle(opacity=1, size=30).encode(
+    x=alt.X("avg_score").title("Average Score"),
+    y=alt.Y("region").sort(region_order).title(None),
+    color=alt.Color("year:N").title("Year")
+)
+
+(lines + points).properties(
+    width=400, height=300, title="Change in Average Score by Region (2023 to 2024)"
+)
+```
+:::
 
 #### 3. Gender Assessment Score by Ownership Type
 
 In addition to industry-based analysis, we examine whether ownership structure affects the overall gender performance scores. The following box plot illustrates how scores vary by ownership category
 
+::: {.panel-tabset}
+## R
 ```{r analysis_1}
 filtered_data <- gender_data |>
   subset(!is.na(score) & !is.na(ownership))
@@ -202,9 +360,22 @@ ggplot(filtered_data, aes(x = ownership, y = score, fill = ownership)) +
     "Government" = "#08306b"  # dark blue
   )) +
   labs(title = "Score by Ownership Type", x = "Ownership", y = "Score") +
-  theme_minimal()
+  theme_minimal() +
+  theme(legend.position = "none")
 
 ```
+
+## Python
+```{python analysis_1_py}
+filtered_data = gender_data.dropna(subset=['score', 'ownership'])
+
+alt.Chart(filtered_data).mark_boxplot(size=80).encode(
+    x=alt.X('ownership').title('Ownership').axis(alt.Axis(labelAngle=0)),
+    y=alt.Y('score').title('Score'),
+    color=alt.Color('ownership', legend=None)
+).properties(width=450, height=350, title="Score by Ownership Type")
+```
+:::
 
 **Hypothesis Testing: Gender Assessment Scores by Ownership Type**
 
@@ -233,10 +404,25 @@ Before applying ANOVA to compare gender assessment scores across ownership types
 
 ANOVA assumes that the residuals are normally distributed. We assess this using the Shapiro-Wilk test:
 
+::: {.panel-tabset}
+## R
 ```{r analysis_2}
 anova_model <- aov(score ~ ownership, data = gender_data)
 shapiro.test(residuals(anova_model))
 ```
+
+## Python
+```{python analysis_2_py}
+anova_model = smf.ols(
+    "score ~ C(ownership)",   # C() specifies a categorical variable
+    data=gender_data
+).fit()
+residuals = anova_model.resid
+shapiro_test_stat, shapiro_p_value = shapiro(residuals)
+
+print(f"W = {shapiro_test_stat:.4f}, p-value = {shapiro_p_value:.4e}")
+```
+:::
 
 **Inference**
 
@@ -246,9 +432,23 @@ Since the p-value is less than 0.05, we reject the null hypothesis of normality.
 
 Another key assumption is that the variance of scores is roughly equal across the ownership types. We use **Levene’s Test** to assess this:
 
+::: {.panel-tabset}
+## R
 ```{r analysis_3}
 leveneTest(score ~ ownership, data = gender_data)
 ```
+
+## Python
+```{python analysis_3_py}
+# create a list of scores per ownership and convert that series of lists into a lists of lists
+groups = gender_data.groupby('ownership', observed=False)['score'].apply(list).to_list()
+
+# perform Levene's test (* unpacks a list)
+levene_test_stat, levene_p_value = levene(*groups)
+
+print(f"F = {levene_test_stat:.4f}, p-value = {levene_p_value:.4e}")
+```
+:::
 
 **Inference**: As the p-value is well below 0.05, we reject the null hypothesis of equal variances. The assumption of **homogeneity of variance is violated**.
 
@@ -263,7 +463,7 @@ To evaluate whether the score differs across different types of business ownersh
 -   Null Hypothesis (H₀):\
     The median score is the same across all ownership groups.\
     $$
-    \hat{\mu}_{\text{public}} = \hat{\mu}_{\text{Private}} = \hat{\mu}_{\text{Government}}
+    \tilde{\mu}_{\text{public}} = \tilde{\mu}_{\text{Private}} = \tilde{\mu}_{\text{Government}}
     $$
 
 -   Alternative Hypothesis (Hₐ):\
@@ -277,9 +477,21 @@ To evaluate whether the score differs across different types of business ownersh
 
 -   Independent Observations: Each row in the data set represents a unique business entity, so the observations are independent.
 
+::: {.panel-tabset}
+## R
 ```{r analysis_4}
 kruskal.test(score ~ ownership, data = gender_data)
 ```
+
+## Python
+```{python analysis_4_py}
+kruskal_test_stat, kruskal_p_value = kruskal(*groups)
+
+print(
+    f"Kruskal-Wallis chi-squared = {kruskal_test_stat:.4f}, p-value = {kruskal_p_value:.4e}"
+)
+```
+:::
 
 -   The p-value is small (\< 0.05), meaning we **reject the null hypothesis (H₀)** that all ownership groups have the same median score.
 -   There are statistically significant differences in median `score` between at least two ownership types.
@@ -290,11 +502,25 @@ Since the test indicates that not all ownership groups are equal, we need to con
 
 To determine which ownership groups differ, we conduct Dunn's test with Bonferroni adjustment for multiple comparisons.
 
+::: {.panel-tabset}
+## R
 ```{r analysis_5}
 # Run Dunn's test with Bonferroni correction
 dunnTest(score ~ ownership, data = gender_data, method = "bonferroni")
 
 ```
+
+## Python
+```{python analysis_5_py}
+gender_data = gender_data.dropna(subset="ownership")
+
+adjusted_p_values = sp.posthoc_dunn(
+    gender_data, val_col="score", group_col="ownership", p_adjust="bonferroni"
+)
+
+Markdown(adjusted_p_values.to_markdown())
+```
+:::
 
 **Inference**
 

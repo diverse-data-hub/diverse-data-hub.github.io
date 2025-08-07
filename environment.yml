@@ -37,3 +37,6 @@ dependencies:
   - pip
   - pip:
       - diversedata
+
+# for the Gender Assessment analysis (additional to what's listed above)
+  - scikit-posthocs=0.11
