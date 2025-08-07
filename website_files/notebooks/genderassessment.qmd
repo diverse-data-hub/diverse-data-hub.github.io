@@ -463,7 +463,7 @@ To evaluate whether the score differs across different types of business ownersh
 -   Null Hypothesis (H₀):\
     The median score is the same across all ownership groups.\
     $$
-    \hat{\mu}_{\text{public}} = \hat{\mu}_{\text{Private}} = \hat{\mu}_{\text{Government}}
+    \tilde{\mu}_{\text{public}} = \tilde{\mu}_{\text{Private}} = \tilde{\mu}_{\text{Government}}
     $$
 
 -   Alternative Hypothesis (Hₐ):\
