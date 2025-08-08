@@ -6,6 +6,13 @@ toc-location: right
 sidebar: false
 ---
 
+::: {.callout-note icon="terminal" title="Try it live!"}
+Use Binder to explore and run this dataset interactively in your browser. Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.
+
+👉 [Launch on Binder](https://mybinder.org/v2/gh/jadeeechen/diversedata-notebooks/HEAD?urlpath=lab/tree/marchmadness.ipynb){target="_blank" rel="noopener"}
+
+:::
+
 ## About the Data
 
 This adapted data set contains historical records of every NCAA Division I Women’s Basketball Tournament appearance since the tournament began in 1982 up until 2018. Sourced from official NCAA, the adapted data set captures tournament results across more than four decades of collegiate women’s basketball. All data is sourced from the NCAA and contains the data behind the story [The Rise and Fall Of Women's NCAA Tournament Dynasties](https://fivethirtyeight.com/features/louisiana-tech-was-the-uconn-of-the-80s/).
