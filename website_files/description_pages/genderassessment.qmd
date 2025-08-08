@@ -103,9 +103,9 @@ Yes
 |-----------------------------------|---------|-----------|------------------------------------------------------------|-------|----------------|
 | company                           | ID      | Character | Name of the company                                        | –     | No             |
 | country                           | Feature | Character | Country where the company is headquartered                 | –     | Yes            |
-| region                            | Feature | Factor    | Geographical region (e.g., North America, Europe)          | –     | Yes            |
-| industry                          | Feature | Factor    | Industry sector (e.g., Chemicals, Finance, Mining)         | –     | Yes            |
-| ownership                         | Feature | Factor    | Ownership type (e.g., Public, Private, Government)         | –     | Yes            |
+| region                            | Feature | Factor    | Geographical region (e.g., "North America", "Europe & Central Asia") | –     | Yes            |
+| industry                          | Feature | Factor    | Industry sector (e.g., "Chemicals", "Retail", "Metals & Mining") | –     | Yes            |
+| ownership                         | Feature | Factor    | Ownership type (e.g., "Public", "Private", "Government")   | –     | Yes            |
 | year                              | Feature | Numeric   | Year of assessment                                         | Year  | No             |
 | score                             | Target  | Numeric   | Overall gender assessment score (out of 52.3)              | –     | Yes            |
 | percent_score                     | Target  | Numeric   | Overall score expressed as a percentage                    | \%    | Yes            |
