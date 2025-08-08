@@ -129,7 +129,7 @@ Yes
 | health_safety                     | Feature | Numeric   | Score (out of 3) for workplace health and safety, including the availability of sex-specific health and safety information to employees | –     | Yes            |
 | health_safety_supply_chain        | Feature | Numeric   | Score (out of 2) for the statement and monitoring of supply chain health and safety | –     | Yes            |
 | violence_prevention               | Feature | Numeric   | Score (out of 1) for policies and measures to prevent gender-based violence | –     | Yes            |
-| violence_remediation              | Feature | Numeric   | Score (out of 2) for mechanisms for remediation after incidents of violence, along with the collection, analysis, and monitoring of the associated data by sex, out of 2 | –     | Yes            |
+| violence_remediation              | Feature | Numeric   | Score (out of 2) for mechanisms for remediation after incidents of violence, along with the collection, analysis, and monitoring of the associated data by sex | –     | Yes            |
 :::
 :::
 
