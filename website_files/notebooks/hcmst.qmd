@@ -361,12 +361,13 @@ ggplot(hcmst, aes(x = same_sex_couple, fill = same_sex_couple)) +
     fill = "Same Sex Couple"
   ) +
   theme_minimal() +
+  theme(legend.position = "none") +
   scale_fill_manual(values = cbPalette) +
   scale_y_continuous(breaks = seq(0, 1200, by = 100))
 ```
 
 ## Python
-```{python simple_bar_py, fig.height=4, fig.width=8}
+```{python simple_bar_py}
 alt.Chart(hcmst).mark_bar().encode(
     x=alt.X("same_sex_couple").title("Same Sex Couple"),
     y=alt.Y("count()").title("Count"),
@@ -537,7 +538,7 @@ def histogram_plot(data, y_var, facet, label_map, plot_title="Relative Frequency
     return plot
 ```
 
-```{python histograms_py, fig.height=20, fig.width=8}
+```{python histograms_py}
 sex_freq_labels = {
   "once_a_month_or_less": "Once a Month or Less",
   "2_to_3_times_a_month": "Two or Three Times a Month",
@@ -737,7 +738,7 @@ Now that our data has been preprocessed, let's fit our model!
 
 Since `scikit-learn` doesn't support ordinal regression at the time of writing, we will use a multinomial logistic regression model via `LogisticRegression()` which will automatically be multinomial if there is more than 2 target classes. We will set `class_weight='balanced'` to try to account for the class imbalance in the target variable and again set the random state for reproducibility.
 
-```{python fit_model_py, output = FALSE}
+```{python fit_model_py, include = FALSE}
 logistic_regression_model = LogisticRegression(
     class_weight="balanced", random_state=123, max_iter=250, n_jobs=-1
 )
@@ -908,11 +909,13 @@ However, the f1-scores (with an unweighted average of 0.22 and a weighted averag
 
 To further evaluate our model, let's compare it to a baseline model that only predicts the most common class in the training data.
 
-```{python baseline_model_confusion_matrix_py}
+```{python baseline_model_fit_py, include = FALSE}
 baseline_model = DummyClassifier()
 baseline_model.fit(X_train_transformed, y_train)
 baseline_y_pred = baseline_model.predict(X_test_transformed)
+```
 
+```{python baseline_model_confusion_matrix_py}
 cm = ConfusionMatrixDisplay.from_estimator(
     baseline_model,
     X_test_transformed,
@@ -922,7 +925,7 @@ cm = ConfusionMatrixDisplay.from_estimator(
 )
 ```
 
-```{python baseline_model_metrics_py, warnings = FALSE}
+```{python baseline_model_metrics_py, warning = FALSE}
 print(
     classification_report(
         y_test,
