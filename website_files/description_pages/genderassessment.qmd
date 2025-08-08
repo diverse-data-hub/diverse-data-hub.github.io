@@ -103,33 +103,33 @@ Yes
 |-----------------------------------|---------|-----------|------------------------------------------------------------|-------|----------------|
 | company                           | ID      | Character | Name of the company                                        | –     | No             |
 | country                           | Feature | Character | Country where the company is headquartered                 | –     | Yes            |
-| region                            | Feature | Factor    | Geographical region (e.g., North America, Europe)          | –     | Yes            |
-| industry                          | Feature | Factor    | Industry sector (e.g., Chemicals, Finance, Mining)         | –     | Yes            |
-| ownership                         | Feature | Factor    | Ownership type (e.g., Public, Private, Government)         | –     | Yes            |
+| region                            | Feature | Factor    | Geographical region (e.g., "North America", "Europe & Central Asia") | –     | Yes            |
+| industry                          | Feature | Factor    | Industry sector (e.g., "Chemicals", "Retail", "Metals & Mining") | –     | Yes            |
+| ownership                         | Feature | Factor    | Ownership type (e.g., "Public", "Private", "Government")   | –     | Yes            |
 | year                              | Feature | Numeric   | Year of assessment                                         | Year  | No             |
-| score                             | Target  | Numeric   | Overall gender assessment score                            | –     | Yes            |
+| score                             | Target  | Numeric   | Overall gender assessment score (out of 52.3)              | –     | Yes            |
 | percent_score                     | Target  | Numeric   | Overall score expressed as a percentage                    | \%    | Yes            |
-| strategic_action                  | Feature | Numeric   | Score for strategic gender action                          | –     | Yes            |
-| gender_targets                    | Feature | Numeric   | Score for gender-related target setting                    | –     | Yes            |
-| gender_due_diligence              | Feature | Numeric   | Score for due diligence on gender issues                   | –     | Yes            |
-| grievance_mechanisms              | Feature | Numeric   | Availability and quality of grievance mechanisms           | –     | Yes            |
-| stakeholder_engagement            | Feature | Numeric   | Score for gender-related stakeholder engagement            | –     | Yes            |
-| corrective_action                 | Feature | Numeric   | Corrective measures in place                               | –     | Yes            |
-| gender_leadership                 | Feature | Numeric   | Gender representation in leadership roles                  | –     | Yes            |
-| development_recruitment           | Feature | Numeric   | Recruitment and career development opportunities by gender | –     | Yes            |
-| employee_data_by_sex              | Feature | Numeric   | Availability of employee data by sex                       | –     | Yes            |
-| supply_chain_gender_leadership    | Feature | Numeric   | Gender representation in supply chain leadership           | –     | Yes            |
-| enabling_environment_union_rights | Feature | Numeric   | Union rights and enabling environment for gender equity    | –     | Yes            |
-| gender_procurement                | Feature | Numeric   | Use of gender-based procurement policies                   | –     | Yes            |
-| gender_pay_gap                    | Feature | Numeric   | Disclosure and performance on gender pay equity            | \%    | Yes            |
-| carer_leave_paid                  | Feature | Numeric   | Paid leave policies for caregivers                         | –     | Yes            |
-| childcare_support                 | Feature | Numeric   | Availability of childcare-related policies                 | –     | Yes            |
-| flex_work                         | Feature | Numeric   | Flexible work options                                      | –     | Yes            |
-| living_wage_supply_chain          | Feature | Numeric   | Enforcement of living wage in supply chain                 | –     | Yes            |
-| health_safety                     | Feature | Numeric   | Workplace health and safety                                | –     | Yes            |
-| health_safety_supply_chain        | Feature | Numeric   | Supply chain health and safety indicators                  | –     | Yes            |
-| violence_prevention               | Feature | Numeric   | Policies and measures to prevent gender-based violence     | –     | Yes            |
-| violence_remediation              | Feature | Numeric   | Mechanisms for remediation after violence incidents        | –     | Yes            |
+| strategic_action                  | Feature | Numeric   | Score (out of 1) for a public commitment to gender equality and women's empowerment | –     | Yes            |
+| gender_targets                    | Feature | Numeric   | Score (out of 2) for target setting on gender equality and women's empowerment | –     | Yes            |
+| gender_due_diligence              | Feature | Numeric   | Score (out of 2) for gender-responsive human rights due diligence process           | –     | Yes            |
+| grievance_mechanisms              | Feature | Numeric   | Score (out of 3) for availability of grievance mechanisms, along with the collection, analysis, and monitoring of the associated data by sex  | –     | Yes            |
+| stakeholder_engagement            | Feature | Numeric   | Score (out of 1) for surveys or other engagement mechanisms that specifically address gender equality & women’s empowerment issues | –     | Yes            |
+| corrective_action                 | Feature | Numeric   | Score (out of 2) for corrective action processes related to gender-related issues     | –     | Yes            |
+| gender_leadership                 | Feature | Numeric   | Score (out of 4) for gender equality in leadership         | –     | Yes            |
+| development_recruitment           | Feature | Numeric   | Score (out of 2) for availability of recruitment and career development opportunities and collection of the associated data by sex | –     | Yes            |
+| employee_data_by_sex              | Feature | Numeric   | Score (out of 4) for availability of employee data by sex  | –     | Yes            |
+| supply_chain_gender_leadership    | Feature | Numeric   | Score (out of 1) for collection of leadership data in the supply chain by sex  | –     | Yes            |
+| enabling_environment_union_rights | Feature | Numeric   | Score (out of 1) for enabling environment for freedom of association and collective bargaining | –     | Yes            |
+| gender_procurement                | Feature | Numeric   | Score (out of 2) for of gender-responsive procurement      | –     | Yes            |
+| gender_pay_gap                    | Feature | Numeric   | Score (out of 3) for collection and analysis of gender pay gap data  | –     | Yes            |
+| carer_leave_paid                  | Feature | Numeric   | Score (out of 4) for paid leave policies for caregivers and the monitoring of the associated data | –     | Yes            |
+| childcare_support                 | Feature | Numeric   | Score (out of 2) for availability of childcare support and family support | –     | Yes            |
+| flex_work                         | Feature | Numeric   | Score (out of 4) for flexible work options and collection of the associated data by sex | –     | Yes            |
+| living_wage_supply_chain          | Feature | Numeric   | Score (out of 2) for enforcement of living wage in supply chain | –     | Yes            |
+| health_safety                     | Feature | Numeric   | Score (out of 3) for workplace health and safety, including the availability of sex-specific health and safety information to employees | –     | Yes            |
+| health_safety_supply_chain        | Feature | Numeric   | Score (out of 2) for the statement and monitoring of supply chain health and safety | –     | Yes            |
+| violence_prevention               | Feature | Numeric   | Score (out of 1) for policies and measures to prevent gender-based violence | –     | Yes            |
+| violence_remediation              | Feature | Numeric   | Score (out of 2) for mechanisms for remediation after incidents of violence, along with the collection, analysis, and monitoring of the associated data by sex | –     | Yes            |
 :::
 :::
 
