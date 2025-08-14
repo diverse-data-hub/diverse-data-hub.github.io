@@ -190,7 +190,7 @@ fig.update_layout(
     height=550,
 )
 
-fig.show(renderer="notebook")
+fig.show()
 ```
 :::
 
@@ -458,7 +458,7 @@ fig.update_layout(
     height=550,
 )
 
-fig.show(renderer="notebook")
+fig.show()
 ```
 :::
 
@@ -564,7 +564,7 @@ fig.update_traces(
 )
 
 fig.update_layout(margin=dict(l=10, r=10, t=30, b=10))
-fig.show(renderer="notebook")
+fig.show()
 ```
 :::
 
