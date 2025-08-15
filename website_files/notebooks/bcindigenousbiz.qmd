@@ -1,5 +1,5 @@
 ```{r}
-#| echo: true
+#| echo: false
 #| warning: false
 #| message: false
 #| collapse: true
@@ -66,6 +66,8 @@ import numpy as np
 import pandas as pd
 import altair as alt
 import plotly.express as px
+# import plotly.io as pio
+# pio.renderers.default = "iframe_connected"
 from scipy.stats import chi2_contingency
 from sklearn.cluster import DBSCAN
 from IPython.display import Markdown
@@ -154,7 +156,7 @@ alt.Chart(indigenousbiz_data).mark_bar().encode(
 
 ::: {.panel-tabset}
 ## R
-```{r eda_2, business-map,warning=FALSE, message=FALSE, fig.width=7, fig.height=9}
+```{r eda_2, warning=FALSE, message=FALSE, fig.width=7, fig.height=9}
 # Create leaflet map
 indigenousbiz_data |>
   leaflet() |>
@@ -173,8 +175,8 @@ indigenousbiz_data |>
 ```
 
 ## Python
-```{python eda_2_py, business-map,warning=FALSE, message=FALSE}
-fig = px.scatter_map(
+```{python eda_2_py, warning=FALSE, message=FALSE, output=FALSE}
+fig_map = px.scatter_map(
     indigenousbiz_data,
     lat="latitude",
     lon="longitude",
@@ -184,13 +186,14 @@ fig = px.scatter_map(
     hover_name="business_name"
 )
 
-fig.update_layout(
+fig_map.update_layout(
     margin=dict(l=0, r=0, t=30, b=10),
     width=700,
     height=550,
+    mapbox_style="open-street-map"
 )
 
-fig.show()
+fig_map.show()
 ```
 :::
 
@@ -255,7 +258,9 @@ To better understand the relationship between Indigenous business locations and 
 
 ::: {.panel-tabset}
 ## R
-```{r analysis_1, results = 'asis', warning = FALSE}
+```{r analysis_1, warning = FALSE}
+#| results: hold
+
 ## Assumptions check
 
 # Step 1: Chi-Square Assumption Check
@@ -278,7 +283,9 @@ if (min_expected >= 5) {
 ```
 
 ## Python
-```{python analysis_1_py, results = 'asis'}
+```{python analysis_1_py}
+#| results: hold
+
 type_region_table = pd.crosstab(
     indigenousbiz_data["type"], indigenousbiz_data["region"]
 )
@@ -304,7 +311,7 @@ Since the assumption regarding minimum expected cell counts was violated with at
 
 The simulation-based tests still require some assumptions to hold:
 
-\- The data must represent independent observations.
+- The data must represent independent observations.
 
 -   The variables must be categorical.
 
@@ -434,14 +441,14 @@ cluster_map
 ```
 
 ## Python
-```{python analysis_3}
+```{python analysis_3_py}
 db = DBSCAN(eps=1.2, min_samples=8).fit(indigenousbiz_data[["longitude", "latitude"]])
 
 # add cluster labels as new column to the data
 indigenousbiz_data["cluster"] = db.labels_.astype(str)
 
 # visualize on map
-fig = px.scatter_map(
+fig_cluster_map = px.scatter_map(
     indigenousbiz_data,
     lat="latitude",
     lon="longitude",
@@ -452,13 +459,14 @@ fig = px.scatter_map(
     hover_name="business_name",
 )
 
-fig.update_layout(
+fig_cluster_map.update_layout(
     margin=dict(l=0, r=0, t=30, b=10),
     width=700,
     height=550,
+    mapbox_style="open-street-map"
 )
 
-fig.show()
+fig_cluster_map.show()
 ```
 :::
 
@@ -475,7 +483,7 @@ file.remove("cluster_map.html")
 
 ::: {.panel-tabset}
 ## R
-```{r analysis_4}
+```{r analysis_4, warning = FALSE}
 
 ## Industry Counts and Treemap Visualization
 
@@ -549,7 +557,7 @@ top_industries["hover_text"] = (
     + top_industries["n"].astype(str)
 )
 
-fig = px.treemap(
+fig_treemap = px.treemap(
     top_industries,
     path=["cluster", "industry_sector_label"],
     values="n",
@@ -559,12 +567,12 @@ fig = px.treemap(
     subtitle="Note: R and Python cluster labels differ",
 )
 
-fig.update_traces(
+fig_treemap.update_traces(
     textinfo="label+value", hovertemplate="%{customdata[0]}<extra></extra>"
 )
 
-fig.update_layout(margin=dict(l=10, r=10, t=30, b=10))
-fig.show()
+fig_treemap.update_layout(margin=dict(l=10, r=10, t=30, b=10))
+fig_treemap.show()
 ```
 :::
 
