@@ -66,8 +66,6 @@ import numpy as np
 import pandas as pd
 import altair as alt
 import plotly.express as px
-# import plotly.io as pio
-# pio.renderers.default = "iframe_connected"
 from scipy.stats import chi2_contingency
 from sklearn.cluster import DBSCAN
 from IPython.display import Markdown
@@ -175,7 +173,9 @@ indigenousbiz_data |>
 ```
 
 ## Python
-```{python eda_2_py, warning=FALSE, message=FALSE, output=FALSE}
+```{python eda_2_py, warning=FALSE, message=FALSE}
+#| output: false
+
 fig_map = px.scatter_map(
     indigenousbiz_data,
     lat="latitude",
@@ -192,8 +192,16 @@ fig_map.update_layout(
     height=550,
     mapbox_style="open-street-map"
 )
+```
 
-fig_map.show()
+```{python fig_map_html}
+#| echo: false
+html_fig_map = fig_map.to_html(include_plotlyjs='cdn', full_html=False)
+```
+
+```{r fig_map_show}
+#| echo: false
+HTML(py$html_fig_map)
 ```
 :::
 
@@ -442,6 +450,7 @@ cluster_map
 
 ## Python
 ```{python analysis_3_py}
+#| output: false
 db = DBSCAN(eps=1.2, min_samples=8).fit(indigenousbiz_data[["longitude", "latitude"]])
 
 # add cluster labels as new column to the data
@@ -459,15 +468,24 @@ fig_cluster_map = px.scatter_map(
     hover_name="business_name",
 )
 
-fig_cluster_map.update_layout(
+fig_cluster_map = fig_cluster_map.update_layout(
     margin=dict(l=0, r=0, t=30, b=10),
     width=700,
     height=550,
     mapbox_style="open-street-map"
 )
-
-fig_cluster_map.show()
 ```
+
+```{python fig_cluster_map_html}
+#| echo: false
+html_fig_cluster_map = fig_cluster_map.to_html(include_plotlyjs='cdn', full_html=False)
+```
+
+```{r fig_cluster_map_show}
+#| echo: false
+HTML(py$html_fig_cluster_map)
+```
+
 :::
 
 ```{r img_save, echo = FALSE, include = FALSE, warning = FALSE, message = FALSE}
@@ -567,13 +585,23 @@ fig_treemap = px.treemap(
     subtitle="Note: R and Python cluster labels differ",
 )
 
-fig_treemap.update_traces(
+fig_treemap = fig_treemap.update_traces(
     textinfo="label+value", hovertemplate="%{customdata[0]}<extra></extra>"
 )
 
-fig_treemap.update_layout(margin=dict(l=10, r=10, t=30, b=10))
-fig_treemap.show()
+fig_treemap = fig_treemap.update_layout(margin=dict(l=10, r=10, t=30, b=10))
 ```
+
+```{python fig_treemap_html}
+#| echo: false
+html_fig_treemap = fig_treemap.to_html(include_plotlyjs='cdn', full_html=False)
+```
+
+```{r fig_treemap_show}
+#| echo: false
+HTML(py$html_fig_treemap)
+```
+
 :::
 
 ### Discussion
