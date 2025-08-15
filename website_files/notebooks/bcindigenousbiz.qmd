@@ -186,7 +186,7 @@ fig_map = px.scatter_map(
     hover_name="business_name"
 )
 
-fig_map.update_layout(
+fig_map = fig_map.update_layout(
     margin=dict(l=0, r=0, t=30, b=10),
     width=700,
     height=550,
@@ -201,6 +201,7 @@ html_fig_map = fig_map.to_html(include_plotlyjs='cdn', full_html=False)
 
 ```{r fig_map_show}
 #| echo: false
+library(htmltools)
 HTML(py$html_fig_map)
 ```
 :::
@@ -589,7 +590,7 @@ fig_treemap = fig_treemap.update_traces(
     textinfo="label+value", hovertemplate="%{customdata[0]}<extra></extra>"
 )
 
-fig_treemap = fig_treemap.update_layout(margin=dict(l=10, r=10, t=30, b=10))
+fig_treemap = fig_treemap.update_layout(margin=dict(l=10, r=10, t=50, b=10))
 ```
 
 ```{python fig_treemap_html}
