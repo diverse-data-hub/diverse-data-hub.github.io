@@ -154,12 +154,12 @@ alt.Chart(indigenousbiz_data).mark_bar().encode(
 
 ::: {.panel-tabset}
 ## R
-```{r eda_2, warning=FALSE, message=FALSE, fig.width=7, fig.height=9}
+```{r eda_2, warning=FALSE, message=FALSE}
 # Create leaflet map
 indigenousbiz_data |>
   leaflet() |>
   addTiles() |>
-  setView(lng = -125, lat = 54, zoom = 4.6) |>
+  setView(lng = -125, lat = 54.5, zoom = 4.5) |>
   addCircleMarkers(
     lng = ~longitude,
     lat = ~latitude,
@@ -409,7 +409,7 @@ To assess whether there is an association between business type and region, we c
 
 #### 4. Spatial Clustering of Indigenous Businesses using DBSCAN
 
-To explore geographic patterns in Indigenous business, the technique of clustering based on latitude and longitude coordinates was applied. This analysis revealed several spatial clusters of Indigenous businesses across British Columbia. The treemap provided more information on which were the prominent industries in each cluster.
+To explore geographic patterns in Indigenous business, the technique of clustering based on latitude and longitude coordinates was applied. This analysis revealed several spatial clusters of Indigenous businesses across British Columbia. The treemap provided more information on which were the prominent industries in each cluster. 
 
 ::: {.panel-tabset}
 ## R
@@ -430,7 +430,7 @@ pal <- colorFactor(palette = "Set1", domain = indigenousbiz_data$cluster)
 
 cluster_map <- leaflet(data = indigenousbiz_data) |>
   addTiles() |>
-  setView(lng = -125, lat = 54, zoom = 4.6) |>
+  setView(lng = -125, lat = 54.5, zoom = 4.5) |>
   addCircleMarkers(
     label = ~business_name,
     radius = 3,
