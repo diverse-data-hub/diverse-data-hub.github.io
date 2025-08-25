@@ -1,5 +1,5 @@
 ```{r}
-#| echo: true
+#| echo: false
 #| warning: false
 #| message: false
 #| collapse: true
@@ -165,11 +165,13 @@ wildfire_clean <- wildfire_clean |>
 
 ```{python prepare-wildfire-data_py, warning=FALSE, message=FALSE}
 # Reading Data
-wildfire = dd.load_data('wildfire')
+wildfire = dd.load_data("wildfire")
 
 # Clean and prepare base data
-wildfire = wildfire.dropna(subset=['assessment_hectares', 'true_cause', 'detection_agent_type'])
-wildfire['large_fire'] = (wildfire['current_size'] > 200)
+wildfire = wildfire.dropna(
+    subset=["assessment_hectares", "true_cause", "detection_agent_type"]
+)
+wildfire["large_fire"] = wildfire["current_size"] > 200
 ```
 :::
 
@@ -288,8 +290,6 @@ fig_map = fig_map.update_layout(
     height=800,
     mapbox_style="open-street-map",
 )
-
-fig_map.show(renderer="notebook")
 ```
 
 ```{python fig_map_html}
@@ -467,10 +467,20 @@ First, let's separate our predictors from the target.
 Then, split our data into train and test sets, with the random state specified to make our work reproducible.
 
 ```{python split_data_py, warning=FALSE}
-X = wildfire[['temperature', 'wind_speed', 'relative_humidity', 'fire_spread_rate', 'fire_type', 'fuel_type', 'ia_access']]
-y = wildfire['large_fire']
+X = wildfire[[
+  "temperature",
+  "wind_speed",
+  "relative_humidity",
+  "fire_spread_rate",
+  "fire_type",
+  "fuel_type",
+  "ia_access",
+]]
+y = wildfire["large_fire"]
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=123)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=123
+)
 ```
 
 As we can see below, there are some missing values in the numeric features: `temperature`, `wind_speed`, and `relative_humidity`. We'll impute these missing values with `scikit-learn`'s `SimpleImputer` with the default strategy of `mean`.
@@ -483,6 +493,7 @@ We'll use `StandardScaler` on the numerical features and encode the categorical 
 A column transformer will allow us to specify which features should be preprocessed in a specific way and a pipeline will put together our preprocessing and modelling steps.
 
 ```{python feats_py, warning=FALSE}
+#| results: hold
 numeric_feats = X_train.select_dtypes('number').columns.to_list()
 categorical_feats = X_train.select_dtypes(exclude=['number']).columns.to_list()
 
@@ -492,16 +503,14 @@ print(f"The categorical features that will one-hot encoded: {categorical_feats}"
 
 ```{python preprocessing_py, warning=FALSE}
 numeric_preprocessor = make_pipeline(SimpleImputer(), StandardScaler())
-categorical_preprocessor = OneHotEncoder(handle_unknown='ignore')
+categorical_preprocessor = OneHotEncoder(handle_unknown="ignore")
 
-preprocessor = make_column_transformer(    
+preprocessor = make_column_transformer(
     (numeric_preprocessor, numeric_feats),
     (categorical_preprocessor, categorical_feats),
 )
 
-pipeline = make_pipeline(
-    preprocessor, LogisticRegression(random_state=123, n_jobs=-1)
-)
+pipeline = make_pipeline(preprocessor, LogisticRegression(random_state=123, n_jobs=-1))
 ```
 
 Using grid search and cross-validation, let's find out the best hyperparamater settings for `class_weight` and `C`. A `class_weight` of `None` will have the target classes weighed the same, while `balanced` will have their weights be inversely proportional to class frequencies in the input data.
@@ -513,13 +522,15 @@ Setting `class_weight` to `None` treats all target classes equally, whereas `bal
 Meanwhile, `C` controls regularization strength: larger values reduce regularization and allows the model to fit the training data more closely, while smaller values increase regularization to avoid overfitting to the training data.
 
 ```{python tuning_py, warning=FALSE}
-#| echo: false
+#| output: false
 param_grid = {
-    "logisticregression__class_weight": [None, 'balanced'],
+    "logisticregression__class_weight": [None, "balanced"],
     "logisticregression__C": [0.001, 0.01, 0.1, 1.0, 10, 100],
 }
 
-gs = GridSearchCV(pipeline, param_grid=param_grid,  scoring='f1', n_jobs=-1, return_train_score=True)
+gs = GridSearchCV(
+    pipeline, param_grid=param_grid, scoring="f1", n_jobs=-1, return_train_score=True
+)
 gs.fit(X_train, y_train)
 ```
 
@@ -606,6 +617,7 @@ When comparing the marginal effect of relative humidity across fire types, we fo
 Now that we've found the best hyperparameter settings, let's evaluate a model that uses them. We'll take a look at the f1 score on the full training set and the testing set using the best parameters and with "Large Fire" being the positive class.
 
 ```{python train_test_score_py}
+#| results: hold
 print(f"Train score on the full training set: {gs.score(X_train, y_train):.4f}")
 print(f"Test score on the testing set: {gs.score(X_test, y_test):.4f}")
 ```
@@ -613,13 +625,18 @@ print(f"Test score on the testing set: {gs.score(X_test, y_test):.4f}")
 This doesn't seem great, but let's compare these scores to a baseline model that only predicts the most common class in the training data ("Not a Large Fire").
 
 ```{python baseline_score_py}
+#| results: hold
 baseline_model = DummyClassifier()
 baseline_model.fit(X_train, y_train)
 baseline_y_pred_train = baseline_model.predict(X_train)
 baseline_y_pred_test = baseline_model.predict(X_test)
 
-print(f"Baseline train score on the full training set: {f1_score(y_train, baseline_y_pred_train):.4f}")
-print(f"Baseline test score on the testing set: {f1_score(y_test, baseline_y_pred_test, pos_label=1):.4f}")
+print(
+    f"Baseline train score on the full training set: {f1_score(y_train, baseline_y_pred_train):.4f}"
+)
+print(
+    f"Baseline test score on the testing set: {f1_score(y_test, baseline_y_pred_test, pos_label=1):.4f}"
+)
 ```
 
 As we can see, the baseline model achieves a f1 score of 0 since it does not make any positive class ("Large Fire") predictions.
@@ -627,13 +644,24 @@ As we can see, the baseline model achieves a f1 score of 0 since it does not mak
 As you’ve likely noticed, we did not include `true_cause` as a predictor in our logistic regression model because it contains many categories, some of which have very few observations. This can lead to large standard errors, unstable coefficient estimates, and a higher risk of overfitting. But let's incorporate `true_cause` into the model to see its effect on model performance.
 
 ```{python model_with_tc_py}
-#| echo: false
-X_tc = wildfire[['temperature', 'wind_speed', 'relative_humidity', 'fire_spread_rate', 'fire_type', 'fuel_type', 'ia_access', 'true_cause']]
-X_train_tc, X_test_tc, y_train, y_test = train_test_split(X_tc, y, test_size=0.3, random_state=123)
+#| output: false
+X_tc = wildfire[[
+  "temperature",
+  "wind_speed",
+  "relative_humidity",
+  "fire_spread_rate",
+  "fire_type",
+  "fuel_type",
+  "ia_access",
+  "true_cause",
+]]
+X_train_tc, X_test_tc, y_train, y_test = train_test_split(
+    X_tc, y, test_size=0.3, random_state=123
+)
 
-categorical_feats_tc = categorical_feats + ['true_cause']
+categorical_feats_tc = categorical_feats + ["true_cause"]
 
-preprocessor_tc = make_column_transformer(    
+preprocessor_tc = make_column_transformer(
     (numeric_preprocessor, numeric_feats),
     (categorical_preprocessor, categorical_feats_tc),
 )
@@ -642,7 +670,9 @@ pipeline_tc = make_pipeline(
     preprocessor_tc, LogisticRegression(random_state=123, n_jobs=-1)
 )
 
-gs_tc = GridSearchCV(pipeline_tc, param_grid=param_grid,  scoring='f1', n_jobs=-1, return_train_score=True)
+gs_tc = GridSearchCV(
+    pipeline_tc, param_grid=param_grid, scoring="f1", n_jobs=-1, return_train_score=True
+)
 
 gs_tc.fit(X_train_tc, y_train)
 ```
@@ -665,6 +695,7 @@ Markdown(cv_results.to_markdown())
 ```
 
 ```{python tc_train_test_score_py}
+#| results: hold
 print(f"Train score with the original model: {gs.score(X_train, y_train):.4f}")
 print(f"Test score with the original model: {gs.score(X_test, y_test):.4f} \n")
 
