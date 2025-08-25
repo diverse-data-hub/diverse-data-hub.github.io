@@ -557,7 +557,7 @@ We can also see that there is not much variation between the validation scores, 
 
 :::
 
-#### 4. Interpretation/Evaluation of our Model**
+#### 4. Interpretation/Evaluation of our Model
 
 ::: {.panel-tabset}
 ## R
