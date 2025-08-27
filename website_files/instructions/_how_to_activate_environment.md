@@ -167,6 +167,7 @@ The following Python packages are used in various analyses and must be installed
 import diversedata as dd
 
 # For `Women's March Madness`:
+
 import pandas as pd
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
@@ -176,6 +177,7 @@ from scipy import stats
 from IPython.display import Markdown
 
 # For `Wildfire`:
+
 import numpy as np
 import pandas as pd
 import altair as alt
@@ -199,6 +201,7 @@ from sklearn.dummy import DummyClassifier
 from IPython.display import Markdown
 
 # For `How Couples Meet and Stay Together`:
+
 import diversedata as dd
 import pandas as pd
 import numpy as np
@@ -217,6 +220,7 @@ from sklearn.metrics import (
 from sklearn.dummy import DummyClassifier
 
 # For `Global Rights`:
+
 import pandas as pd
 import numpy as np
 import altair as alt
@@ -226,6 +230,7 @@ from sklearn.impute import IterativeImputer
 from IPython.display import Markdown
 
 # For `Indigenous Business`:
+
 import numpy as np
 import pandas as pd
 import altair as alt
@@ -235,6 +240,7 @@ from sklearn.cluster import DBSCAN
 from IPython.display import Markdown
 
 # For `Gender Assessment`:
+
 import pandas as pd
 import altair as alt
 import statsmodels.formula.api as smf
