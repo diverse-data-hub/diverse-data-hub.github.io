@@ -535,12 +535,12 @@ imputed_gdp = alt.Chart(all_dfs).transform_density(
 ## R
 ```{r edu-spending-density-comparison, fig.height=10, fig.width=8}
 plot_before <- densityplot(~ edu_spend, data = cleaned_rights,
-                           main = "Distribution of GDP (Original Data)",
-                           xlab = "GDP per Capita")
+                           main = "Distribution of Government Education Spending (Original Data)",
+                           xlab = "Government Education Spending as a Percentage of GDP")
 
 plot_after <- densityplot(imputed, ~ edu_spend,
-                          main = "Distribution of GDP (Imputed vs. Observed)",
-                          xlab = "GDP per Capita")
+                          main = "Distribution of Government Education Spending (Imputed vs. Observed)",
+                          xlab = "Government Education Spending as a Percentage of GDP")
 
 # Arrange the two plots vertically
 grid.arrange(plot_before, plot_after, ncol = 1, heights = c(1, 1))
