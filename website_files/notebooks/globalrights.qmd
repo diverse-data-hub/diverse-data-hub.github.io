@@ -306,15 +306,18 @@ Please note that, based on *Flexible Imputation of Missing Data* by Stef van Buu
 
 ::: {.panel-tabset}
 ## R
-```{r spineplot-gdp-by-marriage}
+```{r spineplot-gdp-by-marriage, message = FALSE, fig.height=5, fig.width=6}
 # Visualize missingness in GDP per capita across same-sex marriage legal status categories
-par(mar = c(10, 4, 4, 2) + 0.1)
+par(mar = c(15, 4, 2, 2) + 0.1)
 spineMiss(cleaned_rights[, c("same_sex_marriage", "gdp_per_capita")],
           col = c("gray85", "skyblue"),
           cex.axis = 0.7,         
-          las = 2,                
-          xlab = "Same Sex Marriage")
-
+          las = 2,               
+          xlab = "",
+          ylab = "")
+mtext("Same Sex Marriage Status", side = 1, line = 13) 
+mtext("Proportion of Missing/Observed", side = 2, line = 3, adj = 1)
+mtext("Missingness of GDP per Capita by Same-Sex Marriage Status", line = 1)
 ```
 
 ## Python
@@ -325,15 +328,17 @@ spino_data["gdp_missing"] = spino_data["gdp_per_capita"].isnull()
 
 alt.Chart(spino_data).mark_bar().encode(
     x=alt.X("same_sex_marriage:N")
-    .title("Same Sex Marriage")
+    .title("Same Sex Marriage Status")
     .axis(alt.Axis(labelAngle=-45)),
-    y=alt.Y("count()").stack("normalize").title("Percent of Missingness"),
+    y=alt.Y("count()").stack("normalize").title("Percent of Missingness/Observed"),
     color=alt.Color("gdp_missing:N")
     .scale(alt.Scale(domain=[True, False], range=["skyblue", "lightgrey"]))
     .legend(None),
     tooltip=["same_sex_marriage", "gdp_missing", "count()"],
 ).properties(
-    width=300, height=300, title="Missingness of GDP per Capita by Same-Sex Marriage"
+    width=300,
+    height=300,
+    title="Missingness of GDP per Capita by Same-Sex Marriage Status"
 )
 ```
 :::
@@ -344,15 +349,18 @@ This pattern suggests that the missingness in GDP is likely not completely at ra
 
 ::: {.panel-tabset}
 ## R
-```{r spineplot-edu-by-marriage}
+```{r spineplot-edu-by-marriage, message = FALSE, fig.height=5, fig.width=6}
 # Visualize missingness in education spending across same-sex marriage legal status categories
-par(mar = c(10, 4, 4, 2) + 0.1)
+par(mar = c(15, 4, 2, 2) + 0.1)
 spineMiss(cleaned_rights[, c("same_sex_marriage", "edu_spend")],
           col = c("gray85", "skyblue"),
           cex.axis = 0.7,         
           las = 2,                
-          xlab = "Same Sex Marriage")
-
+          xlab = "",
+          ylab = "")
+mtext("Same Sex Marriage Status", side = 1, line = 13) 
+mtext("Proportion of Missing/Observed", side = 2, line = 3, adj = 1)
+mtext("Missingness of Education Spending by Same-Sex Marriage Status", line = 1)
 ```
 
 ## Python
@@ -361,9 +369,9 @@ spino_data["edu_missing"] = spino_data["edu_spend"].isnull()
 
 alt.Chart(spino_data).mark_bar().encode(
     x=alt.X("same_sex_marriage:N")
-    .title("Same Sex Marriage")
+    .title("Same Sex Marriage Status")
     .axis(alt.Axis(labelAngle=-45)),
-    y=alt.Y("count()").stack("normalize").title("Percent of Missingness"),
+    y=alt.Y("count()").stack("normalize").title("Percent of Missingness/Observed"),
     color=alt.Color("edu_missing:N")
     .scale(alt.Scale(domain=[True, False], range=["skyblue", "lightgrey"]))
     .legend(None),
@@ -371,7 +379,7 @@ alt.Chart(spino_data).mark_bar().encode(
 ).properties(
     width=300,
     height=300,
-    title="Missingness of Education Spending by Same-Sex Marriage",
+    title="Missingness of Education Spending by Same-Sex Marriage Status",
 )
 ```
 :::
