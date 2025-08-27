@@ -61,16 +61,16 @@ library(mice)
 ```
 
 ## Python
-```{python load-libraries_py, message=FALSE, warning=FALSE}
+```{python load-libraries_py, message=FALSE, warning=FALSE, results=FALSE}
 import diversedata as dd
 import pandas as pd
 import numpy as np
 import altair as alt
-alt.data_transformers.disable_max_rows()
 import matplotlib.pyplot as plt
 from sklearn.experimental import enable_iterative_imputer # no quality assurance
 from sklearn.impute import IterativeImputer
 from IPython.display import Markdown
+alt.data_transformers.disable_max_rows()
 ```
 :::
 
@@ -216,7 +216,7 @@ fig, (ax1, ax2) = plt.subplots(
     1, 2, figsize=(12, 8), gridspec_kw={"width_ratios": [4, 1]}
 )
 
-# Put data int a matrix for heatmap
+# Put data into a matrix for pattern plot
 pattern_matrix = pattern_df_no_count.astype(bool).to_numpy()
 
 # Colors
@@ -231,8 +231,8 @@ ax1.set_xlabel("Variable")
 ax1.set_ylabel("Missing Data Pattern")
 ax1.set_xticks(range(len(pattern_df_no_count.columns)))
 ax1.set_xticklabels(pattern_df_no_count.columns, rotation=45, ha="right")
-ax1.set_yticks([])
-ax1.set_yticklabels([])
+ax1.set_yticks([]);
+ax1.set_yticklabels([]);
 
 # Grid
 ax1.set_xticks(np.arange(len(pattern_df_no_count.columns)) - 0.5, minor=True)
@@ -252,7 +252,7 @@ ax2.set_yticks(y_positions)
 ax2.set_yticklabels([])
 
 # Set y-limits of bar chart to be the same as the pattern plot
-ax2.set_ylim(ax1.get_ylim())
+ax2.set_ylim(ax1.get_ylim());
 
 plt.tight_layout()
 plt.show()
@@ -336,7 +336,7 @@ alt.Chart(spino_data).mark_bar().encode(
     .legend(None),
     tooltip=["same_sex_marriage", "gdp_missing", "count()"],
 ).properties(
-    width=300,
+    width=400,
     height=300,
     title="Missingness of GDP per Capita by Same-Sex Marriage Status"
 )
@@ -377,7 +377,7 @@ alt.Chart(spino_data).mark_bar().encode(
     .legend(None),
     tooltip=["same_sex_marriage", "edu_missing", "count()"],
 ).properties(
-    width=300,
+    width=400,
     height=300,
     title="Missingness of Education Spending by Same-Sex Marriage Status",
 )
