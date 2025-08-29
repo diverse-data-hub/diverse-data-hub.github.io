@@ -101,7 +101,7 @@ Yes
 ::: styled-table
 | Variable Name       | Role    | Type      | Description                                                                     | Units           | Missing Values |
 |------------|------------|------------|------------|------------|------------|
-| business_name       | Feature | Character | Name of the Indigenous business                                                 | –               | Yes            |
+| business_name       | Feature | Character | Name of the Indigenous business                                                 | –               | No            |
 | city                | Feature | Character | City or town where the business is located                                      | –               | Yes            |
 | latitude            | Feature | Numeric   | Latitude coordinate of the business location                                    | Decimal Degrees | Yes            |
 | longitude           | Feature | Numeric   | Longitude coordinate of the business location                                   | Decimal Degrees | Yes            |
