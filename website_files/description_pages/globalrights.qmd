@@ -49,14 +49,14 @@ This data set provides yearly, country-level information on LGBTQ+ rights, econo
 |----------------------------|----------|-------------|----------------------------------------------------------------------------------------------|-----------------|----------------|
 | `year`                     | ID       | Integer     | Year the data was recorded.                                                                  | Year            | No             |
 | `country`                  | ID       | String      | Country name                                                                                 | -               | No             |
-| `country-code`             | ID       | String      | ISO 3-letter country code                                                                    | -               | No             |
+| `country-code`             | ID       | String      | ISO 3-letter country code                                                                    | -               | Yes            |
 | `gdp-per-capita`           | Feature  | Numeric     | Gross Domestic Product per capita                                                            | International $ | Yes            |
 | `education-spending-gdp`   | Feature  | Numeric     | Government education spending as a percentage of GDP                                         | %               | Yes            |
-| `same-sex-marriage`        | Target   | Categorical | Legal status of same-sex marriage (e.g., Legal, Civil Union, Not Recognized)                | -               | No             |
+| `same-sex-marriage`        | Target   | Categorical | Legal status of same-sex marriage (e.g., "Legal", "Varies by region",  "Unecognized")                 | -               | Yes            |
 | `lgbtq-censorship`         | Feature  | Categorical | Whether LGBTQ+ content is censored or restricted                                             | -               | Yes            |
 | `employment-discrimination`| Feature  | Categorical | Whether anti-discrimination protections exist for LGBTQ+ individuals in employment           | -               | Yes            |
 | `gender-affirming-care`    | Feature  | Categorical | Availability and legal access to gender-affirming healthcare                                 | -               | Yes            |
-| `legal-gender`             | Feature  | Categorical | Whether legal gender can be changed and under what conditions (e.g., self-ID, medical req.)  | -               | Yes            |
+| `legal-gender`             | Feature  | Categorical | Whether legal gender can be changed and under what conditions (e.g., "Legal, no restrictions", "Ambiguous")  | -               | Yes            |
 
 
 :::
