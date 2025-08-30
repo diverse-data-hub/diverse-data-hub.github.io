@@ -56,34 +56,34 @@ In particular, Alberta experiences some of the most severe and frequent wildfire
 | `latitude`                     | Feature  | Numeric     | Latitude coordinate of the wildfire origin                                                        | Degrees       | No             |
 | `longitude`                    | Feature  | Numeric     | Longitude coordinate of the wildfire origin                                                       | Degrees       | No             |
 | `fire_origin`                  | Metadata | Categorical | Who owns or administers the land the wildfire ignited on                                          | -             | No             |
-| `general_cause`                | Feature  | Categorical | Classification of the wildfire cause                                                              | -             | Yes            |
-| `responsible_group`            | Metadata | Categorical | Recreational group responsible for causing the wildfire                                           | -             | Yes            |
-| `activity_class`               | Feature  | Categorical | Activity that was going on when the wildfire started                                              | -             | Yes            |
-| `true_cause`                   | Feature  | Categorical | Specific reason why the wildfire started (e.g., "Arson Known", "Hot Exhaust", "Line Impact", "Unattended Fire", etc.) | -             | No             |
-| `fire_start_date`              | Time     | Date        | Datetime the wildfire started                                                                     | YYYY-MM-DD    | No             |
+| `general_cause`                | Feature  | Categorical | Classification of the wildfire cause                                                              | -             | No             |
+| `responsible_group`            | Metadata | Categorical | Recreational group responsible for causing the wildfire                                           | -             | No             |
+| `activity_class`               | Feature  | Categorical | Activity that was going on when the wildfire started                                              | -             | No             |
+| `true_cause`                   | Feature  | Categorical | Specific reason why the wildfire started (e.g., "Arson Known", "Hot Exhaust", "Line Impact", "Unattended Fire", etc.) | -             | No              |
+| `fire_start_date`              | Time     | Date        | Datetime the wildfire started                                                                     | YYYY-MM-DD    | Yes            |
 | `detection_agent_type`         | Feature  | Categorical | Type of detection agent that discovered the wildfire (e.g., lookout ("LKT"), aircraft ("AIR"))    | -             | No             |
-| `detection_agent`              | Feature  | Categorical | Specific type of detection agent that discovered the wildfire                                     | -             | Yes            |
+| `detection_agent`              | Feature  | Categorical | Specific type of detection agent that discovered the wildfire                                     | -             | No             |
 | `assessment_hectares`          | Feature  | Numeric     | Size of the wildfire at the time of assessment                                                    | Hectares      | No             |
-| `fire_spread_rate`             | Feature  | Numeric     | Rate at which the wildfire spread at the time of initial assessment                               | Metres/minute | Yes            |
+| `fire_spread_rate`             | Feature  | Numeric     | Rate at which the wildfire spread at the time of initial assessment                               | Metres/minute | No             |
 | `fire_type`                    | Feature  | Categorical | Predominant wildfire behavior classification at the time of initial assessment (e.g., "Surface", "Ground", "Crown") | -             | No             |
-| `fire_position_on_slope`       | Feature  | Categorical | Position of the wildfire relative to the slope it is travelling on at the time of initial assessment (e.g., "Bottom", "Middle 1/3", "Unknown") | -             | Yes            |
-| `weather_conditions_over_fire` | Feature  | Text        | Weather conditions over the wildfire at the time of initial assessment                            | -             | Yes            |
+| `fire_position_on_slope`       | Feature  | Categorical | Position of the wildfire relative to the slope it is travelling on at the time of initial assessment (e.g., "Bottom", "Middle 1/3", "Unknown") | -             | No             |
+| `weather_conditions_over_fire` | Feature  | Categorical | Weather conditions over the wildfire at the time of initial assessment                            | -             | No             |
 | `temperature`                  | Feature  | Numeric     | Temperature at the wildfire location at the time of initial assessment                            | °C            | Yes            |
 | `relative_humidity`            | Feature  | Numeric     | Relative humidity at the wildfire location at the time of initial assessment                      | %             | Yes            |
-| `wind_direction`               | Feature  | Categorical | Wind direction at the wildfire location at the time of initial assessment                         | -             | Yes            |
+| `wind_direction`               | Feature  | Categorical | Wind direction at the wildfire location at the time of initial assessment                         | -             | No             |
 | `wind_speed`                   | Feature  | Numeric     | Wind speed at the wildfire location in km/h at the time of initial assessment                     | km/h          | Yes            |
-| `fuel_type`                    | Feature  | Categorical | Dominant fuel type (vegetation cover) in which the wildfire is burning at the wildfire location at the time of initial assessment | -             | Yes            |
-| `initial_action_by`            | Metadata | Categorical | Group that initiated suppression efforts                                                          | -             | Yes            |
+| `fuel_type`                    | Feature  | Categorical | Dominant fuel type (vegetation cover) in which the wildfire is burning at the wildfire location at the time of initial assessment | -             | No             |
+| `initial_action_by`            | Metadata | Categorical | Group that initiated suppression efforts                                                          | -             | No             |
 | `ia_arrival_at_fire_date`      | Time     | DateTime    | Datetime when the initial action group arrived at the wildfire                                    | YYYY-MM-DD    | Yes            |
-| `ia_access`                    | Feature  | Categorical | Method of access that the initial action group used                                               | -             | Yes            |
+| `ia_access`                    | Feature  | Categorical | Method of access that the initial action group used                                               | -             | No             |
 | `fire_fighting_start_date`     | Time     | DateTime    | Datetime when the initial action group began firefighting activities                              | YYYY-MM-DD    | Yes            |
-| `fire_fighting_start_size`     | Feature  | Numeric     | Wildfire size at the time firefighting began                                                      | Hectares      | Yes            |
-| `bucketing_on_fire`            | Feature  | Binary      | Whether aerial bucketing was used on the wildfire                                                 | Yes/No        | Yes            |
-| `first_bh_date`                | Time     | DateTime    | Datetime when wildfire was first declared being held                                              | YYYY-MM-DD    | Yes            |
-| `first_bh_size`                | Feature  | Numeric     | Wildfire size when wildfire was first declared being held                                         | Hectares      | Yes            |
-| `first_uc_date`                | Time     | DateTime    | Datetime when wildfire was first declared under control                                           | YYYY-MM-DD    | Yes            |
-| `first_uc_size`                | Feature  | Numeric     | Wildfire size when first declared under control                                                   | Hectares      | Yes            |
-| `first_ex_size_perimeter`      | Feature  | Numeric     | Wildfire size when first declared extinguished                                                    | Hectares      | Yes            |
+| `fire_fighting_start_size`     | Feature  | Numeric     | Wildfire size at the time firefighting began                                                      | Hectares      | No             |
+| `bucketing_on_fire`            | Feature  | Binary      | Whether aerial bucketing was used on the wildfire                                                 | Yes/No        | No             |
+| `first_bh_date`                | Time     | DateTime    | Datetime when wildfire was first declared being held                                              | YYYY-MM-DD    | No             |
+| `first_bh_size`                | Feature  | Numeric     | Wildfire size when wildfire was first declared being held                                         | Hectares      | No             |
+| `first_uc_date`                | Time     | DateTime    | Datetime when wildfire was first declared under control                                           | YYYY-MM-DD    | No             |
+| `first_uc_size`                | Feature  | Numeric     | Wildfire size when first declared under control                                                   | Hectares      | No             |
+| `first_ex_size_perimeter`      | Feature  | Numeric     | Wildfire size when first declared extinguished                                                    | Hectares      | No             |
 
 
 :::
