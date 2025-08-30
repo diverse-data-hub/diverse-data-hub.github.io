@@ -15,7 +15,11 @@ Use Binder to explore and run this dataset interactively in your browser. Ideal 
 
 ## About the Data
 
-This data set provides yearly, country-level information on LGBTQ+ rights, economic indicators, and education spending. The data is compiled from Our World in Data, with primary sources including Equaldex, the World Bank, and other open-access data sets.
+This data set provides yearly, country-level information on LGBTQ+ rights, economic indicators, and education spending from 2001 to 2023. It is compiled from Our World in Data, with primary sources including Equaldex, the World Bank, and other open-access data sets.
+
+The data enables cross-country and temporal comparisons of LGBTQ+ rights and economic/education metrics, exploration of relationships between rights and economic development, and identification of regional and temporal trends.
+
+Amid ongoing challenges to LGBTQ+ rights worldwide, this dataset supports analysis, awareness, and advocacy for their protection.
 
 ### Download
 
