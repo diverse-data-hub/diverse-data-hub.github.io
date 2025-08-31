@@ -39,6 +39,9 @@ jobs:
       - name: Create environment
         run: conda env create -f environment.yml
 
+      - name: Debug conda envs
+        run: conda env list
+
       - name: Export RETICULATE_PYTHON
         run: echo "RETICULATE_PYTHON=$(conda run -n diverse_web_env which python)" >> $GITHUB_ENV
 
