@@ -36,6 +36,11 @@ jobs:
           channels: conda-forge, defaults
           activate-environment: diverse_web_env
           environment-file: environment.yml
+          auto-activate-base: false
+
+      - name: Tell reticulate where conda is
+        run: |
+          Rscript -e "Sys.setenv(RETICULATE_PYTHON = file.path(Sys.getenv('CONDA'), 'envs/diverse_web_env/bin/python'))"
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
