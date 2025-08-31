@@ -29,18 +29,18 @@ jobs:
           Rscript -e 'install.packages("renv", repos="https://cloud.r-project.org")'
           Rscript -e 'renv::restore()'
 
-      - name: Set up conda environment
+      - name: Set up conda
         uses: conda-incubator/setup-miniconda@v3
         with:
           miniforge-version: latest
           channels: conda-forge, defaults
-          activate-environment: diverse_web_env
-          environment-file: environment.yml
           auto-activate-base: false
 
-      - name: Tell reticulate where conda is
-        run: |
-          Rscript -e "Sys.setenv(RETICULATE_PYTHON = file.path(Sys.getenv('CONDA'), 'envs/diverse_web_env/bin/python'))"
+      - name: Create environment
+        run: conda env create -f environment.yml
+
+      - name: Export RETICULATE_PYTHON
+        run: echo "RETICULATE_PYTHON=$(conda run -n diverse_web_env which python)" >> $GITHUB_ENV
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
