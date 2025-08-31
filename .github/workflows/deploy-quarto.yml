@@ -29,21 +29,31 @@ jobs:
           Rscript -e 'install.packages("renv", repos="https://cloud.r-project.org")'
           Rscript -e 'renv::restore()'
 
-      - name: Set up conda
+      - name: Set up conda environment
         uses: conda-incubator/setup-miniconda@v3
         with:
           miniforge-version: latest
           channels: conda-forge, defaults
+          activate-environment: diverse_web_env
+          environment-file: environment.yml
           auto-activate-base: false
 
-      - name: Create environment
-        run: conda env create -f environment.yml
+      - name: Verify conda environment
+        shell: bash -el {0}
+        run: |
+          conda info
+          conda list
+          which python
+          echo "CONDA_DEFAULT_ENV: $CONDA_DEFAULT_ENV"
 
-      - name: Debug conda envs
-        run: conda env list
-
-      - name: Export RETICULATE_PYTHON
-        run: echo "RETICULATE_PYTHON=$(conda run -n diverse_web_env which python)" >> $GITHUB_ENV
+      - name: Configure R for conda environment
+        shell: bash -el {0}
+        run: |
+          Rscript -e "
+          library(reticulate)
+          use_condaenv('diverse_web_env', required = TRUE)
+          py_config()
+          "
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
