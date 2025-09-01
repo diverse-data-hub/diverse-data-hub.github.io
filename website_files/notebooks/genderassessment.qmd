@@ -3,7 +3,13 @@
 #| warning: false
 #| message: false
 library(reticulate)
-use_condaenv("diverse_web_env", required = TRUE)
+if (Sys.getenv("GITHUB_ACTIONS") == "true") {
+  # for running in GitHub Actions (otherwise reticulate can't find diverse_web_env)
+  reticulate::use_python(Sys.getenv("RETICULATE_PYTHON"), required = TRUE)
+} else {
+  # for running locally
+  reticulate::use_condaenv("diverse_web_env", required = TRUE)
+}
 ```
 
 ### Key Features of the Data set
