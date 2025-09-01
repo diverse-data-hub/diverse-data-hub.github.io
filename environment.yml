@@ -38,11 +38,13 @@ dependencies:
   - pip:
       - diversedata
 
-# for the Gender Assessment analysis (additional to what's listed above)
-  - scikit-posthocs=0.11
-
 # for the How Couples Meet and Stay Together analysis (additional to what's listed above)
   - scikit-learn=1.7
 
 # for the BC Indigenous Business Listings analysis (additional to what's listed above)
   - plotly=6.2
+
+# for the Gender Assessment analysis (additional to what's listed above)
+  - scikit-posthocs=0.11
+
+# the dependencies for the analyses of Wildfire and Global Rights are covered by the above
