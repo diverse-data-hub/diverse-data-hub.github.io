@@ -9,7 +9,7 @@ execute:
 ---
 
 ::: {.callout-note icon="terminal" title="Try it live!"}
-Use Binder to explore and run this dataset interactively in your browser. Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.
+Use Binder to explore and run this dataset and analysis interactively in your browser with `R`. Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.
 
 👉 [Launch on Binder](https://mybinder.org/v2/gh/jadeeechen/diversedata-notebooks/HEAD?urlpath=lab/tree/hcmst.ipynb){target="_blank" rel="noopener"}
 
@@ -61,8 +61,8 @@ This analysis contributes to discussions around partnership resilience, healthy 
 | subject_ethnicity | Feature | Nominal Categorical | Levels: ['white', 'black', 'other', 'hispanic', '2_plus_eth'] | - | No |
 | subject_income_category  | Feature | Ordinal Categorical | Ordered categories: ['under_5k' < '5k_7k' < '7k_10k' < '10k_12k' < '12k_15k' < '15k_20k' < '20k_25k' < '25k_30k' < '30k_35k' < '35k_40k' < '40k_50k' < '50k_60k' < '60k_75k' < '75k_85k' < '85k_100k' < '100k_125k' < '125k_150k' < '150k_175k' < '175k_200k' < '200k_250k' < 'over_250k'] | dollars | No |
 | subject_employment_status | Feature | Nominal Categorical | Levels: ['working_paid_employee', 'working_self_employed', 'not_working_temp_layoff', 'not_working_looking', 'not_working_retired', 'not_working_disabled', 'not_working_other'] | - | No |
-| same_sex_couple | Feature | Nominal Categorical | Levels: ['no', 'yes'] | - | Yes |
-| married | Feature | Nominal Categorical | Levels: ['not_married', 'married'] | - | Yes |
+| same_sex_couple | Feature | Nominal Categorical | Levels: ['no', 'yes'] | - | No |
+| married | Feature | Nominal Categorical | Levels: ['not_married', 'married'] | - | No |
 | sex_frequency | Feature | Ordinal Categorical | Ordered categories: ['once_or_more_a_day' < '3_to_6_times_a_week' < 'once_or_twice_a_week' < '2_to_3_times_a_month' < 'once_a_month_or_less'] | - | Yes |
 | flirts_with_partner | Feature | Ordinal Categorical | Ordered categories: ['every_day' < 'a_few_times_a_week' < 'once_a_week' < '1_to_3_times_a_month' < 'less_than_once_a_month' < 'never'] | - | Yes |
 | fights_with_partner | Feature | Ordinal Categorical | Ordered categories: ['0_times' < '1_time' < '2_times' < '3_times' < '4_times' < '5_times' < '6_times' < '7_or_more_times'] | Amount in the last 7 days | Yes |

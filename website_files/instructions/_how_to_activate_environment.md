@@ -176,25 +176,77 @@ import numpy as np
 from scipy import stats
 from IPython.display import Markdown
 
-# For `Wildfire` (Additional to what's listed above)
+# For `Wildfire`:
 
+import numpy as np
+import pandas as pd
+import altair as alt
+import plotly.express as px
+from sklearn.model_selection import train_test_split
+from sklearn.compose import make_column_transformer
+from sklearn.pipeline import make_pipeline
+from sklearn.linear_model import LogisticRegression 
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import (
+    f1_score,
+    precision_score,
+    recall_score,
+    ConfusionMatrixDisplay,
+    confusion_matrix,
+    classification_report
+)
+from sklearn.dummy import DummyClassifier
+from IPython.display import Markdown
 
+# For `How Couples Meet and Stay Together`:
 
-# For `How Couples Meet and Stay Together` (Additional to what's listed above)
+import diversedata as dd
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import altair as alt
+from IPython.display import Markdown
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression 
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    confusion_matrix,
+    classification_report
+)
+from sklearn.dummy import DummyClassifier
 
+# For `Global Rights`:
 
+import pandas as pd
+import numpy as np
+import altair as alt
+import matplotlib.pyplot as plt
+from sklearn.experimental import enable_iterative_imputer # no quality assurance
+from sklearn.impute import IterativeImputer
+from IPython.display import Markdown
 
-# For `Global Rights` (Additional to what's listed above)
+# For `Indigenous Business`:
 
+import numpy as np
+import pandas as pd
+import altair as alt
+import plotly.express as px
+from scipy.stats import chi2_contingency
+from sklearn.cluster import DBSCAN
+from IPython.display import Markdown
 
+# For `Gender Assessment`:
 
-# For `Indigenous Business` (Additional to what's listed above)
-
-
-
-# For `Gender Assessment` (Additional to what's listed above)
-
-
+import pandas as pd
+import altair as alt
+import statsmodels.formula.api as smf
+from scipy.stats import shapiro, levene, kruskal
+import scikit_posthocs as sp
+from IPython.display import Markdown
 
 ```
 
