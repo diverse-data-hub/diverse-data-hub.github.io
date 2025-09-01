@@ -7,7 +7,7 @@ sidebar: false
 ---
 
 ::: {.callout-note icon="terminal" title="Try it live!"}
-Use Binder to explore and run this dataset interactively in your browser. Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.
+Use Binder to explore and run this dataset and analysis interactively in your browser with `R`. Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.
 
 👉 [Launch on Binder](https://mybinder.org/v2/gh/jadeeechen/diversedata-notebooks/HEAD?urlpath=lab/tree/globalrights.ipynb){target="_blank" rel="noopener"}
 
@@ -15,7 +15,11 @@ Use Binder to explore and run this dataset interactively in your browser. Ideal 
 
 ## About the Data
 
-This data set provides yearly, country-level information on LGBTQ+ rights, economic indicators, and education spending. The data is compiled from Our World in Data, with primary sources including Equaldex, the World Bank, and other open-access data sets.
+This data set provides yearly, country-level information on LGBTQ+ rights, economic indicators, and education spending from 2001 to 2023. It is compiled from Our World in Data, with primary sources including Equaldex, the World Bank, and other open-access data sets.
+
+The data enables cross-country and temporal comparisons of LGBTQ+ rights and economic/education metrics, exploration of relationships between rights and economic development, and identification of regional and temporal trends.
+
+Amid ongoing challenges to LGBTQ+ rights worldwide, this dataset supports analysis, awareness, and advocacy for their protection.
 
 ### Download
 
@@ -49,14 +53,14 @@ This data set provides yearly, country-level information on LGBTQ+ rights, econo
 |----------------------------|----------|-------------|----------------------------------------------------------------------------------------------|-----------------|----------------|
 | `year`                     | ID       | Integer     | Year the data was recorded.                                                                  | Year            | No             |
 | `country`                  | ID       | String      | Country name                                                                                 | -               | No             |
-| `country-code`             | ID       | String      | ISO 3-letter country code                                                                    | -               | No             |
+| `country-code`             | ID       | String      | ISO 3-letter country code                                                                    | -               | Yes            |
 | `gdp-per-capita`           | Feature  | Numeric     | Gross Domestic Product per capita                                                            | International $ | Yes            |
 | `education-spending-gdp`   | Feature  | Numeric     | Government education spending as a percentage of GDP                                         | %               | Yes            |
-| `same-sex-marriage`        | Target   | Categorical | Legal status of same-sex marriage (e.g., Legal, Civil Union, Not Recognized)                | -               | No             |
+| `same-sex-marriage`        | Target   | Categorical | Legal status of same-sex marriage (e.g., "Legal", "Varies by region",  "Unecognized")                 | -               | Yes            |
 | `lgbtq-censorship`         | Feature  | Categorical | Whether LGBTQ+ content is censored or restricted                                             | -               | Yes            |
 | `employment-discrimination`| Feature  | Categorical | Whether anti-discrimination protections exist for LGBTQ+ individuals in employment           | -               | Yes            |
 | `gender-affirming-care`    | Feature  | Categorical | Availability and legal access to gender-affirming healthcare                                 | -               | Yes            |
-| `legal-gender`             | Feature  | Categorical | Whether legal gender can be changed and under what conditions (e.g., self-ID, medical req.)  | -               | Yes            |
+| `legal-gender`             | Feature  | Categorical | Whether legal gender can be changed and under what conditions (e.g., "Legal, no restrictions", "Ambiguous")  | -               | Yes            |
 
 
 :::

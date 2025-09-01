@@ -1,3 +1,12 @@
+```{r all_flags}
+#| echo: false
+#| warning: false
+#| message: false
+#| collapse: true
+library(reticulate)
+use_condaenv("diverse_web_env", required = TRUE)
+```
+
 ### **Key Features of the Data Set**
 
 Each row represents a single country’s record for a specific year and includes information such as GDP per capita, education spending, and the legal status of various LGBTQ+ rights and protections.
@@ -40,7 +49,9 @@ Rather than ignoring or arbitrarily removing incomplete data, we apply imputatio
 
 **Loading Libraries**
 
-```{r load-libraries,load-libraries, message=FALSE, warning=FALSE}
+::: {.panel-tabset}
+## R
+```{r load-libraries, message=FALSE, warning=FALSE}
 # Data
 library(diversedata)      # Diverse Data Hub data set
 library(tidyverse)
@@ -49,8 +60,24 @@ library(gridExtra)
 library(mice)
 ```
 
+## Python
+```{python load-libraries_py, message=FALSE, warning=FALSE, results=FALSE}
+import diversedata as dd
+import pandas as pd
+import numpy as np
+import altair as alt
+import matplotlib.pyplot as plt
+from sklearn.experimental import enable_iterative_imputer # no quality assurance
+from sklearn.impute import IterativeImputer
+from IPython.display import Markdown
+alt.data_transformers.disable_max_rows()
+```
+:::
+
 #### **1. Data Cleaning & Processing**
 
+::: {.panel-tabset}
+## R
 ```{r clean-global-rights-data}
 global_rights <- globalrights
 
@@ -77,6 +104,40 @@ colnames(cleaned_rights) <- c(
 
 ```
 
+## Python
+```{python clean-global-rights-data_py}
+global_rights = dd.load_data("globalrights")
+
+# Select and clean variables (excluding marriage from transformation)
+cleaned_rights = global_rights[
+    [
+        "country",
+        "year",
+        "gdp-per-capita",
+        "education-spending-gdp",
+        "same-sex-marriage",
+        "lgbtq-censorship",
+        "employment-discrimination",
+        "gender-affirming-care",
+        "legal-gender",
+    ]
+]
+
+# Rename columns
+cleaned_rights.columns = [
+    "country",
+    "year",
+    "gdp_per_capita",
+    "edu_spend",
+    "same_sex_marriage",
+    "lgbtq_censorship",
+    "employment",
+    "affirming_care",
+    "legal_gender",
+]
+```
+:::
+
 #### **2. Aggregation Plots**
 
 The first fundamental question to ask is: which variables contain missing values, and how many observations are affected? Aggregation plots are a useful tool to quickly summarize and visualize the extent of missingness across all variables in the data set.
@@ -85,8 +146,10 @@ Please note that :
 
 -   Each row in the plot represents a unique pattern of missingness across your variables. For example, one row might show only `gdp-per-capita` is missing and another might show `edu_spend` and `employment` are missing together.
 
--   The height of each bar on the left indicates the number (or percentage) of rows in our data that match that missing pattern.
+-   The height of each bar on the left indicates the number (or proportion) of rows in our data that match that missing pattern.
 
+::: {.panel-tabset}
+## R
 ```{r aggregation-plot, message=FALSE, warning=FALSE, results='hide'}
 # Visualize missing values across all variables
 invisible(
@@ -100,11 +163,101 @@ invisible(
       las = 2,  # vertical labels
       gap = 2,
       col = c("gray85", "skyblue"),
-      ylab = c("Missing Data (%)", "Missing Data Pattern")
+      ylab = c("Missing Data (proportion)", "Missing Data Pattern")
     )
   )
 )
 ```
+
+## Python
+```{python aggregation-plot_py-a, message=FALSE, warning=FALSE}
+missing_prop = (
+    cleaned_rights.isnull()
+    .mean()
+    .reset_index()
+    .rename(columns={"index": "variable", 0: "missing_prop"})
+)
+
+alt.Chart(missing_prop).mark_bar().encode(
+    x=alt.X("variable").sort("-y").title("Variable").axis(alt.Axis(labelAngle=-45)),
+    y=alt.Y("missing_prop").title("Missing Data Proportion"),
+    tooltip=["variable", "missing_prop"],
+).properties(width=400, height=300)
+```
+
+```{python aggregation-plot_py-b, message=FALSE, warning=FALSE}
+#| code-fold: true
+pattern_df = cleaned_rights.isnull().astype(int)
+pattern_df = (
+    pattern_df.groupby(by=pattern_df.columns.to_list())
+    .size()
+    .reset_index(name="count")
+    .sort_values(by="count")
+    .reset_index(drop=True)
+)
+pattern_df = pattern_df[
+    [
+        "lgbtq_censorship",
+        "employment",
+        "affirming_care",
+        "legal_gender",
+        "edu_spend",
+        "same_sex_marriage",
+        "gdp_per_capita",
+        "country",
+        "year",
+        "count",
+    ]
+]
+pattern_df_no_count = pattern_df.drop(columns=["count"])
+
+# Create plot
+fig, (ax1, ax2) = plt.subplots(
+    1, 2, figsize=(12, 8), gridspec_kw={"width_ratios": [4, 1]}
+)
+
+# Put data into a matrix for pattern plot
+pattern_matrix = pattern_df_no_count.astype(bool).to_numpy()
+
+# Colors
+colors = ["lightgrey", "skyblue"]
+cmap = plt.matplotlib.colors.ListedColormap(colors)
+
+# Pattern plot
+im = ax1.imshow(pattern_matrix, cmap=cmap, aspect="auto", interpolation="nearest")
+
+# Labels
+ax1.set_xlabel("Variable")
+ax1.set_ylabel("Missing Data Pattern")
+ax1.set_xticks(range(len(pattern_df_no_count.columns)))
+ax1.set_xticklabels(pattern_df_no_count.columns, rotation=45, ha="right")
+ax1.set_yticks([]);
+ax1.set_yticklabels([]);
+
+# Grid
+ax1.set_xticks(np.arange(len(pattern_df_no_count.columns)) - 0.5, minor=True)
+ax1.set_yticks(np.arange(len(pattern_df_no_count.index)) - 0.5, minor=True)
+ax1.grid(which="minor", color="white", linewidth=2)
+
+# Count bar chart
+counts = pattern_df["count"]
+y_positions = np.arange(len(pattern_df_no_count.index))
+bar_height = 0.8
+bars = ax2.barh(y_positions, counts, height=bar_height, color="skyblue", align="center")
+
+# Labels
+ax2.set_xlabel("Count")
+ax2.set_ylabel("")
+ax2.set_yticks(y_positions)
+ax2.set_yticklabels([])
+
+# Set y-limits of bar chart to be the same as the pattern plot
+ax2.set_ylim(ax1.get_ylim());
+
+plt.tight_layout()
+plt.show()
+```
+:::
 
 ```{r plot-missing-data, echo = FALSE, message = FALSE, warning = FALSE, results = 'hide'}
 # Save missing data plot as PNG (invisible in final output)
@@ -137,9 +290,9 @@ Given the extent of missing data observed in the aggregation plot, we will take 
 
 So far, we have gained a high-level overview of missingness across the data set. To dig deeper, we now examine how missing values in one variable relate to the categories of another. This helps us understand whether missingness may be random or related to other features in the data.
 
-The function `spineMiss()` from the `{VIM}` package is used for this purpose. It produces a spineplot, a type of bar chart that visualizes the distribution of missing vs. non-missing values in a variable (in this case, `gdp`) across the levels of a categorical variable (in this case, `same-sex-marriage`).
+The function `spineMiss()` from the `{VIM}` R package is used for this purpose. It produces a spineplot, a type of bar chart that visualizes the distribution of missing vs. non-missing values in a variable (in this case, `gdp`) across the levels of a categorical variable (in this case, `same-sex-marriage`).
 
-By running `spineMiss(cleaned_rights[, c("marriage", "gdp")])`, we create a plot that shows, for each category of same-sex marriage recognition (e.g., Legal, Civil Union, Not Recognized), the proportion of observations where GDP is missing versus observed.
+By running `spineMiss(cleaned_rights[, c("marriage", "gdp")])`, we create a plot that shows, for each category of same-sex marriage recognition (e.g., Legal, Civil Union, Not Recognized), the proportion of observations where GDP is missing versus observed. This plot can also be replicated in Python using the `pandas` and `altair` packages.
 
 This visualization allows us to assess whether missing GDP values are evenly distributed across marriage groups (which might suggest MCAR: *Missing Completely at Random*), or if they are more prevalent in certain categories (which could suggest MAR: *Missing at Random*). It’s a helpful diagnostic tool to explore whether the missingness in `gdp-per-capita` is associated with legal recognition of same-sex marriage, which is crucial before deciding how to impute or model the data.
 
@@ -151,31 +304,85 @@ Please note that, based on *Flexible Imputation of Missing Data* by Stef van Buu
 
 -   MNAR (Missing Not at Random): The probability of missingness depends on the value of the missing data itself. For example, countries with very low GDP might be less likely to report it.
 
-```{r spineplot-gdp-by-marriage}
-# Visualize missingness in GDP per capita across legal gender categories
-par(mar = c(10, 4, 4, 2) + 0.1)
+::: {.panel-tabset}
+## R
+```{r spineplot-gdp-by-marriage, message = FALSE, fig.height=5, fig.width=6}
+# Visualize missingness in GDP per capita across same-sex marriage legal status categories
+par(mar = c(15, 4, 2, 2) + 0.1)
 spineMiss(cleaned_rights[, c("same_sex_marriage", "gdp_per_capita")],
           col = c("gray85", "skyblue"),
           cex.axis = 0.7,         
-          las = 2,                
-          xlab = "Same Sex Marriage")
-
+          las = 2,               
+          xlab = "",
+          ylab = "")
+mtext("Same Sex Marriage Status", side = 1, line = 13) 
+mtext("Proportion of Missing/Observed", side = 2, line = 3, adj = 1)
+mtext("Missingness of GDP per Capita by Same-Sex Marriage Status", line = 1)
 ```
+
+## Python
+```{python spineplot-gdp-by-marriage_py}
+# Visualize missingness in GDP per capita across same-sex marriage legal status categories
+spino_data = cleaned_rights.copy()
+spino_data["gdp_missing"] = spino_data["gdp_per_capita"].isnull()
+
+alt.Chart(spino_data).mark_bar().encode(
+    x=alt.X("same_sex_marriage:N")
+    .title("Same Sex Marriage Status")
+    .axis(alt.Axis(labelAngle=-45)),
+    y=alt.Y("count()").stack("normalize").title("Percent of Missingness/Observed"),
+    color=alt.Color("gdp_missing:N")
+    .scale(alt.Scale(domain=[True, False], range=["skyblue", "lightgrey"]))
+    .legend(None),
+    tooltip=["same_sex_marriage", "gdp_missing", "count()"],
+).properties(
+    width=400,
+    height=300,
+    title="Missingness of GDP per Capita by Same-Sex Marriage Status"
+)
+```
+:::
 
 The spine plot shows that missing values in `gdp-per-capita` are not distributed evenly across the levels of `same-sex-marriage` recognition. Between seven categories, missingness is most frequent in countries where same-sex marriages are Unrecognized, followed by those where same-sex marriage is Banned, and then in countries where it is Legal.
 
 This pattern suggests that the missingness in GDP is likely not completely at random, and may be associated with marriage recognition status, indicating a Missing At Random (MAR) mechanism. Recognizing this pattern is important, as it can guide the selection of appropriate imputation strategies that account for such relationships.
 
-```{r spineplot-edu-by-marriage}
-# Visualize missingness in education spending across legal gender categories
-par(mar = c(10, 4, 4, 2) + 0.1)
+::: {.panel-tabset}
+## R
+```{r spineplot-edu-by-marriage, message = FALSE, fig.height=5, fig.width=6}
+# Visualize missingness in education spending across same-sex marriage legal status categories
+par(mar = c(15, 4, 2, 2) + 0.1)
 spineMiss(cleaned_rights[, c("same_sex_marriage", "edu_spend")],
           col = c("gray85", "skyblue"),
           cex.axis = 0.7,         
           las = 2,                
-          xlab = "Same Sex Marriage")
-
+          xlab = "",
+          ylab = "")
+mtext("Same Sex Marriage Status", side = 1, line = 13) 
+mtext("Proportion of Missing/Observed", side = 2, line = 3, adj = 1)
+mtext("Missingness of Education Spending by Same-Sex Marriage Status", line = 1)
 ```
+
+## Python
+```{python spineplot-edu-by-marriage_py}
+spino_data["edu_missing"] = spino_data["edu_spend"].isnull()
+
+alt.Chart(spino_data).mark_bar().encode(
+    x=alt.X("same_sex_marriage:N")
+    .title("Same Sex Marriage Status")
+    .axis(alt.Axis(labelAngle=-45)),
+    y=alt.Y("count()").stack("normalize").title("Percent of Missingness/Observed"),
+    color=alt.Color("edu_missing:N")
+    .scale(alt.Scale(domain=[True, False], range=["skyblue", "lightgrey"]))
+    .legend(None),
+    tooltip=["same_sex_marriage", "edu_missing", "count()"],
+).properties(
+    width=400,
+    height=300,
+    title="Missingness of Education Spending by Same-Sex Marriage Status",
+)
+```
+:::
 
 The spine plot for `edu-spend` across `same-sex-marriage` categories reveals that missing values are present in all levels of marriage recognition, unlike `gdp`, where missingness was more concentrated. Again between seven categories, missingness is most frequent in countries where same-sex marriages are Unrecognized, followed by those where same-sex marriage is Banned, and then in countries where it is Legal. We can also see that the Civil union or other partnership category has missing values
 
@@ -193,6 +400,8 @@ To handle multiple variables with missing values, we applied the MICE algorithm,
 
 Finally, MICE generates multiple imputed data sets, which supports transparent and reproducible analysis while accounting for uncertainty in the missing data.
 
+::: {.panel-tabset}
+## R
 ```{r impute-missing-values, message=FALSE, warning=FALSE}
 impute_df <- cleaned_rights |>
   select(gdp_per_capita, edu_spend, same_sex_marriage, lgbtq_censorship, employment, affirming_care, legal_gender)
@@ -210,8 +419,59 @@ set.seed(123)
 imputed <- mice(impute_df, method = "pmm", m = 5)
 ```
 
+## Python
+
+:::: {.callout-warning}
+The `IterativeImputer` estimator by `scikit-learn` is still **experimental** for now: the predictions and the API might change without any deprecation cycle.
+
+It was inspired by the R `MICE` package but only returns a single imputation. So, we have applied it repeatedly with different random seeds to obtain multiple imputations. More information can be found [here](https://scikit-learn.org/stable/modules/generated/sklearn.impute.IterativeImputer.html) and [here](https://scikit-learn.org/stable/modules/impute.html#iterative-imputer).
+::::
+
+```{python impute-missing-values_py, message=FALSE, warning=FALSE}
+# subset the columns
+df_to_impute = cleaned_rights[
+    [
+        "gdp_per_capita",
+        "edu_spend",
+        "same_sex_marriage",
+        "lgbtq_censorship",
+        "employment",
+        "affirming_care",
+        "legal_gender",
+    ]
+].copy()
+
+# convert categorical variables to category dtype
+# and make numeric encodings for imputation
+categorical_cols = [
+    "same_sex_marriage",
+    "lgbtq_censorship",
+    "employment",
+    "affirming_care",
+    "legal_gender",
+]
+for col in categorical_cols:
+    df_to_impute[col] = (
+        df_to_impute[col].astype("category").cat.codes.replace(-1, np.nan)
+    )
+
+# run multiple imputations (predictive mean matching style) to produce 5 imputed datasets
+imputed_dfs = []
+
+for random_state in range(
+    0, 500, 100
+):  # set random state for each iteration for reproducibility
+    imputer = IterativeImputer(random_state=random_state, sample_posterior=True)
+    imputed_array = imputer.fit_transform(df_to_impute)
+    imputed_df = pd.DataFrame(imputed_array, columns=df_to_impute.columns)
+    imputed_dfs.append(imputed_df)
+```
+:::
+
 #### **5.** Visual Comparison for Before and After Imputation
 
+::: {.panel-tabset}
+## R
 ```{r gdp-density-comparison, fig.height=10, fig.width=8}
 plot_before <- densityplot(~ gdp_per_capita, data = cleaned_rights,
                            main = "Distribution of GDP (Original Data)",
@@ -225,18 +485,104 @@ plot_after <- densityplot(imputed, ~ gdp_per_capita,
 grid.arrange(plot_before, plot_after, ncol = 1, heights = c(1, 1))
 ```
 
+## Python
+```{python gdp-density-comparison_py}
+all_imputed_dfs = (
+    pd.concat(imputed_dfs, keys=range(1, 6))
+    .reset_index(names=["imputation_iteration", "old_index"])
+    .drop(columns="old_index")
+)
+df_to_impute["imputation_iteration"] = "Original Observed Data"
+all_dfs = pd.concat([df_to_impute, all_imputed_dfs])
+
+observed_gdp_density = alt.Chart(cleaned_rights).transform_density(
+    "gdp_per_capita",
+    as_=["gdp_per_capita", "density"],
+).mark_line(opacity=0.5).encode(
+    x=alt.X("gdp_per_capita").title("GDP per Capita"),
+    y=alt.Y("density:Q").stack(False).title("Density"),
+).properties(
+    title="Distribution of GDP (Original Data)", width=600, height=400
+)
+
+observed_gdp_point = alt.Chart(cleaned_rights).mark_tick(opacity=0.5).encode(
+    x=alt.X("gdp_per_capita"),
+    y=alt.datum(0)
+)
+
+observed_gdp = observed_gdp_point + observed_gdp_density
+
+imputed_gdp = alt.Chart(all_dfs).transform_density(
+    "gdp_per_capita",
+    groupby=["imputation_iteration"],
+    as_=["gdp_per_capita", "density"],
+).mark_line(opacity=0.5).encode(
+    x=alt.X("gdp_per_capita").title("GDP per Capita"),
+    y=alt.Y("density:Q").stack(False).title("Density"),
+    color=alt.Color("imputation_iteration:N").title("Imputation Iteration"),
+    tooltip=alt.Tooltip(["imputation_iteration"]).title("Imputation Iteration"),
+).properties(
+    title="Distribution of GDP (Imputed vs. Observed)", width=600, height=400
+)
+
+(observed_gdp & imputed_gdp).resolve_scale(x="shared", y="shared").resolve_legend(
+    color="independent"
+)
+```
+:::
+
+::: {.panel-tabset}
+## R
 ```{r edu-spending-density-comparison, fig.height=10, fig.width=8}
 plot_before <- densityplot(~ edu_spend, data = cleaned_rights,
-                           main = "Distribution of GDP (Original Data)",
-                           xlab = "GDP per Capita")
+                           main = "Distribution of Government Education Spending (Original Data)",
+                           xlab = "Government Education Spending as a Percentage of GDP")
 
 plot_after <- densityplot(imputed, ~ edu_spend,
-                          main = "Distribution of GDP (Imputed vs. Observed)",
-                          xlab = "GDP per Capita")
+                          main = "Distribution of Government Education Spending (Imputed vs. Observed)",
+                          xlab = "Government Education Spending as a Percentage of GDP")
 
 # Arrange the two plots vertically
 grid.arrange(plot_before, plot_after, ncol = 1, heights = c(1, 1))
 ```
+
+## Python
+```{python edu-spending-density-comparison_py}
+observed_edu_density = alt.Chart(cleaned_rights.dropna(subset=["edu_spend"])).transform_density(
+    "edu_spend",
+    as_=["edu_spend", "density"],
+).mark_line(opacity=0.5).encode(
+    x=alt.X("edu_spend").title("Government Education Spending as a Percentage of GDP"),
+    y=alt.Y("density:Q").stack(False).title("Density"),
+).properties(
+    title="Distribution of Government Education Spending (Original Data)", width=600, height=400
+)
+
+observed_edu_point = alt.Chart(cleaned_rights).mark_tick(opacity=0.5).encode(
+    x=alt.X("edu_spend"),
+    y=alt.datum(0)
+)
+
+observed_edu = observed_edu_point + observed_edu_density
+
+imputed_edu = alt.Chart(all_dfs.dropna(subset=["edu_spend"])).transform_density(
+    "edu_spend", groupby=["imputation_iteration"], as_=["edu_spend", "density"]
+).mark_line(opacity=0.5).encode(
+    x=alt.X("edu_spend").title("Government Education Spending as a Percentage of GDP"),
+    y=alt.Y("density:Q").stack(False).title("Density"),
+    color=alt.Color("imputation_iteration:N").title("Imputation Iteration"),
+    tooltip=alt.Tooltip(["imputation_iteration"]).title("Imputation Iteration"),
+).properties(
+    title="Distribution of Government Education Spending (Imputed vs. Observed)",
+    width=600,
+    height=400,
+)
+
+(observed_edu & imputed_edu).resolve_scale(x="shared", y="shared").resolve_legend(
+    color="independent"
+)
+```
+:::
 
 ### **Discussion**
 
