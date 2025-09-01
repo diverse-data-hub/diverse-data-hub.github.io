@@ -298,7 +298,7 @@
     "href": "website_files/description_pages/globalrights.html",
     "title": "Global Rights Data",
     "section": "",
-    "text": "Try it live!\n\n\n\nUse Binder to explore and run this dataset interactively in your browser. Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.\n👉 Launch on Binder"
+    "text": "Try it live!\n\n\n\nUse Binder to explore and run this dataset and analysis interactively in your browser with R. Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.\n👉 Launch on Binder"
   },
   {
     "objectID": "website_files/description_pages/globalrights.html#about-the-data",
