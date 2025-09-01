@@ -34,15 +34,13 @@ jobs:
         with:
           miniforge-version: latest
           channels: conda-forge, defaults
+          activate-environment: diverse_web_env
+          environment-file: environment.yml
           auto-activate-base: false
 
-      - name: Create and verify conda environment
-        shell: bash -el {0}
+      - name: Tell reticulate where conda is
         run: |
-          conda env create -f environment.yml
-          conda activate diverse_web_env
-          conda info
-          which python
+          Rscript -e "Sys.setenv(RETICULATE_PYTHON = file.path(Sys.getenv('CONDA'), 'envs/diverse_web_env/bin/python'))"
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
