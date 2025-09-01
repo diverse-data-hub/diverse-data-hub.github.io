@@ -34,15 +34,15 @@ jobs:
         with:
           miniforge-version: latest
           channels: conda-forge, defaults
+          activate-environment: diverse_web_env
+          environment-file: environment.yml
           auto-activate-base: false
 
-      - name: Create and verify conda environment
-        shell: bash -el {0}
+      # so diverse_web_env can be found by reticulate which allows
+      # Python code to be executed in the .qmd files using the conda environment
+      - name: Tell reticulate where conda is
         run: |
-          conda env create -f environment.yml
-          conda activate diverse_web_env
-          conda info
-          which python
+          echo "RETICULATE_PYTHON=$CONDA/envs/diverse_web_env/bin/python" >> $GITHUB_ENV
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
