@@ -711,13 +711,16 @@ print(f"Test score on with true_cause as a feature: {gs_tc.score(X_test_tc, y_te
 
 It looks like our model performs a bit better without using `true_cause`, as we suspected.
 
-Let's take a closer look at how the model performs with the best hyperparameters (without `true_cause` and with `class_weight='balanced'` and `C=0.001`).
+Let's take a closer look at how the model performs on the train set and test set with the best hyperparameters (without `true_cause` and with `class_weight='balanced'` and `C=0.001`).
 
-```{python cm_py}
+:::: {.panel-tabset}
+### On the train set:
+
+```{python cm_train_py}
 cm = ConfusionMatrixDisplay.from_estimator(
     gs,
-    X_test,
-    y_test,
+    X_train,
+    y_train,
     display_labels=["Not a Large Fire", "Large Fire"],
 )
 ```
@@ -729,7 +732,41 @@ From the above confusion matrix, we can observe that:
 - There are relatively little "Large Fire" samples.
 - The predictions for the true "Large Fire" class are mostly correct.
 
-```{python metrics_py}
+```{python metrics_train_py}
+y_pred_train = gs.predict(X_train)
+print(
+    classification_report(
+        y_train,
+        y_pred_train,
+        target_names=["Not a Large Fire", "Large Fire"],
+    )
+)
+```
+
+From the above metrics, we can see that accuracy is high on the train set (0.88), but accuracy can be misleading with imbalanced data.
+
+In general, scores for the dominant class ("Not a Large Fire") are high.
+Meanwhile, the precision (0.11) and consequently the f1 score (0.19) for the minority class ("Large Fire") is low. However, the recall is decent (0.79). This means that the model is able to predict most of the actual "Large Fire" incidents, but at the cost of many false positives.
+
+### On the test set:
+
+```{python cm_test_py}
+cm = ConfusionMatrixDisplay.from_estimator(
+    gs,
+    X_test,
+    y_test,
+    display_labels=["Not a Large Fire", "Large Fire"],
+)
+```
+
+From the above confusion matrix, we can observe that the model performs similarly on the test set as on the train set:
+
+- The "Not a Large Fire" class has the largest number samples and correct predictions.
+- There are many incorrect "Large Fire" predictions.
+- There are relatively little "Large Fire" samples.
+- The predictions for the true "Large Fire" class are mostly correct.
+
+```{python metrics_test_py}
 y_pred = gs.predict(X_test)
 print(
     classification_report(
@@ -740,14 +777,16 @@ print(
 )
 ```
 
-From the above metrics, we can see that accuracy is high (0.88), but accuracy can be misleading with imbalanced data.
+From the above metrics, we can see that accuracy is high on the test set (0.88), but accuracy can be misleading with imbalanced data.
 
-In general, scores for the dominant class ("Not a Large Fire") are high.
-Meanwhile, the precision (0.10) and consequently the f1 score (0.18) for the minority class ("Large Fire") is low. However, the recall is decent (0.76). This means that the model is able to predict most of the actual "Large Fire" incidents, but at the cost of many false positives.
+In general, scores for the dominant class ("Not a Large Fire") are again high.
+Meanwhile, the precision (0.10) and recall (0.76) are slightly lower compared to on the train set (0.11 and 0.79, respectively), and consequently the f1 score (0.18) for the minority class ("Large Fire") is lower. The recall is decent (0.76), which again means that the model is able to predict most of the actual "Large Fire" incidents, but at the cost of many false positives.
 
-If the goal is safety and preparedness, the model performance may be desireable. It might even be better to perform the hyperparameter search using recall or f-beta score with more weight on recall instead of f1 score.
+::::
 
-If the goal is efficient use of resources, the model performance is not desireable due to many false positives. It would be better to perform the hyperparameter seach using precision or f-beta score with more weight on precision instead of f1 score.
+If the goal is safety and preparedness, the model performance may be desirable. It might even be better to perform the hyperparameter search using recall or f-beta score with more weight on recall instead of f1 score.
+
+If the goal is efficient use of resources, the model performance is not desirable due to many false positives. It would be better to perform the hyperparameter seach using precision or f-beta score with more weight on precision instead of f1 score.
 
 Overall, it's important to keep in mind the purpose and goal of the model before any analysis and evaluation.
 :::
