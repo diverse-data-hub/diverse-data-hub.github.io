@@ -6,7 +6,7 @@ on:
 name: Quarto Render Test
 
 jobs:
-  build-deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
