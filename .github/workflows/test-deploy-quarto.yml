@@ -3,7 +3,7 @@ on:
   push:
     branches: fix/gh-actions-env
 
-name: Quarto Publish
+name: Quarto Render Test
 
 jobs:
   build-deploy:
