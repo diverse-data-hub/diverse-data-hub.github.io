@@ -4,7 +4,7 @@ on:
     branches: gha-improvement
 
 name: Quarto Render Test
-
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
