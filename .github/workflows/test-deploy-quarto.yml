@@ -52,8 +52,7 @@ jobs:
           environment-file: environment.yml
           auto-activate-base: false
           use-only-tar-bz2: true
-          cache-downloads: true
-          conda-build-args: --pkgs-dir ~/conda_pkgs_dir
+          pkgs-dirs: ~/conda_pkgs_dir
 
       - name: Tell reticulate where conda is
         run: |
