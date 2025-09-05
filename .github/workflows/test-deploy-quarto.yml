@@ -54,7 +54,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           miniforge-version: latest
-          channels: conda-forge, defaults
+          channels: conda-forge
           activate-environment: diverse_web_env
           environment-file: environment.yml
           auto-activate-base: false
