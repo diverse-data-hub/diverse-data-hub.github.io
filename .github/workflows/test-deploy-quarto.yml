@@ -1,7 +1,7 @@
 on:
   workflow_dispatch:
   push:
-    branches: gha-improve
+    branches: gha-improvement
 
 name: Quarto Render Test
 
