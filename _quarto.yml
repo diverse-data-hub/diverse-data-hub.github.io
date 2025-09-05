@@ -1,5 +1,9 @@
 project:
   type: website
+  render: 
+    - "!notebooks/"
+    - "!scripts/"
+    - "!website_files/notebooks/"
 
 freeze: auto
 
