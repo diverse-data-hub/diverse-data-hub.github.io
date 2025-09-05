@@ -41,10 +41,14 @@ jobs:
 
       - name: Cache conda
         uses: actions/cache@v4
+        env:
+          # Increase this value to reset cache if environment.yml has not changed
+          CACHE_NUMBER: 0
         with:
           path: ~/conda_pkgs_dir
-          key: ${{ runner.os }}-conda-${{ hashFiles('environment.yml') }}
-          restore-keys: ${{ runner.os }}-conda-
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
+            hashFiles('environment.yml') }}
 
       - name: Set up conda environment
         uses: conda-incubator/setup-miniconda@v3
@@ -55,7 +59,6 @@ jobs:
           environment-file: environment.yml
           auto-activate-base: false
           use-only-tar-bz2: true
-          pkgs-dirs: ~/conda_pkgs_dir
 
       - name: Tell reticulate where conda is
         run: |
