@@ -1,10 +1,10 @@
 on:
   workflow_dispatch:
   push:
-    branches: main
+    branches: gha-improvement
 
-name: Quarto Publish
-
+name: Quarto Render Test
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -60,8 +60,6 @@ jobs:
           auto-activate-base: false
           use-only-tar-bz2: true  # IMPORTANT: This needs to be set for caching to work properly!
 
-      # so diverse_web_env can be found by reticulate which allows
-      # Python code to be executed in the .qmd files using the conda environment
       - name: Tell reticulate where conda is
         run: |
           echo "RETICULATE_PYTHON=$CONDA/envs/diverse_web_env/bin/python" >> $GITHUB_ENV
@@ -69,9 +67,5 @@ jobs:
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
-      - name: Render and Publish
-        uses: quarto-dev/quarto-actions/publish@v2
-        with:
-          target: gh-pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Render site
+        uses: quarto-dev/quarto-actions/render@v2
