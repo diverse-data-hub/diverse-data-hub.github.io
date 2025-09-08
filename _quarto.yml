@@ -1,6 +1,14 @@
 project:
   type: website
   render: 
+    - "index.qmd"
+    - "data/"
+    - "website_files/description_pages/"
+    - "website_files/grid_items/"
+    - "website_files/img/"
+    - "website_files/citation.qmd"
+    - "website_files/collaborate.qmd"
+    - "website_files/datasets.qmd"
     - "!scripts/"
     - "!website_files/notebooks/"
 
