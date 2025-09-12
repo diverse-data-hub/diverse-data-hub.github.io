@@ -825,7 +825,7 @@ rs_results = pd.DataFrame(random_search.cv_results_)[
 Markdown(rs_results.to_markdown())
 ```
 
-From the above, we can see that the hyperparameter settings of `max_depth=17`, `min_samples_split=4`, `min_samples_leaf=4`, and `class_weight='balanced'` achieves the best mean validation f1 score (`0.30`) with little variation (standard deviation = `0.017`). This is an improvement compared to the logistic regression model, but let's take a closer look at how this random forest model performs on the whole training and testing set.
+From the above, we can see that the hyperparameter settings of `max_depth=17`, `min_samples_split=4`, `min_samples_leaf=4`, and `class_weight='balanced'` achieves the best mean validation f1 score (`0.30`) with little variation (standard deviation = `0.018`). This is an improvement compared to the logistic regression model, but let's take a closer look at how this random forest model performs on the whole training and testing set.
 
 :::: {.panel-tabset}
 ### On the train set:
@@ -856,10 +856,10 @@ print(
     )
 )
 ```
-From the above metrics, we can see that accuracy is very high on the train set (0.97), but accuracy can be misleading with imbalanced data.
+From the above metrics, we can see that accuracy is very high on the train set (0.98), but accuracy can be misleading with imbalanced data.
 
 In general, scores for the dominant class ("Not a Large Fire") are very high.
-Meanwhile, the precision (0.35) and consequently the f1 score (0.51) for the minority class ("Large Fire") is lower. However, the recall is very high (0.99). This means that the model is able to predict most of the actual "Large Fire" incidents, but at the cost of false positives.
+Meanwhile, the precision (0.36) and consequently the f1 score (0.52) for the minority class ("Large Fire") is lower. However, the recall is very high (0.99). This means that the model is able to predict most of the actual "Large Fire" incidents, but at the cost of false positives.
 
 These scores are better compared to the logistic regression model (accuracy = 0.88; precision = 0.11; f1 score = 0.19; recall = 0.79)!
 
@@ -892,10 +892,10 @@ print(
 )
 ```
 
-From the above metrics, we can see that accuracy is high on the test set (0.96), but accuracy can be misleading with imbalanced data.
+From the above metrics, we can see that accuracy is high on the test set (0.95), but accuracy can be misleading with imbalanced data.
 
 In general, scores for the dominant class ("Not a Large Fire") are again high.
-Meanwhile, the precision (0.21) and recall (0.56) are lower compared to on the train set (0.35 and 0.99, respectively), and consequently the f1 score (0.31) for the minority class ("Large Fire") is lower. This indicates some overfitting on the training set.
+Meanwhile, the precision (0.21) and recall (0.56) are lower compared to on the train set (0.35 and 0.99, respectively), and consequently the f1 score (0.30) for the minority class ("Large Fire") is lower. This indicates some overfitting on the training set.
 
 The random forest classifier performs much better compared to the logistic regression model, in terms of testing f1 score (accuracy = 0.88; precision = 0.10; recall = 0.76; f1 score = 0.18). There are much less false positives and more true negatives, but there are also less true positives and more false negatives.
 
@@ -903,7 +903,7 @@ The random forest classifier performs much better compared to the logistic regre
 
 If the goal is safety and preparedness, the logistic regression model performance may be desirable (testing recall = 0.76; testing f1 score = 0.18). It might even be better to perform the hyperparameter search using recall or f-beta score with more weight on recall instead of f1 score.
 
-If the goal is efficient use of resources, the random forest model performance (testing precision = 0.21; testing f1 score = 0.31) is a bit better compared to the logistic regression model, but still not desirable due to many false positives. It would be better to perform the hyperparameter seach using precision or f-beta score with more weight on precision instead of f1 score.
+If the goal is efficient use of resources, the random forest model performance (testing precision = 0.21; testing f1 score = 0.30) is a bit better compared to the logistic regression model, but still not desirable due to many false positives. It would be better to perform the hyperparameter seach using precision or f-beta score with more weight on precision instead of f1 score.
 
 Overall, it's important to keep in mind the purpose and goal of the model before any analysis and evaluation.
 :::
