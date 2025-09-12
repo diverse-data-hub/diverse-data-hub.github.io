@@ -112,10 +112,12 @@ import plotly.express as px
 from sklearn.model_selection import train_test_split
 from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
-from sklearn.linear_model import LogisticRegression 
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from scipy.stats import randint
 from sklearn.metrics import (
     f1_score,
     precision_score,
@@ -536,9 +538,7 @@ gs = GridSearchCV(
     pipeline, param_grid=param_grid, scoring="f1", n_jobs=-1, return_train_score=True
 )
 gs.fit(X_train, y_train)
-```
 
-```{python cv_results_py, warning=FALSE}
 cv_results = pd.DataFrame(gs.cv_results_)[
     [
         "mean_train_score",
@@ -550,7 +550,7 @@ cv_results = pd.DataFrame(gs.cv_results_)[
         "mean_fit_time",
         "rank_test_score",
     ]
-].set_index("rank_test_score").sort_index()
+].set_index("rank_test_score").sort_index().head(5)
 
 Markdown(cv_results.to_markdown())
 ```
@@ -782,9 +782,128 @@ Meanwhile, the precision (0.10) and recall (0.76) are slightly lower compared to
 
 ::::
 
-If the goal is safety and preparedness, the model performance may be desirable. It might even be better to perform the hyperparameter search using recall or f-beta score with more weight on recall instead of f1 score.
+Overall, the model performance isn't great, so let's try a random forest model.
 
-If the goal is efficient use of resources, the model performance is not desirable due to many false positives. It would be better to perform the hyperparameter seach using precision or f-beta score with more weight on precision instead of f1 score.
+### Random Forest Model
+
+We'll first find the optimal hyperparameter settings via cross validation and again prioritize f1-score over accuracy since there is a class imbalance in the data for the target. Since there is a large hyperparameter space, we'll use a randomized hyperparameter search instead of a grid search for efficiency.
+
+```{python rf_tuning_py, warning=FALSE}
+param_dist = {
+    "randomforestclassifier__max_depth": randint(1, 20),
+    "randomforestclassifier__min_samples_split": randint(2, 20),
+    "randomforestclassifier__min_samples_leaf": randint(1, 20),
+    "randomforestclassifier__class_weight": [None, "balanced"],
+}
+pipeline = make_pipeline(preprocessor, RandomForestClassifier(random_state=123))
+random_search = RandomizedSearchCV(
+    pipeline,
+    param_distributions=param_dist,
+    n_iter=100,
+    cv=5,
+    random_state=123,
+    scoring="f1",
+    return_train_score=True,
+)
+random_search.fit(X_train, y_train)
+
+rs_results = pd.DataFrame(random_search.cv_results_)[
+    [
+        "mean_train_score",
+        "std_train_score",
+        "mean_test_score",
+        "std_test_score",
+        "param_randomforestclassifier__max_depth", 
+        "param_randomforestclassifier__min_samples_split",
+        "param_randomforestclassifier__min_samples_leaf",
+        "param_randomforestclassifier__class_weight",
+        "mean_fit_time",
+        "rank_test_score",
+    ]
+].set_index("rank_test_score").sort_index().head(5)
+
+Markdown(rs_results.to_markdown())
+```
+
+From the above, we can see that the hyperparameter settings of `max_depth=17`, `min_samples_split=4`, `min_samples_leaf=4`, and `class_weight='balanced'` achieves the best mean validation f1 score (`0.30`) with little variation (standard deviation = `0.017`). This is an improvement compared to the logistic regression model, but let's take a closer look at how this random forest model performs on the whole training and testing set.
+
+:::: {.panel-tabset}
+### On the train set:
+
+```{python rf_cm_train_py}
+cm = ConfusionMatrixDisplay.from_estimator(
+    random_search,
+    X_train,
+    y_train,
+    display_labels=["Not a Large Fire", "Large Fire"],
+)
+```
+
+From the above confusion matrix, we can observe that:
+
+- The "Not a Large Fire" class has the largest number samples and correct predictions. There are more correct predictions for this class compared to the logistic regression model.
+- There are quite a few incorrect "Large Fire" predictions, but less compared to the logistic regression model.
+- There are relatively little "Large Fire" samples.
+- The predictions for the true "Large Fire" class are mostly correct. There are more correct predictions for this class compared to the logistic regression model.
+
+```{python rf_metrics_train_py}
+y_pred_train_rf = random_search.predict(X_train)
+print(
+    classification_report(
+        y_train,
+        y_pred_train_rf,
+        target_names=["Not a Large Fire", "Large Fire"],
+    )
+)
+```
+From the above metrics, we can see that accuracy is very high on the train set (0.97), but accuracy can be misleading with imbalanced data.
+
+In general, scores for the dominant class ("Not a Large Fire") are very high.
+Meanwhile, the precision (0.35) and consequently the f1 score (0.51) for the minority class ("Large Fire") is lower. However, the recall is very high (0.99). This means that the model is able to predict most of the actual "Large Fire" incidents, but at the cost of false positives.
+
+These scores are better compared to the logistic regression model (accuracy = 0.88; precision = 0.11; f1 score = 0.19; recall = 0.79)!
+
+### On the test set:
+
+```{python rf_cm_test_py}
+cm = ConfusionMatrixDisplay.from_estimator(
+    random_search,
+    X_test,
+    y_test,
+    display_labels=["Not a Large Fire", "Large Fire"],
+)
+```
+
+From the above confusion matrix, we can observe that the model performs similarly on the test set as on the train set:
+
+- The "Not a Large Fire" class has the largest number samples and correct predictions. There are more correct predictions for this class compared to the logistic regression model.
+- There are quite a few incorrect "Large Fire" predictions, but less compared to the logistic regression model.
+- There are relatively little "Large Fire" samples.
+- Slightly more than half of predictions for the true "Large Fire" class are  correct. There are less correct predictions for this class compared to the logistic regression model.
+
+```{python rf_metrics_test_py}
+y_pred_rf = random_search.predict(X_test)
+print(
+    classification_report(
+        y_test,
+        y_pred_rf,
+        target_names=["Not a Large Fire", "Large Fire"],
+    )
+)
+```
+
+From the above metrics, we can see that accuracy is high on the test set (0.96), but accuracy can be misleading with imbalanced data.
+
+In general, scores for the dominant class ("Not a Large Fire") are again high.
+Meanwhile, the precision (0.21) and recall (0.56) are lower compared to on the train set (0.35 and 0.99, respectively), and consequently the f1 score (0.31) for the minority class ("Large Fire") is lower. This indicates some overfitting on the training set.
+
+The random forest classifier performs much better compared to the logistic regression model, in terms of testing f1 score (accuracy = 0.88; precision = 0.10; recall = 0.76; f1 score = 0.18). There are much less false positives and more true negatives, but there are also less true positives and more false negatives.
+
+::::
+
+If the goal is safety and preparedness, the logistic regression model performance may be desirable (testing recall = 0.76; testing f1 score = 0.18). It might even be better to perform the hyperparameter search using recall or f-beta score with more weight on recall instead of f1 score.
+
+If the goal is efficient use of resources, the random forest model performance (testing precision = 0.21; testing f1 score = 0.31) is a bit better compared to the logistic regression model, but still not desirable due to many false positives. It would be better to perform the hyperparameter seach using precision or f-beta score with more weight on precision instead of f1 score.
 
 Overall, it's important to keep in mind the purpose and goal of the model before any analysis and evaluation.
 :::
@@ -815,5 +934,5 @@ The features included in the model were guided by domain expertise documented in
 
 The performance of the model depends on its intended purpose, particularly in the presence of class imbalance, and the chosen evaluation metric should align with the model's goal. Metrics like precision, recall, and f1 score provide a more informative and holistic evaluation compared to accuracy alone. If the goal is to maximize detection of large fires, recall should be considered more heavily. If the goal is to minimize false alarms, precision should be prioritized.
 
-The current model performs well for the majority class and achieves relatively high recall for the minority class (large fires), showing some promise. However, its low precision for large fires indicates many false positives. Since this may be due to class imbalance in the data, future iterations could explore resampling strategies such as SMOTE, or decision threshold adjustment to improve minority class performance and overall balance.
+The logistic regression model performs well for the majority class and achieves relatively high recall for the minority class (large fires), showing some promise. However, its low precision for large fires indicates many false positives. Despite achieving a higer f1 score compared to the logistic regression model, the random forest model also has low precision. Since this may be due to class imbalance in the data, future iterations could explore resampling strategies such as SMOTE, or decision threshold adjustment to improve minority class performance and overall balance.
 :::
