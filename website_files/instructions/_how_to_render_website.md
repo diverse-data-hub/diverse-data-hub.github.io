@@ -56,4 +56,5 @@ The following instructions are deprecated. They are from when local rendering wa
 > ```
 > 
 > This tricks Quarto into thinking the parent file has changed, so it will be re-rendered.
+> 
 > **Note**: If this workaround doesn't trigger a re-render, open the parent .qmd file, make a small edit (such as adding and removing a space), save the file, and then render the site again. This ensures that Quarto detects the change and processes the parent file properly.
