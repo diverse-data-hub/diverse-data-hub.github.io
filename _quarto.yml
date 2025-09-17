@@ -12,8 +12,6 @@ project:
     - "!scripts/"
     - "!website_files/notebooks/"
 
-freeze: auto
-
 website:
 
   title: "Diverse Data Hub"
