@@ -1,18 +1,18 @@
-## How to Add New Data to The Packages.
+# How to Add New Data to The Packages
 
-### R Package
+## R Package
 
 **Author:** Siddarth Subrahmanian  
 **Date:** June 9, 2025
 
 Within the [R package repository](https://github.com/diverse-data-hub/diversedata):
 
-#### 1. Place the Cleaned data in the `data-clean` folder
+### 1. Place the Cleaned data in the `data-clean` folder
 
 Add the cleaned data file (.csv ) to:
 `data-clean/new_data.csv`
 
-#### 2. Update the Processing Script
+### 2. Update the Processing Script
 
 Add the below code to the `data-clean/prepare-data.R` file.
 
@@ -24,13 +24,13 @@ add the new data set to the use_data function
 
 ``` use_data(``newData,``bcindigenousbiz,wildfire,globalrights,hcmst,womensmarchmadness,genderassessment,overwrite = TRUE) ```
 
-#### 3. Document the new data set
+### 3. Document the new data set
 
 Add a new R script for documentation: **R/newData.R**
 
 Use @format, @source, and @description.
 
-#### 4. Build & Check
+### 4. Build & Check
 
 Build the Documentation:
 
@@ -46,7 +46,7 @@ Check and Build the Package:
 
 `data("newData")`
 
-### Python Package
+## Python Package
 
 **Author:** Stephanie Ta  
 **Date:** July 14, 2025
