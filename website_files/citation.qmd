@@ -1,23 +1,24 @@
-Burak K, Khoda E (2025). diversedata: Diverse Data Hub. R Package Version 1.0.0, [https://github.com/diverse-data-hub/diversedata](https://github.com/diverse-data-hub/diversedata)
+Burak K, Khoda E, Piran A, Ramirez F, Subrahmanian S, Ta S (2025). diversedata: Diverse Data Hub. R Package Version 1.0.0, [https://github.com/diverse-data-hub/diversedata](https://github.com/diverse-data-hub/diversedata)
 
 ```bash
 @Manual{diversedata,
   title  = {diversedata: Diverse Dataset Hub R package},
-  author = {Burak K, Khoda E},
+  author = {Katie Burak and Elham E Khoda and Azin Piran and Francisco Ramirez and Siddarth Subrahmanian and Stephanie Ta},
   year   = {2025},
   note   = {R Package Version 1.0.0},
   url    = {https://github.com/diverse-data-hub/diversedata},
 }
 ```
 
-Burak K, Khoda E (2025). diversedata‑py: Diverse Data Hub Python Package. Python Package Version 1.0.0, [https://github.com/diverse-data-hub/diversedata-py](https://github.com/diverse-data-hub/diversedata-py)
+
+Burak K, Khoda E, Ta S (2025). diversedata‑py: Diverse Data Hub Python Package. Python Package Version 1.0.2, [https://github.com/diverse-data-hub/diversedata-py](https://github.com/diverse-data-hub/diversedata-py)
 
 ```bash
 @Manual{diversedatapy,
   title  = {diversedata-py: Diverse Data Hub Python Package},
-  author = {Burak K and Khoda E},
+  author = {Katie Burak and Elham E Khoda and Stephanie Ta},
   year   = {2025},
-  note   = {Python Package Version 1.0.0},
+  note   = {Python Package Version 1.0.2},
   url    = {https://github.com/diverse-data-hub/diversedata-py},
 }
 ```

@@ -26,6 +26,12 @@ Go [here](https://github.com/diverse-data-hub/diverse-data-hub.github.io/blob/ma
 
 Go [here](https://github.com/diverse-data-hub/diverse-data-hub.github.io/blob/main/website_files/instructions/_how_to_rerun_independent_analysis.md) for instructions on how to run any analysis `.qmd` notebook isolated from the website.
 
-## How to Install the `diversedata` R Package
+## How to Install the `diversedata` Package
 
-Please, refer to the R Package [repository's README](https://github.com/diverse-data-hub/diversedata/blob/main/README.md) for detailed instructions.
+For the R package, please refer to its [repository's README](https://github.com/diverse-data-hub/diversedata/blob/main/README.md) for detailed instructions.
+
+For the Python package, please refer to its [repository's README](https://github.com/diverse-data-hub/diversedata-py/blob/main/README.md) for detailed instructions.
+
+## How to Add New Data to the Packages
+
+Go [here](https://github.com/diverse-data-hub/diverse-data-hub.github.io/blob/main/website_files/instructions/_how_to_add_new_data_to_packages.md) for instructions on how to add new data to the packages.
