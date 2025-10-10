@@ -1,5 +1,5 @@
 ```{r}
-#| echo: true
+#| echo: false
 #| warning: false
 #| message: false
 #| collapse: true
@@ -44,6 +44,9 @@ This data set is designed to support analysis of:
 
 ### Objective
 
+::: {.panel-tabset}
+## R
+
 Large wildfires pose serious environmental, social, and economic challenges, especially as climate conditions become more extreme. Identifying the key environmental and human factors linked to these fires can help guide more effective prevention and response strategies.\
 So, our main question is:
 
@@ -52,10 +55,24 @@ So, our main question is:
 According to [Natural Resources Canada](https://cwfis.cfs.nrcan.gc.ca/ha/nfdb), wildfires exceeding 200 hectares in final size are classified as "large fires." While these fires represent a small percentage of all wildfires, they account for the majority of the total area burned annually.\
 The goal is to explore potential predictors of fire size, such as weather, fire cause, and detection method, and provide insights that could inform early interventions and resource planning.
 
+## Python
+
+Large wildfires pose serious environmental, social, and economic challenges, especially as climate conditions become more extreme. A machine learning model may be able to guide prevention and response strategies.
+
+So, our main question is:
+
+**How well can a logistic regression model be used to predict large wildfires?**
+
+According to [Natural Resources Canada](https://cwfis.cfs.nrcan.gc.ca/ha/nfdb), wildfires exceeding 200 hectares in final size are classified as "large fires". While these fires represent a small percentage of all wildfires, they account for the majority of the total area burned annually.  
+The goal is to explore a predictive logistic regression model, tune its hyperparameters, and evaluate its performance.
+:::
+
 ### Analysis
 
 **Loading Libraries**
 
+::: {.panel-tabset}
+## R
 ```{r load-libraries, results = "hide", warning = FALSE, message = FALSE}
 # Data
 library(diversedata)      # Diverse Data Hub data sets
@@ -85,7 +102,39 @@ library(marginaleffects)
 library(broom)           
 ```
 
+## Python
+```{python load-libraries_py, results = "hide", warning = FALSE, message = FALSE}
+import diversedata as dd
+import numpy as np
+import pandas as pd
+import altair as alt
+import plotly.express as px
+from sklearn.model_selection import train_test_split
+from sklearn.compose import make_column_transformer
+from sklearn.pipeline import make_pipeline
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from scipy.stats import randint
+from sklearn.metrics import (
+    f1_score,
+    precision_score,
+    recall_score,
+    ConfusionMatrixDisplay,
+    confusion_matrix,
+    classification_report
+)
+from sklearn.dummy import DummyClassifier
+from IPython.display import Markdown
+```
+:::
+
 #### 1. Data Cleaning & Processing
+
+::: {.panel-tabset}
+## R
 
 -   Converted fire size to numeric
 -   Created a binary variable `large_fire` (TRUE if \>200 ha)
@@ -117,16 +166,37 @@ wildfire_clean <- wildfire_clean |>
 
 ```
 
+## Python
+
+-   Created a binary variable `large_fire` (TRUE if \>200 ha)
+-   Filtered out incomplete records
+
+```{python prepare-wildfire-data_py, warning=FALSE, message=FALSE}
+# Reading Data
+wildfire = dd.load_data("wildfire")
+
+# Clean and prepare base data
+wildfire = wildfire.dropna(
+    subset=["assessment_hectares", "true_cause", "detection_agent_type"]
+)
+wildfire["large_fire"] = wildfire["current_size"] > 200
+```
+:::
+
 #### 2. Exploratory Data Analysis
 
 **Map of Wildfire Size and Location in Alberta**
 
 This interactive map displays the geographic distribution and relative size of wildfires across Alberta, using red circles sized by fire area. Each point represents a wildfire event, with larger circles indicating more extensive burns. The map reveals regions with concentrated wildfire activity and visually emphasizes differences in fire magnitude across the province.
 
-> **Note**  
-> To provide geographic context for our wildfire data, we added a shapefile representing Alberta's boundaries.  
-> This shapefile was sourced from the [Alberta Government Open Data Portal](https://open.alberta.ca/opendata) and specifically corresponds to the *Electoral Division Shapefile (Bill 33, 2017)*.  
-> The data was processed and transformed to the appropriate geographic coordinate system to enable mapping alongside our wildfire data set.
+::: {.panel-tabset}
+## R
+
+:::: {.callout-note}
+To provide geographic context for our wildfire data, we added a shapefile representing Alberta's boundaries.  
+This shapefile was sourced from the [Alberta Government Open Data Portal](https://open.alberta.ca/opendata) and specifically corresponds to the *Electoral Division Shapefile (Bill 33, 2017)*.  
+The data was processed and transformed to the appropriate geographic coordinate system to enable mapping alongside our wildfire data set.
+::::
 
 ```{r load-and-transform-shapefiles, warning=FALSE, message=FALSE, echo=FALSE, results='hide'}
 invisible({
@@ -204,22 +274,60 @@ invisible({
 
 ```
 
+## Python
+```{python wildfire-map_py, warning=FALSE, message=FALSE}
+wildfire["display_size"] = wildfire["current_size"] + 1000
+
+fig_map = px.scatter_map(
+    wildfire,
+    lat="latitude",
+    lon="longitude",
+    opacity=0.6,
+    zoom=4.7,
+    center={"lat": 55, "lon": -116},
+    size="display_size",
+    color_discrete_sequence=["red"],
+    hover_name="fire_number",
+    hover_data={"display_size": False, "current_size": True},
+    labels={"current_size": "size (hectares)"},
+)
+
+fig_map = fig_map.update_layout(
+    margin=dict(l=0, r=0, t=30, b=10),
+    width=700,
+    height=800,
+    mapbox_style="open-street-map",
+)
+```
+
+```{python fig_map_html}
+#| echo: false
+html_fig_map = fig_map.to_html(include_plotlyjs='cdn', full_html=False)
+```
+
+```{r fig_map_show}
+#| echo: false
+library(htmltools)
+HTML(py$html_fig_map)
+```
+:::
+
 **Proportion of Large Fires by Cause**
 
+::: {.panel-tabset}
+## R
 ```{r plot-large-fire-proportion-by-cause}
 wildfire_clean |>
   group_by(true_cause) |>
   summarize(prop_large = mean(large_fire, na.rm = TRUE)) |>
   filter(prop_large > 0) |>
-  ggplot(aes(x = reorder(true_cause, prop_large), y = prop_large, fill = prop_large)) +
-  geom_col() +
+  ggplot(aes(x = reorder(true_cause, -prop_large), y = prop_large)) +
+  geom_col(fill = 'skyblue') +
   coord_flip() +
-  scale_fill_gradient(low = "skyblue1", high = "skyblue4") +  
   labs(
     title = "Proportion of Large Fires by True Cause",
     x = "True Cause",
     y = "Proportion of Fires > 200 ha",
-    fill = "Proportion"
   ) +
   theme_minimal() +
   theme(
@@ -229,6 +337,22 @@ wildfire_clean |>
   )
 
 ```
+
+## Python
+```{python plot-large-fire-proportion-by-cause_py}
+wildfire_by_true_cause = (
+    wildfire.groupby("true_cause")
+    .agg(prop_large=("large_fire", lambda x: x.mean(skipna=True)))
+    .query("prop_large > 0")
+    .reset_index()
+)
+
+alt.Chart(wildfire_by_true_cause).mark_bar().encode(
+    x=alt.X("prop_large:Q").title("Proportion of Fires > 200 ha"),
+    y=alt.Y("true_cause").sort("x").title("True Cause"),
+).properties(title="Proportion of Large Fires by True Cause", width=500, height=300)
+```
+:::
 
 #### 3. Logistic Regression Model
 
@@ -310,6 +434,10 @@ $$
 \end{aligned}
 $$
 
+::: {.panel-tabset}
+## R
+In this R analysis, we will fit a logistic regression model for inference.
+
 ```{r logistic-regression-large-fires, warning=FALSE}
 
 model <- glm(
@@ -338,7 +466,105 @@ This logistic regression model estimates the factors influencing the likelihood 
 
 Let’s dig into our model further by examining how different environmental and operational factors interact to influence fire outcomes.
 
-#### 4. Interpretation of our Model **using `marginaleffects`**
+## Python
+
+In this Python analysis, we will fit a logistic regression model for prediction.
+
+First, let's separate our predictors from the target.
+
+Then, split our data into train and test sets, with the random state specified to make our work reproducible.
+
+```{python split_data_py, warning=FALSE}
+X = wildfire[[
+  "temperature",
+  "wind_speed",
+  "relative_humidity",
+  "fire_spread_rate",
+  "fire_type",
+  "fuel_type",
+  "ia_access",
+]]
+y = wildfire["large_fire"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=123
+)
+```
+
+As we can see below, there are some missing values in the numeric features: `temperature`, `wind_speed`, and `relative_humidity`. We'll impute these missing values with `scikit-learn`'s `SimpleImputer` with the default strategy of `mean`.
+
+```{python missing_data_py, warning=FALSE}
+X_train.isna().sum()
+```
+
+We'll use `StandardScaler` on the numerical features and encode the categorical features with `OneHotEncoder`. 
+A column transformer will allow us to specify which features should be preprocessed in a specific way and a pipeline will put together our preprocessing and modelling steps.
+
+```{python feats_py, warning=FALSE}
+#| results: hold
+numeric_feats = X_train.select_dtypes('number').columns.to_list()
+categorical_feats = X_train.select_dtypes(exclude=['number']).columns.to_list()
+
+print(f"The numeric features that will be scaled and missing values will be imputed: {numeric_feats} \n")
+print(f"The categorical features that will one-hot encoded: {categorical_feats}")
+```
+
+```{python preprocessing_py, warning=FALSE}
+numeric_preprocessor = make_pipeline(SimpleImputer(), StandardScaler())
+categorical_preprocessor = OneHotEncoder(handle_unknown="ignore")
+
+preprocessor = make_column_transformer(
+    (numeric_preprocessor, numeric_feats),
+    (categorical_preprocessor, categorical_feats),
+)
+
+pipeline = make_pipeline(preprocessor, LogisticRegression(random_state=123, n_jobs=-1))
+```
+
+Using grid search with cross-validation, we'll identify the optimal hyperparameter settings for `class_weight` and `C`. We'll prioritize f1-score over accuracy since there is a class imbalance in the data for the target.
+
+Setting `class_weight` to `None` treats all target classes equally, whereas `balanced` adjusts the weights inversely proportional to their frequencies in the input data.
+
+Meanwhile, `C` controls regularization strength: larger values reduce regularization and allows the model to fit the training data more closely, while smaller values increase regularization to avoid overfitting to the training data.
+
+```{python tuning_py, warning=FALSE}
+#| output: false
+param_grid = {
+    "logisticregression__class_weight": [None, "balanced"],
+    "logisticregression__C": [0.001, 0.01, 0.1, 1.0, 10, 100],
+}
+
+gs = GridSearchCV(
+    pipeline, param_grid=param_grid, scoring="f1", n_jobs=-1, return_train_score=True
+)
+gs.fit(X_train, y_train)
+
+cv_results = pd.DataFrame(gs.cv_results_)[
+    [
+        "mean_train_score",
+        "std_train_score",
+        "mean_test_score",
+        "std_test_score",
+        "param_logisticregression__class_weight", 
+        "param_logisticregression__C",
+        "mean_fit_time",
+        "rank_test_score",
+    ]
+].set_index("rank_test_score").sort_index().head(5)
+
+Markdown(cv_results.to_markdown())
+```
+
+In the table above, we can see that a `class_weight='balanced'` and `C=0.001` achieves the best mean validation score.
+
+We can also see that there is not much variation between the validation scores, with a standard deviation (`std_test_score`) of `0.0069`. This indicates that the model has a stable performance and is not overly sensitive to which subset of the training data it sees.
+
+:::
+
+#### 4. Interpretation/Evaluation of our Model
+
+::: {.panel-tabset}
+## R
 
 **The Role of Wind Across Fire Causes**
 
@@ -390,7 +616,303 @@ plot_comparisons(model, variables = "relative_humidity", by = "fire_type")
 
 When comparing the marginal effect of relative humidity across fire types, we found that three fire types showed almost no change in large fire probability as humidity increased. However, one fire type exhibited a noticeably stronger negative effect. This suggests that humidity plays a more meaningful role in suppressing fire growth for certain fire types likely those that are more sensitive to moisture availability, such as crown fires—while having minimal effect on others.
 
+## Python
+
+Now that we've found the best hyperparameter settings, let's evaluate a model that uses them. We'll take a look at the f1 score on the full training set and the testing set using the best parameters and with "Large Fire" being the positive class.
+
+```{python train_test_score_py}
+#| results: hold
+print(f"Train score on the full training set: {gs.score(X_train, y_train):.4f}")
+print(f"Test score on the testing set: {gs.score(X_test, y_test):.4f}")
+```
+
+This doesn't seem great, but let's compare these scores to a baseline model that only predicts the most common class in the training data ("Not a Large Fire").
+
+```{python baseline_score_py}
+#| results: hold
+baseline_model = DummyClassifier()
+baseline_model.fit(X_train, y_train)
+baseline_y_pred_train = baseline_model.predict(X_train)
+baseline_y_pred_test = baseline_model.predict(X_test)
+
+print(
+    f"Baseline train score on the full training set: {f1_score(y_train, baseline_y_pred_train):.4f}"
+)
+print(
+    f"Baseline test score on the testing set: {f1_score(y_test, baseline_y_pred_test, pos_label=1):.4f}"
+)
+```
+
+As we can see, the baseline model achieves a f1 score of 0 since it does not make any positive class ("Large Fire") predictions.
+
+As you’ve likely noticed, we did not include `true_cause` as a predictor in our logistic regression model because it contains many categories, some of which have very few observations. This can lead to large standard errors, unstable coefficient estimates, and a higher risk of overfitting. But let's incorporate `true_cause` into the model to see its effect on model performance.
+
+```{python model_with_tc_py}
+#| output: false
+X_tc = wildfire[[
+  "temperature",
+  "wind_speed",
+  "relative_humidity",
+  "fire_spread_rate",
+  "fire_type",
+  "fuel_type",
+  "ia_access",
+  "true_cause",
+]]
+X_train_tc, X_test_tc, y_train, y_test = train_test_split(
+    X_tc, y, test_size=0.3, random_state=123
+)
+
+categorical_feats_tc = categorical_feats + ["true_cause"]
+
+preprocessor_tc = make_column_transformer(
+    (numeric_preprocessor, numeric_feats),
+    (categorical_preprocessor, categorical_feats_tc),
+)
+
+pipeline_tc = make_pipeline(
+    preprocessor_tc, LogisticRegression(random_state=123, n_jobs=-1)
+)
+
+gs_tc = GridSearchCV(
+    pipeline_tc, param_grid=param_grid, scoring="f1", n_jobs=-1, return_train_score=True
+)
+
+gs_tc.fit(X_train_tc, y_train)
+```
+
+```{python tc_cv_results_py}
+cv_results_tc = pd.DataFrame(gs_tc.cv_results_)[
+    [
+        "mean_train_score",
+        "std_train_score",
+        "mean_test_score",
+        "std_test_score",
+        "param_logisticregression__class_weight", 
+        "param_logisticregression__C",
+        "mean_fit_time",
+        "rank_test_score",
+    ]
+].set_index("rank_test_score").sort_index()
+
+Markdown(cv_results.to_markdown())
+```
+
+```{python tc_train_test_score_py}
+#| results: hold
+print(f"Train score with the original model: {gs.score(X_train, y_train):.4f}")
+print(f"Test score with the original model: {gs.score(X_test, y_test):.4f} \n")
+
+print(f"Train score with true_cause as a feature: {gs_tc.score(X_train_tc, y_train):.4f}")
+print(f"Test score on with true_cause as a feature: {gs_tc.score(X_test_tc, y_test):.4f}")
+```
+
+It looks like our model performs a bit better without using `true_cause`, as we suspected.
+
+Let's take a closer look at how the model performs on the train set and test set with the best hyperparameters (without `true_cause` and with `class_weight='balanced'` and `C=0.001`).
+
+:::: {.panel-tabset}
+### On the train set:
+
+```{python cm_train_py}
+cm = ConfusionMatrixDisplay.from_estimator(
+    gs,
+    X_train,
+    y_train,
+    display_labels=["Not a Large Fire", "Large Fire"],
+)
+```
+
+From the above confusion matrix, we can observe that:
+
+- The "Not a Large Fire" class has the largest number samples and correct predictions.
+- There are many incorrect "Large Fire" predictions.
+- There are relatively little "Large Fire" samples.
+- The predictions for the true "Large Fire" class are mostly correct.
+
+```{python metrics_train_py}
+y_pred_train = gs.predict(X_train)
+print(
+    classification_report(
+        y_train,
+        y_pred_train,
+        target_names=["Not a Large Fire", "Large Fire"],
+    )
+)
+```
+
+From the above metrics, we can see that accuracy is high on the train set (0.88), but accuracy can be misleading with imbalanced data.
+
+In general, scores for the dominant class ("Not a Large Fire") are high.
+Meanwhile, the precision (0.11) and consequently the f1 score (0.19) for the minority class ("Large Fire") is low. However, the recall is decent (0.79). This means that the model is able to predict most of the actual "Large Fire" incidents, but at the cost of many false positives.
+
+### On the test set:
+
+```{python cm_test_py}
+cm = ConfusionMatrixDisplay.from_estimator(
+    gs,
+    X_test,
+    y_test,
+    display_labels=["Not a Large Fire", "Large Fire"],
+)
+```
+
+From the above confusion matrix, we can observe that the model performs similarly on the test set as on the train set:
+
+- The "Not a Large Fire" class has the largest number samples and correct predictions.
+- There are many incorrect "Large Fire" predictions.
+- There are relatively little "Large Fire" samples.
+- The predictions for the true "Large Fire" class are mostly correct.
+
+```{python metrics_test_py}
+y_pred = gs.predict(X_test)
+print(
+    classification_report(
+        y_test,
+        y_pred,
+        target_names=["Not a Large Fire", "Large Fire"],
+    )
+)
+```
+
+From the above metrics, we can see that accuracy is high on the test set (0.88), but accuracy can be misleading with imbalanced data.
+
+In general, scores for the dominant class ("Not a Large Fire") are again high.
+Meanwhile, the precision (0.10) and recall (0.76) are slightly lower compared to on the train set (0.11 and 0.79, respectively), and consequently the f1 score (0.18) for the minority class ("Large Fire") is lower. The recall is decent (0.76), which again means that the model is able to predict most of the actual "Large Fire" incidents, but at the cost of many false positives.
+
+::::
+
+Overall, the model performance isn't great, so let's try a random forest model.
+
+### Random Forest Model
+
+We'll first find the optimal hyperparameter settings via cross validation and again prioritize f1-score over accuracy since there is a class imbalance in the data for the target. Since there is a large hyperparameter space, we'll use a randomized hyperparameter search instead of a grid search for efficiency.
+
+```{python rf_tuning_py, warning=FALSE}
+param_dist = {
+    "randomforestclassifier__max_depth": randint(1, 20),
+    "randomforestclassifier__min_samples_split": randint(2, 20),
+    "randomforestclassifier__min_samples_leaf": randint(1, 20),
+    "randomforestclassifier__class_weight": [None, "balanced"],
+}
+pipeline = make_pipeline(preprocessor, RandomForestClassifier(random_state=123))
+random_search = RandomizedSearchCV(
+    pipeline,
+    param_distributions=param_dist,
+    n_iter=100,
+    cv=5,
+    random_state=123,
+    scoring="f1",
+    return_train_score=True,
+)
+random_search.fit(X_train, y_train)
+
+rs_results = pd.DataFrame(random_search.cv_results_)[
+    [
+        "mean_train_score",
+        "std_train_score",
+        "mean_test_score",
+        "std_test_score",
+        "param_randomforestclassifier__max_depth", 
+        "param_randomforestclassifier__min_samples_split",
+        "param_randomforestclassifier__min_samples_leaf",
+        "param_randomforestclassifier__class_weight",
+        "mean_fit_time",
+        "rank_test_score",
+    ]
+].set_index("rank_test_score").sort_index().head(5)
+
+Markdown(rs_results.to_markdown())
+```
+
+From the above, we can see that the hyperparameter settings of `max_depth=17`, `min_samples_split=4`, `min_samples_leaf=4`, and `class_weight='balanced'` achieves the best mean validation f1 score (`0.30`) with little variation (standard deviation = `0.018`). This is an improvement compared to the logistic regression model, but let's take a closer look at how this random forest model performs on the whole training and testing set.
+
+:::: {.panel-tabset}
+### On the train set:
+
+```{python rf_cm_train_py}
+cm = ConfusionMatrixDisplay.from_estimator(
+    random_search,
+    X_train,
+    y_train,
+    display_labels=["Not a Large Fire", "Large Fire"],
+)
+```
+
+From the above confusion matrix, we can observe that:
+
+- The "Not a Large Fire" class has the largest number samples and correct predictions. There are more correct predictions for this class compared to the logistic regression model.
+- There are quite a few incorrect "Large Fire" predictions, but less compared to the logistic regression model.
+- There are relatively little "Large Fire" samples.
+- The predictions for the true "Large Fire" class are mostly correct. There are more correct predictions for this class compared to the logistic regression model.
+
+```{python rf_metrics_train_py}
+y_pred_train_rf = random_search.predict(X_train)
+print(
+    classification_report(
+        y_train,
+        y_pred_train_rf,
+        target_names=["Not a Large Fire", "Large Fire"],
+    )
+)
+```
+From the above metrics, we can see that accuracy is very high on the train set (0.98), but accuracy can be misleading with imbalanced data.
+
+In general, scores for the dominant class ("Not a Large Fire") are very high.
+Meanwhile, the precision (0.36) and consequently the f1 score (0.52) for the minority class ("Large Fire") is lower. However, the recall is very high (0.99). This means that the model is able to predict most of the actual "Large Fire" incidents, but at the cost of false positives.
+
+These scores are better compared to the logistic regression model (accuracy = 0.88; precision = 0.11; f1 score = 0.19; recall = 0.79)!
+
+### On the test set:
+
+```{python rf_cm_test_py}
+cm = ConfusionMatrixDisplay.from_estimator(
+    random_search,
+    X_test,
+    y_test,
+    display_labels=["Not a Large Fire", "Large Fire"],
+)
+```
+
+From the above confusion matrix, we can observe that the model performs similarly on the test set as on the train set:
+
+- The "Not a Large Fire" class has the largest number samples and correct predictions. There are more correct predictions for this class compared to the logistic regression model.
+- There are quite a few incorrect "Large Fire" predictions, but less compared to the logistic regression model.
+- There are relatively little "Large Fire" samples.
+- Slightly more than half of predictions for the true "Large Fire" class are  correct. There are less correct predictions for this class compared to the logistic regression model.
+
+```{python rf_metrics_test_py}
+y_pred_rf = random_search.predict(X_test)
+print(
+    classification_report(
+        y_test,
+        y_pred_rf,
+        target_names=["Not a Large Fire", "Large Fire"],
+    )
+)
+```
+
+From the above metrics, we can see that accuracy is high on the test set (0.95), but accuracy can be misleading with imbalanced data.
+
+In general, scores for the dominant class ("Not a Large Fire") are again high.
+Meanwhile, the precision (0.21) and recall (0.56) are lower compared to on the train set (0.35 and 0.99, respectively), and consequently the f1 score (0.30) for the minority class ("Large Fire") is lower. This indicates some overfitting on the training set.
+
+The random forest classifier performs much better compared to the logistic regression model, in terms of testing f1 score (accuracy = 0.88; precision = 0.10; recall = 0.76; f1 score = 0.18). There are much less false positives and more true negatives, but there are also less true positives and more false negatives.
+
+::::
+
+If the goal is safety and preparedness, the logistic regression model performance may be desirable (testing recall = 0.76; testing f1 score = 0.18). It might even be better to perform the hyperparameter search using recall or f-beta score with more weight on recall instead of f1 score.
+
+If the goal is efficient use of resources, the random forest model performance (testing precision = 0.21; testing f1 score = 0.30) is a bit better compared to the logistic regression model, but still not desirable due to many false positives. It would be better to perform the hyperparameter seach using precision or f-beta score with more weight on precision instead of f1 score.
+
+Overall, it's important to keep in mind the purpose and goal of the model before any analysis and evaluation.
+:::
+
 ### Discussion
+
+::: {.panel-tabset}
+
+## R
 
 This analysis aimed to uncover the key environmental and operational factors associated with the development of large wildfires in Alberta. Using logistic regression and marginal effects, we modeled the probability of a wildfire exceeding 200 hectares, which is a meaningful operational threshold for fire managers.
 
@@ -403,3 +925,14 @@ Similarly, by plotting the effect of `relative_humidity` across different `fire_
 While some observed differences in marginal effects were small in magnitude and had overlapping confidence intervals, these nuanced insights still provide value. They highlight where future research or localized fire management protocols could focus, especially under climate scenarios with increasing temperature and wind extremes.
 
 Overall, this case study illustrates how statistical modeling paired with domain-informed exploratory tools like marginal effects can support risk-informed, data-driven wildfire management.
+
+## Python
+
+This analysis demonstrates how to tune a model's hyperparameters using grid search and cross-validation. More importantly, it highlights the critical role of feature selection and metric choice.
+
+The features included in the model were guided by domain expertise documented in the literature for their relevance to fire behavior, and a particularly sparse feature was excluded to avoid introducing noise. This approach could extended upon by using machine learning–based feature selection techniques, such as recursive feature elimination or regularization, to further refine the chosen predictors.
+
+The performance of the model depends on its intended purpose, particularly in the presence of class imbalance, and the chosen evaluation metric should align with the model's goal. Metrics like precision, recall, and f1 score provide a more informative and holistic evaluation compared to accuracy alone. If the goal is to maximize detection of large fires, recall should be considered more heavily. If the goal is to minimize false alarms, precision should be prioritized.
+
+The logistic regression model performs well for the majority class and achieves relatively high recall for the minority class (large fires), showing some promise. However, its low precision for large fires indicates many false positives. Despite achieving a higer f1 score compared to the logistic regression model, the random forest model also has low precision. Since this may be due to class imbalance in the data, future iterations could explore resampling strategies such as SMOTE, or decision threshold adjustment to improve minority class performance and overall balance.
+:::
