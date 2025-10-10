@@ -217,7 +217,7 @@ Compact hero-banner styling: reduces height, padding, font sizes, solid primary 
 }
 
 .hero-banner p {
-  font-size: 0.925rem;
+  font-size: 0.95rem;
   line-height: 1.3;
   margin-bottom: 0.5rem;
 }
@@ -293,11 +293,11 @@ Home Page Dataset Grid
 
 #featured-data-sets .grid-item h3 {
   font-size: 1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 #featured-data-sets .grid-item p {
-  font-size: 0.9rem;
+  font-size: 0.925rem;
   line-height: 1.3;
   margin-bottom: 0.5rem;
 }
