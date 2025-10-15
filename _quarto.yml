@@ -11,6 +11,8 @@ project:
     - "website_files/datasets.qmd"
     - "!scripts/"
     - "!website_files/notebooks/"
+  resources:
+    - website_files/_ga-download-tracking.js
 
 website:
 
