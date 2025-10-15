@@ -2451,6 +2451,23 @@ Kruskal-Wallis chi-squared = 517.7, df = 2, p-value &lt; 2.2e-16</code></pre>
 </section>
 
 </main> <!-- /main -->
+// The following javascript code is to enable how many times each
+// CSV file is downloaded within Google Analytics.
+// Quarto will include this code in the html site files via the line in _quarto.yml:
+// `include-after-body: "website_files/_ga-download-tracking.js"`
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('a[href$=".csv"]').forEach(function (link) {
+    link.addEventListener('click', function () {
+      const fileUrl = link.getAttribute('href');
+      gtag('event', 'file_download', {
+        file_name: fileUrl,
+        event_category: 'engagement',
+        event_label: fileUrl
+      });
+    });
+  });
+});
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
