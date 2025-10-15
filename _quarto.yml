@@ -54,7 +54,6 @@ format:
     toc: true
     toc-location: left
     fontsize: 1.175em
-    include-after-body: "website_files/_ga-download-tracking.js"
 
 
 
