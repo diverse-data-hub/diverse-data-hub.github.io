@@ -1,8 +1,18 @@
 project:
   type: website
-  output-dir: docs
-
-freeze: auto
+  render: 
+    - "index.qmd"
+    - "data/"
+    - "website_files/description_pages/"
+    - "website_files/grid_items/"
+    - "website_files/img/"
+    - "website_files/citation.qmd"
+    - "website_files/collaborate.qmd"
+    - "website_files/datasets.qmd"
+    - "!scripts/"
+    - "!website_files/notebooks/"
+  resources:
+    - website_files/_ga-download-tracking.js
 
 website:
 
@@ -45,6 +55,9 @@ format:
     page-layout: full
     toc: true
     toc-location: left
-
+    fontsize: 1.175em
+    include-after-body:
+      text: |
+        <script src="https://diverse-data-hub.github.io/website_files/_ga-download-tracking.js"></script>
 
 

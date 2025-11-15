@@ -6,10 +6,12 @@ on:
 name: Quarto Publish
 
 jobs:
-  build-deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      RENV_PATHS_ROOT: ~/.cache/R/renv
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -24,19 +26,39 @@ jobs:
         with:
           r-version: '4.4'
 
-      - name: Install renv and restore
+      - name: Cache R packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.RENV_PATHS_ROOT }}
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: ${{ runner.os }}-renv-
+
+      - name: Restore packages
+        shell: Rscript {0}
         run: |
-          Rscript -e 'install.packages("renv", repos="https://cloud.r-project.org")'
-          Rscript -e 'renv::restore()'
+          if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv", repos="https://cloud.r-project.org")
+          renv::restore()
+
+      - name: Cache conda
+        uses: actions/cache@v4
+        env:
+          # Increase this value to reset cache if environment.yml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
+            hashFiles('environment.yml') }}
 
       - name: Set up conda environment
         uses: conda-incubator/setup-miniconda@v3
         with:
           miniforge-version: latest
-          channels: conda-forge, defaults
+          channels: conda-forge
           activate-environment: diverse_web_env
           environment-file: environment.yml
           auto-activate-base: false
+          use-only-tar-bz2: true  # IMPORTANT: This needs to be set for caching to work properly!
 
       # so diverse_web_env can be found by reticulate which allows
       # Python code to be executed in the .qmd files using the conda environment
