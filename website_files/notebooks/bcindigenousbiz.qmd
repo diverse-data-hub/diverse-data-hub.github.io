@@ -37,9 +37,9 @@ The data set offers rich, structured information about Indigenous-owned business
 
 The purpose of this document is to:
 
--   Explore the growth and economic contributions of Indigenous businesses.
--   Analyze key challenges and opportunities they face.
--   Demonstrate how data can support policy and development decisions.
+- Increase the visibility of Indigenous-owned businesses.
+- Provide insights into the distribution, characteristics, and trends of Indigenous businesses in British Columbia.
+- Supplemented by community data, study relationships between business presence and community characteristics.
 
 ## Case Study
 
@@ -47,7 +47,7 @@ The purpose of this document is to:
 
 **Which regions in British Columbia have the highest density of Indigenous-owned businesses, and how do industry sectors vary across these clusters?**
 
-The goal is to explore the geographic and economic distribution of Indigenous businesses using attributes such as region, city, and industry sector. We apply clustering techniques to identify natural groupings of businesses based on their geo spatial coordinates and sectoral attributes. This helps reveal regional concentrations, uncover potential economic hubs, and provide insights for targeted policy or investment strategies.
+The goal is to explore the geographic and economic distribution of Indigenous businesses using attributes such as region, city, and industry sector. We apply clustering techniques to identify natural groupings of businesses based on their geospatial coordinates and sectoral attributes. This helps highlight regional concentrations, suggest potential areas of economic activity, and offer insights that could inform future policy or investment considerations.
 
 ### Analysis
 
