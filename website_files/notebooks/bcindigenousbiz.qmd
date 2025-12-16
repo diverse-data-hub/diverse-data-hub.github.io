@@ -1,5 +1,5 @@
 ```{r}
-#| echo: true
+#| echo: false
 #| warning: false
 #| message: false
 #| collapse: true
@@ -37,9 +37,9 @@ The data set offers rich, structured information about Indigenous-owned business
 
 The purpose of this document is to:
 
--   Explore the growth and economic contributions of Indigenous businesses.
--   Analyze key challenges and opportunities they face.
--   Demonstrate how data can support policy and development decisions.
+- Increase the visibility of Indigenous-owned businesses.
+- Provide insights into the distribution, characteristics, and trends of Indigenous businesses in British Columbia.
+- Supplemented by community data, study relationships between business presence and community characteristics.
 
 ## Case Study
 
@@ -47,12 +47,14 @@ The purpose of this document is to:
 
 **Which regions in British Columbia have the highest density of Indigenous-owned businesses, and how do industry sectors vary across these clusters?**
 
-The goal is to explore the geographic and economic distribution of Indigenous businesses using attributes such as region, city, and industry sector. We apply clustering techniques to identify natural groupings of businesses based on their geo spatial coordinates and sectoral attributes. This helps reveal regional concentrations, uncover potential economic hubs, and provide insights for targeted policy or investment strategies.
+The goal is to explore the geographic and economic distribution of Indigenous businesses using attributes such as region, city, and industry sector. We apply clustering techniques to identify natural groupings of businesses based on their geospatial coordinates and sectoral attributes. This helps highlight regional concentrations, suggest potential areas of economic activity, and offer insights that could inform future policy or investment considerations.
 
 ### Analysis
 
 **Loading Libraries**
 
+::: {.panel-tabset}
+## R
 ```{r library_load, results = "hide", warning = FALSE, message = FALSE}
 library(diversedata) 
 library(tidyverse)  # Loads dplyr, tidyr, stringr, ggplot2, etc.
@@ -60,7 +62,22 @@ library(infer)      # For chi-square test
 library(dbscan)     # For clustering
 library(leaflet)    # For interactive maps
 library(treemapify) # For creating treemaps
+library(knitr)
 ```
+
+## Python
+```{python library_load_py, results = "hide", warning = FALSE, message = FALSE}
+import diversedata as dd
+import numpy as np
+import pandas as pd
+import altair as alt
+import plotly.express as px
+from scipy.stats import chi2_contingency
+from sklearn.cluster import DBSCAN
+from IPython.display import Markdown
+np.random.seed(123) # set seed for reproducibility
+```
+:::
 
 #### 1. Data Cleaning & Processing
 
@@ -72,8 +89,9 @@ To ensure the quality and consistency of the data set, several pre-processing st
 
 -   **Converted field types**: The `Industry Sector` column was converted to a factor for categorical analysis, and `Year Formed` was converted to integer to allow for chronological trends and filtering.
 
+::: {.panel-tabset}
+## R
 ```{r data_load}
-
 # Load and clean the data
 indigenousbiz_data <- bcindigenousbiz |>
   filter(!is.na(latitude) & !is.na(longitude)) |>
@@ -85,28 +103,42 @@ indigenousbiz_data <- bcindigenousbiz |>
 
 # Preview cleaned data
 indigenousbiz_data |> 
-  head()
+  head() |>
+  kable()
 ```
+
+## Python
+```{python data_load_py}
+# Load and clean the data
+indigenousbiz_data = dd.load_data("bcindigenousbiz")
+indigenousbiz_data = indigenousbiz_data.dropna(subset=["latitude", "longitude"])
+indigenousbiz_data["region"] = indigenousbiz_data["region"].str.title()
+indigenousbiz_data["industry_sector"] = pd.Categorical(
+    indigenousbiz_data["industry_sector"], ordered=False
+)
+indigenousbiz_data["year_formed"] = indigenousbiz_data["year_formed"].astype("Int64")
+
+# Preview cleaned data
+Markdown(indigenousbiz_data.head().to_markdown())
+```
+:::
 
 #### 2. Exploratory Data Analysis (EDA)
 
 **Business count by Region**
 
+::: {.panel-tabset}
+## R
 ```{r eda_1, warning=FALSE, message=FALSE}
 # Business count by region with tidyverse style
 indigenousbiz_data |>
   count(region, sort = TRUE) |>
   ggplot(aes(
-    x = fct_reorder(region, n),  # Use forcats for reordering
+    x = fct_reorder(region, -n),  # Use forcats for reordering
     y = n,
-    fill = n
   )) +
-  geom_col() +
+  geom_col(fill = 'skyblue') +
   coord_flip() +
-  scale_fill_gradient(
-    low = "skyblue1",
-    high = "skyblue4"
-  ) +
   labs(
     title = "Business Count per Region",
     x = "Region",
@@ -115,14 +147,25 @@ indigenousbiz_data |>
   theme_minimal()
 ```
 
+## Python
+```{python eda_1_py, warning=FALSE, message=FALSE}
+alt.Chart(indigenousbiz_data).mark_bar().encode(
+    x=alt.X("count()").title("Number of Businesses"),
+    y=alt.Y("region").sort("x").title("Region"),
+).properties(title="Business Count per Region", width=500, height=300)
+```
+:::
+
 **Mapping Businesses**
 
-```{r eda_2, business-map,warning=FALSE, message=FALSE, fig.width=7, fig.height=9}
+::: {.panel-tabset}
+## R
+```{r eda_2, warning=FALSE, message=FALSE}
 # Create leaflet map
 indigenousbiz_data |>
   leaflet() |>
   addTiles() |>
-  setView(lng = -125, lat = 54, zoom = 4.6) |>
+  setView(lng = -125, lat = 54.5, zoom = 4.5) |>
   addCircleMarkers(
     lng = ~longitude,
     lat = ~latitude,
@@ -135,20 +178,54 @@ indigenousbiz_data |>
 
 ```
 
+## Python
+```{python eda_2_py, warning=FALSE, message=FALSE}
+#| output: false
+
+fig_map = px.scatter_map(
+    indigenousbiz_data,
+    lat="latitude",
+    lon="longitude",
+    opacity=0.5,
+    zoom=4,
+    center={"lat": 54.5, "lon": -128},
+    hover_name="business_name"
+)
+
+fig_map = fig_map.update_layout(
+    margin=dict(l=0, r=0, t=30, b=10),
+    width=700,
+    height=550,
+    mapbox_style="open-street-map"
+)
+```
+
+```{python fig_map_html}
+#| echo: false
+html_fig_map = fig_map.to_html(include_plotlyjs='cdn', full_html=False)
+```
+
+```{r fig_map_show}
+#| echo: false
+library(htmltools)
+HTML(py$html_fig_map)
+```
+:::
+
 **Industry Analysis**
 
-```{r eda_3, warning=FALSE, message=FALSE, echo=FALSE}
+::: {.panel-tabset}
+## R
+```{r eda_3, warning=FALSE, message=FALSE}
 # Plot top 10 industry sectors
 indigenousbiz_data |>
   count(industry_sector, sort = TRUE) |>
   slice_max(n, n = 10) |>
   ggplot(aes(
-    x = fct_reorder(industry_sector, n),
+    x = fct_reorder(industry_sector, -n),
     y = n,
-    fill = n
   )) +
-  geom_col() +
-  scale_fill_gradient(low = "skyblue1", high = "skyblue4") +
+  geom_col(fill = 'skyblue') +
   coord_flip() +
   labs(
     title = "Top Industry Sectors",
@@ -157,6 +234,22 @@ indigenousbiz_data |>
   ) +
   theme_minimal()
 ```
+## Python
+```{python eda_3_py, warning=FALSE, message=FALSE}
+top_10_sectors = (
+    indigenousbiz_data.groupby("industry_sector", observed=True)
+    .size()
+    .reset_index(name="count")
+    .sort_values(by="count", ascending=False)
+    .head(10)
+)
+
+alt.Chart(top_10_sectors).mark_bar().encode(
+    x=alt.X("count").title("Number of Businesses"),
+    y=alt.Y("industry_sector").sort("x").title("Sector").axis(alt.Axis(labelLimit=300))
+).properties(title="Top Industry Sectors", width=500, height=300)
+```
+:::
 
 #### 3. Chi-Squared Test of Independence
 
@@ -178,7 +271,11 @@ To better understand the relationship between Indigenous business locations and 
 
 -   Expected Count: The Chi-square test expects that all expected cell frequencies are ≥ 5. In our case this assumption is violated.
 
-```{r analysis_1}
+::: {.panel-tabset}
+## R
+```{r analysis_1, warning = FALSE}
+#| results: hold
+
 ## Assumptions check
 
 # Step 1: Chi-Square Assumption Check
@@ -188,7 +285,7 @@ expected_counts <- chisq_result$expected
 
 min_expected <- min(expected_counts)
 
-cat("Chi-Square Assumptions:\n")
+cat("Chi-Square Assumptions Check:\n")
 cat("- Minimum expected count:", round(min_expected, 2), "\n")
 
 if (min_expected >= 5) {
@@ -200,19 +297,44 @@ if (min_expected >= 5) {
 
 ```
 
+## Python
+```{python analysis_1_py}
+#| results: hold
+
+type_region_table = pd.crosstab(
+    indigenousbiz_data["type"], indigenousbiz_data["region"]
+)
+chi2_stat, p_value, dof, expected = chi2_contingency(type_region_table)
+min_expected = expected.min()
+
+print("Chi-Square Assumptions Check:")
+print(f"- Minimum expected count: {min_expected:.2f}")
+
+if min_expected >= 5:
+    print("Chi-squared assumptions met. Proceeding with standard test.")
+    print(f"Chi2 Statistic: {chi2_stat}")
+    print(f"P-value: {p_value}")
+    print(f"Degrees of Freedom: {dof}")
+else:
+    print("Assumptions violated. Proceeding with simulation-based Chi-squared test.")
+```
+:::
+
 **Simulation-based Chi-Square Test with `infer`**
 
 Since the assumption regarding minimum expected cell counts was violated with at least one expected frequency falling below the threshold of 5. The Chi-squared test may yield inaccurate results. To overcome this, we use a simulation-based Chi-squared test via the infer package. This method generates a null distribution by permuting the data under the assumption of independence.
 
 The simulation-based tests still require some assumptions to hold:
 
-\- The data must represent independent observations.
+- The data must represent independent observations.
 
 -   The variables must be categorical.
 
 -   The permutations assume that under the null hypothesis, the distribution of values across categories is exchangeable.
 
-```{r analysis_2}
+::: {.panel-tabset}
+## R
+```{r analysis_2, warning = FALSE}
 # Generate null distribution
 null_distribution <- indigenousbiz_data |>
   specify(type ~ region) |>
@@ -239,15 +361,65 @@ cat("Simulation-based p-value:", round(p_val$p_value, 4), "\n")
 
 ```
 
+## Python
+```{python analysis_2a_py}
+# Drop missing values in the columns of interest
+df = indigenousbiz_data.dropna(subset=["type", "region"])
+
+# Make function to calculate chi-square stat
+def chi2_statistic(data):
+    table = pd.crosstab(data["type"], data["region"])
+    chi2, _, _, _ = chi2_contingency(table)
+    return chi2
+
+# Generate null distribution
+reps = 1000
+null_distribution = []
+
+for rep in range(reps):
+    shuffled = df.copy()
+    shuffled["region"] = np.random.permutation(shuffled["region"])
+    null_distribution.append(chi2_statistic(shuffled))
+
+null_distribution = np.array(null_distribution)
+null_df = pd.DataFrame({"chi2_stat": null_distribution})
+
+# Observed statistic from earlier
+observed_stat = chi2_stat
+
+# Plot permutation distribution
+histogram = alt.Chart(null_df).mark_bar(color="grey").encode(
+    x=alt.X("chi2_stat:Q").bin(alt.Bin(maxbins=30)).title("Chi-square statistic"),
+    y=alt.Y("count()").title("Count")
+).properties(width=600, height=400, title="Simulation-based Null Distribution")
+
+observed_stat_line = alt.Chart(pd.DataFrame({"obs": [observed_stat]})).mark_rule(color="red", size=3).encode(
+    x="obs:Q"
+)
+
+permutation_dist = histogram + observed_stat_line
+permutation_dist
+```
+
+```{python analysis_2b_py}
+# Compute p-value (proportion of null stats >= observed stat)
+p_value = np.mean(null_distribution >= observed_stat)
+
+print(f"Simulation-based p-value: {p_value:.4e}")
+```
+:::
+
 **Inference**
 
 To assess whether there is an association between business type and region, we conducted a simulation-based chi-squared test using 1,000 permutations. The null distribution of test statistics generated under the assumption of independence shows that our observed statistic lies far in the tail of the distribution. This suggests that such an extreme result would be highly unlikely if business type and region were truly independent. Therefore, we reject the null hypothesis and conclude that business type and region are statistically dependent.
 
 #### 4. Spatial Clustering of Indigenous Businesses using DBSCAN
 
-To explore geographic patterns in Indigenous business, the technique of clustering based on latitude and longitude coordinates was applied. This analysis revealed several spatial clusters of Indigenous businesses across British Columbia. The treemap provided more information on which were the prominent industries in each cluster.
+To explore geographic patterns in Indigenous business, the technique of clustering based on latitude and longitude coordinates was applied. This analysis revealed several spatial clusters of Indigenous businesses across British Columbia. The treemap provided more information on which were the prominent industries in each cluster. 
 
-```{r analysis_3}
+::: {.panel-tabset}
+## R
+```{r analysis_3, warning = FALSE, message = FALSE}
 ## DBSCAN Clustering and Leaflet Map
 
 coords <- indigenousbiz_data |>
@@ -264,7 +436,7 @@ pal <- colorFactor(palette = "Set1", domain = indigenousbiz_data$cluster)
 
 cluster_map <- leaflet(data = indigenousbiz_data) |>
   addTiles() |>
-  setView(lng = -125, lat = 54, zoom = 4.6) |>
+  setView(lng = -125, lat = 54.5, zoom = 4.5) |>
   addCircleMarkers(
     label = ~business_name,
     radius = 3,
@@ -283,6 +455,46 @@ cluster_map <- leaflet(data = indigenousbiz_data) |>
 cluster_map
 ```
 
+## Python
+```{python analysis_3_py}
+#| output: false
+db = DBSCAN(eps=1.2, min_samples=8).fit(indigenousbiz_data[["longitude", "latitude"]])
+
+# add cluster labels as new column to the data
+indigenousbiz_data["cluster"] = db.labels_.astype(str)
+
+# visualize on map
+fig_cluster_map = px.scatter_map(
+    indigenousbiz_data,
+    lat="latitude",
+    lon="longitude",
+    color="cluster",
+    opacity=0.5,
+    zoom=4,
+    center={"lat": 54.5, "lon": -128},
+    hover_name="business_name",
+)
+
+fig_cluster_map = fig_cluster_map.update_layout(
+    margin=dict(l=0, r=0, t=30, b=10),
+    width=700,
+    height=550,
+    mapbox_style="open-street-map"
+)
+```
+
+```{python fig_cluster_map_html}
+#| echo: false
+html_fig_cluster_map = fig_cluster_map.to_html(include_plotlyjs='cdn', full_html=False)
+```
+
+```{r fig_cluster_map_show}
+#| echo: false
+HTML(py$html_fig_cluster_map)
+```
+
+:::
+
 ```{r img_save, echo = FALSE, include = FALSE, warning = FALSE, message = FALSE}
 library(htmlwidgets)
 library(webshot2)
@@ -294,7 +506,9 @@ file.remove("cluster_map.html")
 
 #### 5. Treemap of Industry sectors within cluster
 
-```{r analysis_4}
+::: {.panel-tabset}
+## R
+```{r analysis_4, warning = FALSE}
 
 ## Industry Counts and Treemap Visualization
 
@@ -334,6 +548,71 @@ ggplot(top_industries, aes(area = n, fill = industry_sector,
   )
 
 ```
+
+## Python
+```{python analysis_4_py}
+industry_cluster_counts = (
+    indigenousbiz_data.groupby(by=["cluster", "industry_sector"], observed=True)
+    .size()
+    .reset_index(name="n")
+)
+
+industry_cluster_counts["rank"] = industry_cluster_counts.groupby(
+    by="cluster", observed=True
+)["n"].rank(method="min", ascending=False)
+
+industry_cluster_counts["industry_sector_label"] = industry_cluster_counts.apply(
+    lambda row: row["industry_sector"] if row["rank"] <= 3 else "Other", axis=1
+)
+
+top_industries = (
+    industry_cluster_counts.groupby(
+        by=["cluster", "industry_sector_label"], observed=True
+    )
+    .agg({"n": "sum"})
+    .reset_index()
+)
+
+top_industries["hover_text"] = (
+    "Cluster: "
+    + top_industries["cluster"].astype(str)
+    + "<br>Industry: "
+    + top_industries["industry_sector_label"].astype(str)
+    + "<br>Businesses: "
+    + top_industries["n"].astype(str)
+)
+
+fig_treemap = px.treemap(
+    top_industries,
+    path=["cluster", "industry_sector_label"],
+    values="n",
+    color="industry_sector_label",
+    custom_data=["hover_text"],
+    title="Top Industry Sectors by Geo Cluster",
+)
+
+fig_treemap = fig_treemap.update_traces(
+    textinfo="label+value", hovertemplate="%{customdata[0]}<extra></extra>"
+)
+
+fig_treemap = fig_treemap.update_layout(margin=dict(l=10, r=10, t=30, b=10))
+```
+
+```{python fig_treemap_html}
+#| echo: false
+html_fig_treemap = fig_treemap.to_html(include_plotlyjs='cdn', full_html=False)
+```
+
+```{r fig_treemap_show}
+#| echo: false
+HTML(py$html_fig_treemap)
+```
+
+:::: {.callout-note}
+The R and Python cluster labels differ.
+::::
+
+:::
 
 ### Discussion
 
