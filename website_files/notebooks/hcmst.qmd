@@ -723,8 +723,6 @@ Since all of the predictors are ordinal, we'll use `OrdinalEncoder` to encode th
 `OrdinalEncoder` will encode the levels of an ordinal column(s) to be equally spaced apart. This may not be desireable for some analyses.
 ::::
 
-We won't forget to only `fit_transform` on the training set and only `transform` on the testing set! We don't want to break the golden rule.
-
 ```{python preprocess_py}
 # make sure the specified order for the variables are maintained
 level_order = [
@@ -741,8 +739,6 @@ level_order = [
 ]
 
 preprocessor = OrdinalEncoder(categories=level_order)
-X_train_transformed = preprocessor.fit_transform(X_train)
-X_test_transformed = preprocessor.transform(X_test)
 ```
 
 Now that our data has been preprocessed, let's identify the best performing model using cross validation and a weighted f1 score. A weighted f1 score is the average f1 score across the classes, weighted by support. This accounts for label imbalance.
@@ -803,7 +799,7 @@ for (name, model) in classifiers.items():
 Markdown(pd.DataFrame(results).T.to_markdown())
 ```
 
-The logistic regression model has the best validation score and performs better than a baseline dummy model that only predicts the most common class in the training data. Let's tune it.
+The logistic regression model has the best validation score. It also performs better than the baseline dummy model that only predicts the most common class in the training data. Let's tune it.
 
 ```{python tuning_py}
 #| output: false
@@ -815,7 +811,11 @@ param_grid = {
 }
 
 gs = GridSearchCV(
-    lr_pipe, param_grid=param_grid, scoring="f1_weighted", n_jobs=-1, return_train_score=True
+    lr_pipe,
+    param_grid=param_grid,
+    scoring="f1_weighted",
+    n_jobs=-1,
+    return_train_score=True
 )
 gs.fit(X_train, y_train)
 ```
@@ -837,7 +837,7 @@ cv_results = pd.DataFrame(gs.cv_results_)[
 Markdown(cv_results.to_markdown())
 ```
 
-From the table above, we can see that setting `class_weight=None` and `C=500` yields the best mean validation score with little variation between the validation scores (`std_test_score = 0.024966`), indicating that the model has a stable performance and is not overly sensitive to which subset of the training data it sees.
+From the table above, we can see that setting `class_weight=None` and `C=500` yields the best mean validation score. There is also little variation between the validation scores (`std_test_score = 0.024966`), indicating that the model has a stable performance and is not overly sensitive to the subset of the training data it sees.
 
 
 :::
@@ -890,7 +890,9 @@ feature_names = X.columns
 classes = gs.best_estimator_.named_steps['logisticregression'].classes_
 
 abs_coef_df = pd.DataFrame(
-    np.abs(gs.best_estimator_.named_steps['logisticregression'].coef_.T), columns=classes, index=feature_names
+    np.abs(gs.best_estimator_.named_steps['logisticregression'].coef_.T),
+    columns=classes,
+    index=feature_names
 )
 
 abs_coef_long = (
@@ -921,7 +923,7 @@ Meanwhile, "Sex Frequency" is the strongest predictor for the "Excellent" class.
 :::: {.callout-note}
 These feature importances reflect how the model uses the features to make predictions, but they do **not** imply statisical, causal, or real-world effects/associations.
 
-We will also see in the subsequent part of the analysis that the model does not have a very high performance and these specific feature importances may not be helpful in practical applications, but are kept in this analysis for demonstration purposes.
+We will also see in the subsequent part of the analysis that the model does not have a very high performance and these specific feature importances may not be helpful in practical applications, but are investigated in this analysis for demonstration purposes.
 ::::
 
 :::
@@ -1090,7 +1092,7 @@ Meanwhile, the f1-scores (with an unweighted average of 0.29 and a weighted aver
 
 The logistic regression model achieves a slightly higher accuracy (0.58) compared to the baseline dummy model (0.50), but we cannot conclude that it performs better solely based on this metric, due to the class imbalance in the data.
 
-Nonetheless, the logistic regression model performs around two times better in terms of the unweighted F1-score average (0.29 vs. 0.13) and the weighted F1-score average (0.56 vs. 0.34), suggesting that it offers more balanced performance across all classes.
+Nonetheless, the logistic regression model performs around two times better in terms of the unweighted f1-score average (0.29 vs. 0.13) and the weighted f1-score average (0.56 vs. 0.34), suggesting that it offers more balanced performance across all classes.
 
 :::
 
@@ -1098,6 +1100,8 @@ Nonetheless, the logistic regression model performs around two times better in t
 
 :::: {.callout-note}
 The conclusions regarding the statistical and real-world effects/associations can only be made from the statistical R analysis and **not** the Python analysis.
+
+The Python analysis demonstrates a way to obtain feature importances from a model, but it is important to keep in mind that those feature importances only indicate what the model deems to be important for its predictions. They do **not** imply statisical, causal, or real-world effects/associations.
 ::::
 
 This analysis explored how relationship habits, particularly in the context of the COVID-19 pandemic relate to perceived relationship quality across different types of couples. Through the analysis, results highlight that relationship behaviors and shared beliefs meaningfully affect how individuals evaluate their relationships. More specifically, we could conclude the following:
