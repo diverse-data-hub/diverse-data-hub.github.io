@@ -72,8 +72,6 @@ library(knitr)
 import diversedata as dd
 import pandas as pd
 import numpy as np
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
 import altair as alt
 from IPython.display import Markdown
 from sklearn.model_selection import train_test_split
@@ -83,6 +81,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from lightgbm.sklearn import LGBMClassifier
 from sklearn.model_selection import cross_validate
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
     confusion_matrix,
@@ -749,12 +748,13 @@ X_test_transformed = preprocessor.transform(X_test)
 Now that our data has been preprocessed, let's identify the best performing model using cross validation and a weighted f1 score. A weighted f1 score is the average f1 score across the classes, weighted by support. This accounts for label imbalance.
 
 ```{python cv_models_py}
-#| include: false
-lr_pipe = make_pipeline(preprocessor, LogisticRegression(random_state=123))
+#| output: false
+#| warnings : false
+lr_pipe = make_pipeline(preprocessor, LogisticRegression(random_state=123, max_iter=300))
 rf_pipe = make_pipeline(preprocessor, RandomForestClassifier(random_state=123))
 lgbm_pipe = make_pipeline(preprocessor, LGBMClassifier(random_state=123))
 
-# this function code is borrowed from DSCI 573 notes
+# this function code is adapted from DSCI 573 notes
 def mean_std_cross_val_scores(model, X_train, y_train, **kwargs):
     """
     Returns mean and std of cross validation
@@ -803,6 +803,43 @@ for (name, model) in classifiers.items():
 Markdown(pd.DataFrame(results).T.to_markdown())
 ```
 
+The logistic regression model has the best validation score and performs better than a baseline dummy model that only predicts the most common class in the training data. Let's tune it.
+
+```{python tuning_py}
+#| output: false
+#| warning: false
+
+param_grid = {
+    "logisticregression__class_weight": [None, "balanced"],
+    "logisticregression__C": [0.001, 0.01, 0.1, 1.0, 10, 100, 500, 1000],
+}
+
+gs = GridSearchCV(
+    lr_pipe, param_grid=param_grid, scoring="f1_weighted", n_jobs=-1, return_train_score=True
+)
+gs.fit(X_train, y_train)
+```
+
+```{python tuning_results_py}
+cv_results = pd.DataFrame(gs.cv_results_)[
+    [
+        "mean_train_score",
+        "std_train_score",
+        "mean_test_score",
+        "std_test_score",
+        "param_logisticregression__class_weight", 
+        "param_logisticregression__C",
+        "mean_fit_time",
+        "rank_test_score",
+    ]
+].set_index("rank_test_score").sort_index()
+
+Markdown(cv_results.to_markdown())
+```
+
+From the table above, we can see that setting `class_weight=None` and `C=500` yields the best mean validation score with little variation between the validation scores (`std_test_score = 0.024966`), indicating that the model has a stable performance and is not overly sensitive to which subset of the training data it sees.
+
+
 :::
 
 #### 5. Model Interpretation
@@ -849,15 +886,42 @@ Now, we can take a look at the feature importances via the absolute value of the
 
 ```{python feature_importances_py}
 # get absolute value coefficients into a dataframe
+feature_names = X.columns
+classes = gs.best_estimator_.named_steps['logisticregression'].classes_
 
+abs_coef_df = pd.DataFrame(
+    np.abs(gs.best_estimator_.named_steps['logisticregression'].coef_.T), columns=classes, index=feature_names
+)
+
+abs_coef_long = (
+    abs_coef_df.reset_index()
+    .melt(id_vars="index", var_name="class", value_name="absolute_value_coefficient")
+    .rename(columns={"index": "feature"})
+)
+
+# clean up labels for visualization
+abs_coef_long["class"] = abs_coef_long["class"].str.replace("_", " ").str.title()
+abs_coef_long["feature"] = abs_coef_long["feature"].str.replace("_", " ").str.title()
+
+# make visualization
+alt.Chart(abs_coef_long).mark_bar().encode(
+    x=alt.X("absolute_value_coefficient").title("| Coefficient |"),
+    y=alt.Y("feature").sort("x").title("Feature"),
+).properties(width=150, height=150).facet(
+    facet=alt.Facet("class").title("Relationship Quality").sort("descending"), columns=2
+).resolve_scale(
+    y="independent"
+)
 ```
 
 Above, we can see that the feature "Partner Had Covid" is the most influential predictor for the "Very Poor" and "Poor" relationship quality classes.  
-For the "Good" class, the most important feature is "Same Sex Couple".  
-Meanwhile, "Fights With Partner" is the strongest predictor for the "Fair" class, and "Agree Covid Approach" is the strongest predictor for the "Excellent" class.
+For the "Good" and "Fair" classes, the most important feature is "Subject Had Covid".  
+Meanwhile, "Sex Frequency" is the strongest predictor for the "Excellent" class.
 
 :::: {.callout-note}
 These feature importances reflect how the model uses the features to make predictions, but they do **not** imply statisical, causal, or real-world effects/associations.
+
+We will also see in the subsequent part of the analysis that the model does not have a very high performance and these specific feature importances may not be helpful in practical applications, but are kept in this analysis for demonstration purposes.
 ::::
 
 :::
@@ -905,49 +969,128 @@ On the other hand, a subject involved in a different-sex couple, who has sex two
 
 ## Python
 
-Let's see how well our model predicts using unseen data. First, via a confusion matrix:
+Let's see how well our model predicts on the training data and unseen data, then compare it to a baseline dummy model. First, via a confusion matrix:
 
+:::: {.panel-tabset}
+### On the train set:
 ```{python confusion_matrix_py}
-
+cm = ConfusionMatrixDisplay.from_estimator(
+    gs,
+    X_train,
+    y_train,
+    labels=["very_poor", "poor", "fair", "good", "excellent"],
+    display_labels=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+)
 ```
 
-From the above confusion matrix, we can observe that:
+### On the test set:
+```{python confusion_matrix_test_py}
+cm = ConfusionMatrixDisplay.from_estimator(
+    gs,
+    X_test,
+    y_test,
+    labels=["very_poor", "poor", "fair", "good", "excellent"],
+    display_labels=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+)
+```
+
+
+### DummyClassifier on the test set:
+```{python confusion_matrix_dummy_py}
+dc = DummyClassifier()
+dc.fit(X_train, y_train)
+
+cm = ConfusionMatrixDisplay.from_estimator(
+    dc,
+    X_test,
+    y_test,
+    labels=["very_poor", "poor", "fair", "good", "excellent"],
+    display_labels=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+)
+```
+
+::::
+
+From the above confusion matrices, we can observe that the findings from the training set and testing set are similar:
 
 - The "Excellent" category has the largest number of correct predictions.
 - Predictions for the true "Very Poor", "Poor", and "Fair" qualities are scattered across multiple categories.
-- Predictions for the true "Good" quality are concentrated at "Excellent".
-- The model tends to predict higher relationship quality. This may be partly due to the small number of samples for the lower relationship quality classes, despite using balanced class weights.
+- Predictions for the true "Good" quality are concentrated at "Excellent" and "Good".
+- The model tends to predict higher relationship quality. This may be partly due to the small number of samples for the lower relationship quality classes.
+
+Additionally, as expected, the baseline dummy model only predicts the "Excellent" class.
+
 
 Let's take a look at some metrics:
 
-```{python metrics_py}
+:::: {.panel-tabset}
+### On the train set:
+```{python train_metrics_py}
+#| warning: false
 
+y_pred_train = gs.predict(X_train)
+print(
+    classification_report(
+        y_train,
+        y_pred_train,
+        labels=["very_poor", "poor", "fair", "good", "excellent"],
+        target_names=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+    )
+)
 ```
 
-From the above metrics, we can see that accuracy is low (0.40), but accuracy can be misleading with imbalanced data.  
-However, the f1-scores (with an unweighted average of 0.22 and a weighted average of 0.44) still indicate that the model is not performing well, especially for the lower relationship quality classes.
-
-To further evaluate our model, let's compare it to a baseline model that only predicts the most common class in the training data.
-
-```{python baseline_model_fit_py, include = FALSE}
-
-```
-
-```{python baseline_model_confusion_matrix_py}
-
-```
-
-```{python baseline_model_metrics_py, warning = FALSE}
-
-```
-
-:::: {.callout-note}
+::::: {.callout-note}
 Precision is set to 0 for labels with no predicted samples.
+:::::
+
+### On the test set:
+```{python test_metrics_py}
+#| warning: false
+
+y_pred = gs.predict(X_test)
+print(
+    classification_report(
+        y_test,
+        y_pred,
+        labels=["very_poor", "poor", "fair", "good", "excellent"],
+        target_names=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+    )
+)
+```
+
+::::: {.callout-note}
+Precision is set to 0 for labels with no predicted samples.
+:::::
+
+### DummyClassifier on the test set:
+```{python dummy_metrics_py}
+#| warning: false
+
+y_pred_dummy = dc.predict(X_test)
+print(
+    classification_report(
+        y_test,
+        y_pred_dummy,
+        labels=["very_poor", "poor", "fair", "good", "excellent"],
+        target_names=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+    )
+)
+```
+
+::::: {.callout-note}
+Precision is set to 0 for labels with no predicted samples.
+:::::
+
 ::::
 
-While the baseline model achieves a higher accuracy (0.50) compared to the logistic regression model (0.40), we cannot conclude that it performs better solely based on this metric, due to the class imbalance in the data.
+From the above metrics, we can see that the logistic regression model's test scores are similar to but under its train scores. This indicates that the model is not overfitting to the training data.
 
-In fact, the logistic regression model performs slightly better in terms of the unweighted F1-score average (0.22 vs. 0.13) and the weighted F1-score average (0.44 vs. 0.34), suggesting that it offers more balanced performance across all classes.
+We can also see that the test accuracy is low (0.58), but accuracy can be misleading with imbalanced data.  
+Meanwhile, the f1-scores (with an unweighted average of 0.29 and a weighted average of 0.56) still indicate that the model is not performing particularly well, especially for the lower relationship quality classes.
+
+The logistic regression model achieves a slightly higher accuracy (0.58) compared to the baseline dummy model (0.50), but we cannot conclude that it performs better solely based on this metric, due to the class imbalance in the data.
+
+Nonetheless, the logistic regression model performs around two times better in terms of the unweighted F1-score average (0.29 vs. 0.13) and the weighted F1-score average (0.56 vs. 0.34), suggesting that it offers more balanced performance across all classes.
 
 :::
 
