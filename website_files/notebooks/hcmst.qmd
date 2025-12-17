@@ -1,5 +1,5 @@
 ```{r all_flags}
-#| echo: true
+#| echo: false
 #| warning: false
 #| message: false
 #| collapse: true
@@ -77,8 +77,12 @@ import statsmodels.formula.api as smf
 import altair as alt
 from IPython.display import Markdown
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression 
 from sklearn.preprocessing import OrdinalEncoder
+from sklearn.pipeline import make_pipeline
+from sklearn.linear_model import LogisticRegression 
+from sklearn.ensemble import RandomForestClassifier
+from lightgbm.sklearn import LGBMClassifier
+from sklearn.model_selection import cross_validate
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
     confusion_matrix,
@@ -699,7 +703,9 @@ This limitation is common in multivariable modeling and reflects constraints in 
 
 ## Python
 
-In this Python analysis, we will be fitting a **Multi-Class Logistic Regression Model**, finding its feature importances, and assessing how well it predicts on unseen data.
+In this Python analysis, we fit a **multi-class logistic regression model**, a **random forest classifier**, and a **LightGBM model**. We then identify the best-performing model, tune it, examine its feature importances, and assess how well it predicts unseen data.
+
+These models were selected because they can predict more than two classes while also providing interpretable feature importance measures.
 
 First, let's separate our predictors from the target.
 
@@ -740,16 +746,63 @@ X_train_transformed = preprocessor.fit_transform(X_train)
 X_test_transformed = preprocessor.transform(X_test)
 ```
 
-Now that our data has been preprocessed, let's fit our model!
+Now that our data has been preprocessed, let's identify the best performing model using cross validation and a weighted f1 score. A weighted f1 score is the average f1 score across the classes, weighted by support. This accounts for label imbalance.
 
-Since `scikit-learn` doesn't support ordinal regression at the time of writing, we will use a multinomial logistic regression model via `LogisticRegression()` which will automatically be multinomial if there is more than 2 target classes. We will set `class_weight='balanced'` to try to account for the class imbalance in the target variable and again set the random state for reproducibility.
+```{python cv_models_py}
+#| include: false
+lr_pipe = make_pipeline(preprocessor, LogisticRegression(random_state=123))
+rf_pipe = make_pipeline(preprocessor, RandomForestClassifier(random_state=123))
+lgbm_pipe = make_pipeline(preprocessor, LGBMClassifier(random_state=123))
 
-```{python fit_model_py, include = FALSE}
-logistic_regression_model = LogisticRegression(
-    class_weight="balanced", random_state=123, max_iter=250, n_jobs=-1
-)
-logistic_regression_model.fit(X_train_transformed, y_train)
+# this function code is borrowed from DSCI 573 notes
+def mean_std_cross_val_scores(model, X_train, y_train, **kwargs):
+    """
+    Returns mean and std of cross validation
+
+    Parameters
+    ----------
+    model :
+        scikit-learn model
+    X_train : numpy array or pandas DataFrame
+        X in the training data
+    y_train :
+        y in the training data
+
+    Returns
+    ----------
+        pandas Series with mean scores from cross_validation
+    """
+
+    scores = cross_validate(model, X_train, y_train, **kwargs)
+
+    mean_scores = pd.DataFrame(scores).mean()
+    std_scores = pd.DataFrame(scores).std()
+    out_col = []
+
+    for i in range(len(mean_scores)):
+        out_col.append((f"%0.3f (+/- %0.3f)" % (mean_scores.iloc[i], std_scores.iloc[i])))
+
+    return pd.Series(data=out_col, index=mean_scores.index)
+
+classifiers = {
+    "Dummy": DummyClassifier(),
+    "Logistic Regression": lr_pipe,
+    "Random Forest": rf_pipe,
+    "LightGBM": lgbm_pipe,
+}
+
+results = {}
+
+for (name, model) in classifiers.items():
+    results[name] = mean_std_cross_val_scores(
+        model, X_train, y_train, return_train_score=True, scoring="f1_weighted"
+    )
 ```
+
+```{python cv_models_results_py}
+Markdown(pd.DataFrame(results).T.to_markdown())
+```
+
 :::
 
 #### 5. Model Interpretation
@@ -796,32 +849,7 @@ Now, we can take a look at the feature importances via the absolute value of the
 
 ```{python feature_importances_py}
 # get absolute value coefficients into a dataframe
-feature_names = X.columns
-classes = logistic_regression_model.classes_
 
-abs_coef_df = pd.DataFrame(
-    np.abs(logistic_regression_model.coef_.T), columns=classes, index=feature_names
-)
-
-abs_coef_long = (
-    abs_coef_df.reset_index()
-    .melt(id_vars="index", var_name="class", value_name="absolute_value_coefficient")
-    .rename(columns={"index": "feature"})
-)
-
-# clean up labels for visualization
-abs_coef_long["class"] = abs_coef_long["class"].str.replace("_", " ").str.title()
-abs_coef_long["feature"] = abs_coef_long["feature"].str.replace("_", " ").str.title()
-
-# make visualization
-alt.Chart(abs_coef_long).mark_bar().encode(
-    x=alt.X("absolute_value_coefficient").title("| Coefficient |"),
-    y=alt.Y("feature").sort("x").title("Feature"),
-).properties(width=150, height=150).facet(
-    facet=alt.Facet("class").title("Relationship Quality").sort("descending"), columns=2
-).resolve_scale(
-    y="independent"
-)
 ```
 
 Above, we can see that the feature "Partner Had Covid" is the most influential predictor for the "Very Poor" and "Poor" relationship quality classes.  
@@ -880,13 +908,7 @@ On the other hand, a subject involved in a different-sex couple, who has sex two
 Let's see how well our model predicts using unseen data. First, via a confusion matrix:
 
 ```{python confusion_matrix_py}
-cm = ConfusionMatrixDisplay.from_estimator(
-    logistic_regression_model,
-    X_test_transformed,
-    y_test,
-    labels=["very_poor", "poor", "fair", "good", "excellent"],
-    display_labels=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
-)
+
 ```
 
 From the above confusion matrix, we can observe that:
@@ -899,15 +921,7 @@ From the above confusion matrix, we can observe that:
 Let's take a look at some metrics:
 
 ```{python metrics_py}
-y_pred = logistic_regression_model.predict(X_test_transformed)
-print(
-    classification_report(
-        y_test,
-        y_pred,
-        labels=["very_poor", "poor", "fair", "good", "excellent"],
-        target_names=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
-    )
-)
+
 ```
 
 From the above metrics, we can see that accuracy is low (0.40), but accuracy can be misleading with imbalanced data.  
@@ -916,30 +930,15 @@ However, the f1-scores (with an unweighted average of 0.22 and a weighted averag
 To further evaluate our model, let's compare it to a baseline model that only predicts the most common class in the training data.
 
 ```{python baseline_model_fit_py, include = FALSE}
-baseline_model = DummyClassifier()
-baseline_model.fit(X_train_transformed, y_train)
-baseline_y_pred = baseline_model.predict(X_test_transformed)
+
 ```
 
 ```{python baseline_model_confusion_matrix_py}
-cm = ConfusionMatrixDisplay.from_estimator(
-    baseline_model,
-    X_test_transformed,
-    y_test,
-    labels=["very_poor", "poor", "fair", "good", "excellent"],
-    display_labels=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
-)
+
 ```
 
 ```{python baseline_model_metrics_py, warning = FALSE}
-print(
-    classification_report(
-        y_test,
-        baseline_y_pred,
-        labels=["very_poor", "poor", "fair", "good", "excellent"],
-        target_names=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
-    )
-)
+
 ```
 
 :::: {.callout-note}
