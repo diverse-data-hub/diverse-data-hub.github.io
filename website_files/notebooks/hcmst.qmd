@@ -800,7 +800,9 @@ classifiers = {
     "Dummy": DummyClassifier(),
     "Logistic Regression": lr_pipe,
     "Random Forest": rf_pipe,
+    "Random Forest with Non-Default Settings": rf_pipe_b, 
     "LightGBM": lgbm_pipe,
+    "LightGBM with Non-Default Settings": lgbm_pipe_b,
 }
 
 results = {}
