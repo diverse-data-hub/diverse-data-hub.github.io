@@ -155,9 +155,9 @@ hcmst.shape[0]
 
 #### 2. Variable Encoding
 
-We can note that our categorical response follows a specific order. For this reason, we require a model that suits ordinal responses. Hence, we will be using an Ordinal Logistic regression model framework.
+We can note that our categorical response follows a specific order. For this reason, we require a model that suits ordinal responses. 
 
-In order to do so, we need to make sure that our response variable is encoded as an ordered factor. We will also take this opportunity to encode our explanatory variables as factors (and ordered factors) as needed.
+We should also encode our explanatory variables as factors (and ordered factors) as needed.
 
 First, we can encode our nominal categorical explanatory variables:
 
@@ -329,6 +329,7 @@ Finally, we can encode our target variable:
 
 ::: {.panel-tabset}
 ## R
+In this R analysis, will be using an Ordinal Logistic regression model framework. Hence, we need to make sure that our response variable is encoded as an ordered factor. 
 ```{r recode_d}
 hcmst <- hcmst |> 
   mutate(relationship_quality = as.ordered(relationship_quality)) |> 
@@ -339,6 +340,7 @@ levels(hcmst$relationship_quality)
 ```
 
 ## Python
+In this Python analysis, it is not necessary to encode the target variable as ordinal, since the models that we will consider do not natively support ordinal responses; the encoding is shown for demonstration purposes only.
 ```{python recode_d_py}
 hcmst["relationship_quality"] = pd.Categorical(
     hcmst["relationship_quality"],
@@ -743,12 +745,26 @@ preprocessor = OrdinalEncoder(categories=level_order)
 
 Now that our data has been preprocessed, let's identify the best performing model using cross validation and a weighted f1 score. A weighted f1 score is the average f1 score across the classes, weighted by support. This accounts for label imbalance.
 
+We will also consider a random forest model and a LightGBM model with non-default hyperparameters chosen to reduce overfitting.
+
 ```{python cv_models_py}
 #| output: false
 #| warnings : false
 lr_pipe = make_pipeline(preprocessor, LogisticRegression(random_state=123, max_iter=300))
 rf_pipe = make_pipeline(preprocessor, RandomForestClassifier(random_state=123))
+rf_pipe_b = make_pipeline(
+    preprocessor,
+    RandomForestClassifier(
+        random_state=123, class_weight="balanced", max_depth=13, min_samples_leaf=5
+    ),
+)
 lgbm_pipe = make_pipeline(preprocessor, LGBMClassifier(random_state=123))
+lgbm_pipe_b = make_pipeline(
+    preprocessor,
+    LGBMClassifier(
+        random_state=123, class_weight="balanced", max_depth=8, learning_rate=0.05, reg_lambda=0.1,
+    ),
+)
 
 # this function code is adapted from DSCI 573 notes
 def mean_std_cross_val_scores(model, X_train, y_train, **kwargs):
@@ -837,8 +853,14 @@ cv_results = pd.DataFrame(gs.cv_results_)[
 Markdown(cv_results.to_markdown())
 ```
 
-From the table above, we can see that setting `class_weight=None` and `C=500` yields the best mean validation score. There is also little variation between the validation scores (`std_test_score = 0.024966`), indicating that the model has a stable performance and is not overly sensitive to the subset of the training data it sees.
+From the table above, we can see that setting `class_weight=None` and `C=100`, `500`, or `1000` yields the best mean validation score. There is also little variation between the validation scores across folds (`std_test_score = 0.024966`), indicating that the model has a stable performance and is not overly sensitive to the subset of the training data it sees. Since validation performance is the same across these values of C, we will select the more regularized model (`C=100`) to prioritize generalization, reduce the risk of overfitting, and improve coefficient stability.
 
+```{python select_model_py}
+best_lr_pipe = make_pipeline(
+  preprocessor, LogisticRegression(class_weight=None, C=100, random_state=123, max_iter=300)
+)
+best_lr_pipe.fit(X_train, y_train)
+```
 
 :::
 
@@ -887,10 +909,10 @@ Now, we can take a look at the feature importances via the absolute value of the
 ```{python feature_importances_py}
 # get absolute value coefficients into a dataframe
 feature_names = X.columns
-classes = gs.best_estimator_.named_steps['logisticregression'].classes_
+classes = best_lr_pipe.named_steps['logisticregression'].classes_
 
 abs_coef_df = pd.DataFrame(
-    np.abs(gs.best_estimator_.named_steps['logisticregression'].coef_.T),
+    np.abs(best_lr_pipe.named_steps['logisticregression'].coef_.T),
     columns=classes,
     index=feature_names
 )
@@ -977,7 +999,7 @@ Let's see how well our model predicts on the training data and unseen data, then
 ### On the train set:
 ```{python confusion_matrix_py}
 cm = ConfusionMatrixDisplay.from_estimator(
-    gs,
+    best_lr_pipe,
     X_train,
     y_train,
     labels=["very_poor", "poor", "fair", "good", "excellent"],
@@ -988,7 +1010,7 @@ cm = ConfusionMatrixDisplay.from_estimator(
 ### On the test set:
 ```{python confusion_matrix_test_py}
 cm = ConfusionMatrixDisplay.from_estimator(
-    gs,
+    best_lr_pipe,
     X_test,
     y_test,
     labels=["very_poor", "poor", "fair", "good", "excellent"],
@@ -1019,6 +1041,7 @@ From the above confusion matrices, we can observe that the findings from the tra
 - Predictions for the true "Very Poor", "Poor", and "Fair" qualities are scattered across multiple categories.
 - Predictions for the true "Good" quality are concentrated at "Excellent" and "Good".
 - The model tends to predict higher relationship quality. This may be partly due to the small number of samples for the lower relationship quality classes.
+- The model appears to have difficulty distinguishing between "Good" and "Excellent" classes.
 
 Additionally, as expected, the baseline dummy model only predicts the "Excellent" class.
 
@@ -1030,7 +1053,7 @@ Let's take a look at some metrics:
 ```{python train_metrics_py}
 #| warning: false
 
-y_pred_train = gs.predict(X_train)
+y_pred_train = best_lr_pipe.predict(X_train)
 print(
     classification_report(
         y_train,
@@ -1049,7 +1072,7 @@ Precision is set to 0 for labels with no predicted samples.
 ```{python test_metrics_py}
 #| warning: false
 
-y_pred = gs.predict(X_test)
+y_pred = best_lr_pipe.predict(X_test)
 print(
     classification_report(
         y_test,
@@ -1084,8 +1107,7 @@ Precision is set to 0 for labels with no predicted samples.
 :::::
 
 ::::
-
-From the above metrics, we can see that the logistic regression model's test scores are similar to but under its train scores. This indicates that the model is not overfitting to the training data.
+From the above metrics, we can see that the logistic regression model's test scores are slightly lower than its train scores. This indicates that the model is not overfitting to the training data.
 
 We can also see that the test accuracy is low (0.58), but accuracy can be misleading with imbalanced data.  
 Meanwhile, the f1-scores (with an unweighted average of 0.29 and a weighted average of 0.56) still indicate that the model is not performing particularly well, especially for the lower relationship quality classes.
