@@ -40,6 +40,7 @@ dependencies:
 
 # for the How Couples Meet and Stay Together analysis (additional to what's listed above)
   - scikit-learn=1.7
+  - lightgbm=4.6
 
 # for the BC Indigenous Business Listings analysis (additional to what's listed above)
   - plotly=6.2

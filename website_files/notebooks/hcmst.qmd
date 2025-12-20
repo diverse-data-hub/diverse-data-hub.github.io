@@ -1,5 +1,5 @@
 ```{r all_flags}
-#| echo: true
+#| echo: false
 #| warning: false
 #| message: false
 #| collapse: true
@@ -54,6 +54,8 @@ By examining survey data, we aim to:
 
 First, we need to load the libraries that will be used through the exercise, including the `diversedata` package.
 
+::: {.panel-tabset}
+## R
 ```{r library_load, results = "hide", warning = FALSE, message = FALSE}
 library(diversedata)
 library(tidyverse) 
@@ -65,10 +67,36 @@ library(brant)
 library(knitr)
 ```
 
+## Python
+```{python library_load_py, results = "hide", warning = FALSE, message = FALSE}
+import diversedata as dd
+import pandas as pd
+import numpy as np
+import altair as alt
+from IPython.display import Markdown
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.pipeline import make_pipeline
+from sklearn.linear_model import LogisticRegression 
+from sklearn.ensemble import RandomForestClassifier
+from lightgbm.sklearn import LGBMClassifier
+from sklearn.model_selection import cross_validate
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    confusion_matrix,
+    classification_report
+)
+from sklearn.dummy import DummyClassifier
+```
+:::
+
 #### 1. Data Cleaning & Processing
 
 First, we can load our data set (`hcmst` from `diversedata` package), select our specific variables of intereset and remove NAs from our data set.
 
+::: {.panel-tabset}
+## R
 ```{r data_load, warning = FALSE, message = FALSE}
 # Reading Data
 hcmst <- hcmst
@@ -96,14 +124,45 @@ hcmst <- hcmst |>
 nrow(hcmst)
 ```
 
+## Python
+```{python data_load_py, warning = FALSE, message = FALSE}
+hcmst = dd.load_data("hcmst")
+
+# Review total rows
+hcmst.shape[0]
+
+# Select features of interest and removing NA
+hcmst = hcmst[
+    [
+        "same_sex_couple",
+        "sex_frequency",
+        "flirts_with_partner",
+        "fights_with_partner",
+        "inc_change_during_pandemic",
+        "subject_had_covid",
+        "partner_had_covid",
+        "subject_vaccinated",
+        "partner_vaccinated",
+        "agree_covid_approach",
+        "relationship_quality",
+    ]
+].dropna()
+
+# Remaining row count.
+hcmst.shape[0]
+```
+:::
+
 #### 2. Variable Encoding
 
-We can note that our categorical response follows a specific order. For this reason, we require a model that suits ordinal responses. Hence, we will be using an Ordinal Logistic regression model framework.
+We can note that our categorical response follows a specific order. For this reason, we require a model that suits ordinal responses. 
 
-In order to do so, we need to make sure that our response variable is encoded as an ordered factor. We will also take this opportunity to encode our explanatory variables as factors (and ordered factors) as needed.
+We should also encode our explanatory variables as factors (and ordered factors) as needed.
 
 First, we can encode our nominal categorical explanatory variables:
 
+::: {.panel-tabset}
+## R
 ```{r recode_a, warning = FALSE, message = FALSE}
 hcmst <- hcmst |> 
   mutate(same_sex_couple = as_factor(same_sex_couple)|> 
@@ -112,8 +171,20 @@ hcmst <- hcmst |>
 levels(hcmst$same_sex_couple)
 ```
 
+## Python
+```{python recode_a_py, warning = FALSE, message = FALSE}
+hcmst['same_sex_couple'] = pd.Categorical(
+    hcmst['same_sex_couple'],
+    categories=['no', 'yes'],
+)
+print(f'same_sex_couple levels: {hcmst["same_sex_couple"].cat.categories.tolist()}')
+```
+:::
+
 Then, we can encode all our ordinal, categorical, explanatory, behavioral variables:
 
+::: {.panel-tabset}
+## R
 ```{r recode_b}
 hcmst <- hcmst |> 
   mutate(sex_frequency = as.ordered(sex_frequency)) |> 
@@ -139,11 +210,42 @@ hcmst <- hcmst |>
       c("0_times", "1_time", "2_times", "3_times", "4_times", 
         "5_times", "6_times", "7_or_more_times")))
 
-levels(hcmst$sex_frequency)
+levels(hcmst$fights_with_partner)
 ```
+
+## Python
+```{python recode_b_py}
+behavioral_variables_levels = {
+    "sex_frequency" : [
+        "once_a_month_or_less", "2_to_3_times_a_month",
+        "once_or_twice_a_week", "3_to_6_times_a_week",
+        "once_or_more_a_day"
+    ],
+    "flirts_with_partner" : [
+        "never", "less_than_once_a_month", 
+        "1_to_3_times_a_month", "once_a_week", 
+        "a_few_times_a_week", "every_day"
+    ],
+    "fights_with_partner" : [
+        "0_times", "1_time", "2_times", "3_times", "4_times", 
+        "5_times", "6_times", "7_or_more_times"
+    ],
+}
+
+for variable, levels in behavioral_variables_levels.items():
+    hcmst[variable] = pd.Categorical(
+        hcmst[variable],
+        categories=levels,
+        ordered=True
+    )
+    print(f'{variable} levels: {", ".join(hcmst[variable].cat.categories)} \n')
+```
+:::
 
 Then, we can encode all our ordinal, categorical, explanatory, COVID-19-related variables:
 
+::: {.panel-tabset}
+## R
 ```{r recode_c}
 hcmst <- hcmst |> 
   mutate(inc_change_during_pandemic = as.ordered(inc_change_during_pandemic)) |> 
@@ -187,21 +289,76 @@ hcmst <- hcmst |>
 levels(hcmst$agree_covid_approach)
 ```
 
+## Python
+```{python recode_c_py}
+covid_19_variables_levels = {
+    "inc_change_during_pandemic": [
+        "much_worse", "worse", "no_change", "better", "much_better"
+    ],
+    "subject_had_covid": [
+        "no", "yes"
+    ],
+    "partner_had_covid": [
+        "no", "yes"
+    ],
+    "subject_vaccinated": [
+        "not_vaccinated", "partially_vaccinated", 
+        "fully_vaccinated_no_booster", "fully_vaccinated_and_booster"
+    ],
+    "partner_vaccinated": [
+        "not_vaccinated", "partially_vaccinated", 
+        "fully_vaccinated_no_booster", "fully_vaccinated_and_booster"
+    ],
+    "agree_covid_approach": [
+        "completely_disagree", "mostly_disagree", 
+        "mostly_agree", "completely_agree"
+    ],
+}
+
+for variable, levels in covid_19_variables_levels.items():
+    hcmst[variable] = pd.Categorical(
+        hcmst[variable],
+        categories=levels,
+        ordered=True
+    )
+    print(f'{variable} levels: {", ".join(hcmst[variable].cat.categories)} \n')
+```
+:::
+
 Finally, we can encode our target variable:
 
+::: {.panel-tabset}
+## R
+In this R analysis, will be using an Ordinal Logistic regression model framework. Hence, we need to make sure that our response variable is encoded as an ordered factor. 
 ```{r recode_d}
 hcmst <- hcmst |> 
   mutate(relationship_quality = as.ordered(relationship_quality)) |> 
   mutate(relationship_quality = fct_relevel(relationship_quality, 
       c("very_poor", "poor", "fair", "good", "excellent")))
 
-levels(hcmst$sex_frequency)
+levels(hcmst$relationship_quality)
 ```
+
+## Python
+In this Python analysis, it is not necessary to encode the target variable as ordinal, since the models that we will consider do not natively support ordinal responses; the encoding is shown for demonstration purposes only.
+```{python recode_d_py}
+hcmst["relationship_quality"] = pd.Categorical(
+    hcmst["relationship_quality"],
+    categories=[
+        "very_poor", "poor", "fair", "good", "excellent"
+    ],
+    ordered=True,
+)
+print(f'relationship_quality levels: {hcmst["relationship_quality"].cat.categories.tolist()}')
+```
+:::
 
 #### 3. Exploratory Data Analysis
 
 We will visualize histograms charts for our different categorical variables. But first, we will see how different groups were sampled in the survey and how different these samples are for same sex couples.
 
+::: {.panel-tabset}
+## R
 ```{r simple_bar, fig.height=4, fig.width=8}
 # We'll use a color blind friendly pallete:
 cbPalette <- c("#0072B2", "#56B4E9", "#999999", "#E69F00", "#009E73", "#F0E442", "#D55E00", "#CC79A7")
@@ -215,16 +372,28 @@ ggplot(hcmst, aes(x = same_sex_couple, fill = same_sex_couple)) +
     fill = "Same Sex Couple"
   ) +
   theme_minimal() +
+  theme(legend.position = "none") +
   scale_fill_manual(values = cbPalette) +
   scale_y_continuous(breaks = seq(0, 1200, by = 100))
 ```
+
+## Python
+```{python simple_bar_py}
+alt.Chart(hcmst).mark_bar().encode(
+    x=alt.X("same_sex_couple").title("Same Sex Couple"),
+    y=alt.Y("count()").title("Count"),
+    color=alt.Color("same_sex_couple", legend=None),
+).properties(title="Couple Type Distribution", width=350, height=350)
+```
+:::
 
 It can be noted that the sample of `same_sex_couples` is smaller that that of different-sex couples. In the original study, same sex couples were oversampled. For more information on how the survey data was collected, refer to the [original data set](https://data.stanford.edu/hcmst2017).
 
 To explore our other variables, we will create a function that will be used for visualization. Since we know that the samples for different types of couples are different, we will use relative frequency in our visualizations.
 
+::: {.panel-tabset}
+## R
 ```{r hist_function}
-
 histogram_plot <- function(data, y_var, facet, plot_title = "Relative Frequency by Category", label_map) {
   data_long <- data |> 
     dplyr::select(all_of(c(y_var, facet))) |> 
@@ -363,6 +532,111 @@ plot_grid(
   ncol = 1, align = "v", axis = "lr")
 ```
 
+## Python
+```{python hist_function_py}
+def histogram_plot(data, y_var, facet, label_map, plot_title="Relative Frequency by Category"):
+    data_cleaned = data.groupby(by=[y_var, facet], observed=False).size().reset_index(name='count')
+    data_cleaned['prop'] = data_cleaned.groupby(facet, observed=False)['count'].transform(lambda x: x / x.sum())
+    data_cleaned[y_var] = data_cleaned[y_var].cat.rename_categories(label_map)
+
+    plot = alt.Chart(data_cleaned).mark_bar(size=10).encode(
+        x=alt.X('prop').title('Relative Frequency'),
+        y=alt.Y(y_var).title(None).scale(alt.Scale(reverse=True)),
+        yOffset='same_sex_couple',
+        color=alt.Color('same_sex_couple').title("Same Sex Couple"),
+    ).properties(title=plot_title, width=400, height=alt.Step(10))
+    
+    return plot
+```
+
+```{python histograms_py}
+sex_freq_labels = {
+  "once_a_month_or_less": "Once a Month or Less",
+  "2_to_3_times_a_month": "Two or Three Times a Month",
+  "once_or_twice_a_week": "Once or Twice a Week",
+  "3_to_6_times_a_week": "Three to Six Times a Week",
+  "once_or_more_a_day": "Once or More a Day"
+}
+hist_sex_freq = histogram_plot(hcmst, 'sex_frequency', 'same_sex_couple', sex_freq_labels, 'Sex Frequency')
+
+flirt_freq_labels = {
+  "never": "Never",
+  "less_than_once_a_month": "Less Than Once a Month",
+  "1_to_3_times_a_month": "One to Three Times a Month",
+  "once_a_week": "Once a Week",
+  "a_few_times_a_week": "A Few Times a Week",
+  "every_day": "Every Day" 
+}
+hist_flirt_freq = histogram_plot(hcmst, "flirts_with_partner", "same_sex_couple", flirt_freq_labels, "Flirting Frequency")
+
+fight_freq_labels = {
+  "0_times": "Zero Times",
+  "1_time": "One Time",
+  "2_times": "Two Times",
+  "3_times": "Three Times",
+  "4_times": "Four Times",
+  "5_times": "Five Times",
+  "6_times": "Six Times",
+  "7_or_more_times": "Seven or More Times"
+}
+hist_fight_freq = histogram_plot(hcmst, "fights_with_partner", "same_sex_couple", fight_freq_labels, "Fighting Frequency")
+
+inc_labels = {
+  "much_worse": "Much Worse",
+  "worse": "Worse",
+  "no_change": "No Change",
+  "better": "Better",
+  "much_better": "Much Better"
+}
+hist_inc_change_freq = histogram_plot(hcmst, "inc_change_during_pandemic", "same_sex_couple", inc_labels, "Income Change During Pandemic Frequency")
+
+yes_no_label = {
+    "no": "No", "yes": "Yes"
+}
+hist_sub_covid_freq = histogram_plot(hcmst, "subject_had_covid", "same_sex_couple", yes_no_label, "Subject had COVID-19 Frequency")
+hist_par_covid_freq = histogram_plot(hcmst, "partner_had_covid", "same_sex_couple", yes_no_label, "Partner had COVID-19 Frequency")
+
+vax_label ={
+  "not_vaccinated": "Not Vaccinated",
+  "partially_vaccinated": "Partially Vaccinated",
+  "fully_vaccinated_no_booster": "Fully Vaccinated No Booster",
+  "fully_vaccinated_and_booster": "Fully Vaccinated and Booster"
+}
+hist_sub_vax_freq = histogram_plot(hcmst, "subject_vaccinated", "same_sex_couple", vax_label, "Subject Vaccination Status Frequency")
+hist_par_vax_freq = histogram_plot(hcmst, "partner_vaccinated", "same_sex_couple", vax_label, "Partner Vaccination Status Frequency")
+
+approach_label = {
+  "completely_disagree": "Completely Disagree",
+  "mostly_disagree": "Mostly Disagree",
+  "mostly_agree": "Mostly Agree",
+  "completely_agree": "Completely Agree"
+}
+hist_cov_approach_freq = histogram_plot(hcmst, "agree_covid_approach", "same_sex_couple", approach_label, "Agreement on Pandemic Approach Frequency")
+
+quality_label = {
+  "very_poor": "Very Poor",
+  "poor": "Poor",
+  "fair": "Fair",
+  "good": "Good",
+  "excellent": "Excellent"
+}
+hist_quality_freq = histogram_plot(hcmst, "relationship_quality", "same_sex_couple", quality_label, "Relationship Quality Frequency")
+
+alt.vconcat(
+  hist_sex_freq,
+  hist_flirt_freq,
+  hist_fight_freq,
+  hist_inc_change_freq,
+  hist_sub_covid_freq,
+  hist_par_covid_freq,
+  hist_sub_vax_freq,
+  hist_par_vax_freq,
+  hist_cov_approach_freq,
+  hist_quality_freq
+).resolve_legend(color='independent')
+```
+:::
+
 Same-sex and different-sex couples show similar patters in how frequently they engage in sexual activity. However, the overall sample is skewed towards reporting low sex frequency. We can also visualize how often couples flirt with or fight with their partners. The distribution of responses shows a tendency toward lower frequencies of both flirting and fighting.
 
 In the context of the COVID-19 pandemic, it can be noted that most subjects had no change in income during the pandemic, did not have COVID, were fully vaccinated including the booster shot, and completely agreed with their partners in terms of their approach to the pandemic.
@@ -374,6 +648,9 @@ ggsave("../img/hcmst.png", plot = hist_flirt_freq, width = 6, height = 4, dpi = 
 ```
 
 #### 4. Model Fitting and Assumptions
+
+::: {.panel-tabset}
+## R
 
 We will be assuming and fitting a proportional odds model, which assumes that the log-odds of being in a higher category of the response variable follows a linear relationship with the explanatory variables.
 
@@ -425,7 +702,174 @@ One potential solution is to bin levels of categorical variables that have low c
 
 This limitation is common in multivariable modeling and reflects constraints in data collection and the inherent sparsity of data. As such, the results from diagnostics like the Brant test should be interpreted with caution.
 
+## Python
+
+In this Python analysis, we fit a **multi-class logistic regression model**, a **random forest classifier**, and a **LightGBM model**. We then identify the best-performing model, tune it, examine its feature importances, and assess how well it predicts unseen data.
+
+These models were selected because they can predict more than two classes while also providing interpretable feature importance measures.
+
+First, let's separate our predictors from the target.
+
+Then, split our data into train and test sets, with the random state specified to make our work reproducible.
+
+```{python data_split_py}
+X = hcmst.drop(columns=['relationship_quality'])
+y = hcmst['relationship_quality']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=123)
+```
+
+Since all of the predictors are ordinal, we'll use `OrdinalEncoder` to encode them. Since there are no missing values, imputation is not needed. This preprocessing is necessary since most `scikit-learn` algorithms require numerical inputs.
+
+:::: {.callout-note}
+`OrdinalEncoder` will encode the levels of an ordinal column(s) to be equally spaced apart. This may not be desireable for some analyses.
+::::
+
+```{python preprocess_py}
+# make sure the specified order for the variables are maintained
+level_order = [
+    hcmst["same_sex_couple"].cat.categories.tolist(),
+    hcmst["sex_frequency"].cat.categories.tolist(),
+    hcmst["flirts_with_partner"].cat.categories.tolist(),
+    hcmst["fights_with_partner"].cat.categories.tolist(),
+    hcmst["inc_change_during_pandemic"].cat.categories.tolist(),
+    hcmst["subject_had_covid"].cat.categories.tolist(),
+    hcmst["partner_had_covid"].cat.categories.tolist(),
+    hcmst["subject_vaccinated"].cat.categories.tolist(),
+    hcmst["partner_vaccinated"].cat.categories.tolist(),
+    hcmst["agree_covid_approach"].cat.categories.tolist(),
+]
+
+preprocessor = OrdinalEncoder(categories=level_order)
+```
+
+Now that our data has been preprocessed, let's identify the best performing model using cross validation and a weighted f1 score. A weighted f1 score is the average f1 score across the classes, weighted by support. This accounts for label imbalance.
+
+We will also consider a random forest model and a LightGBM model with non-default hyperparameters chosen to reduce overfitting.
+
+```{python cv_models_py}
+#| output: false
+#| warnings : false
+lr_pipe = make_pipeline(preprocessor, LogisticRegression(random_state=123, max_iter=300))
+rf_pipe = make_pipeline(preprocessor, RandomForestClassifier(random_state=123))
+rf_pipe_b = make_pipeline(
+    preprocessor,
+    RandomForestClassifier(
+        random_state=123, class_weight="balanced", max_depth=13, min_samples_leaf=5
+    ),
+)
+lgbm_pipe = make_pipeline(preprocessor, LGBMClassifier(random_state=123))
+lgbm_pipe_b = make_pipeline(
+    preprocessor,
+    LGBMClassifier(
+        random_state=123, class_weight="balanced", max_depth=8, learning_rate=0.05, reg_lambda=0.1,
+    ),
+)
+
+# this function code is adapted from DSCI 573 notes
+def mean_std_cross_val_scores(model, X_train, y_train, **kwargs):
+    """
+    Returns mean and std of cross validation
+
+    Parameters
+    ----------
+    model :
+        scikit-learn model
+    X_train : numpy array or pandas DataFrame
+        X in the training data
+    y_train :
+        y in the training data
+
+    Returns
+    ----------
+        pandas Series with mean scores from cross_validation
+    """
+
+    scores = cross_validate(model, X_train, y_train, **kwargs)
+
+    mean_scores = pd.DataFrame(scores).mean()
+    std_scores = pd.DataFrame(scores).std()
+    out_col = []
+
+    for i in range(len(mean_scores)):
+        out_col.append((f"%0.3f (+/- %0.3f)" % (mean_scores.iloc[i], std_scores.iloc[i])))
+
+    return pd.Series(data=out_col, index=mean_scores.index)
+
+classifiers = {
+    "Dummy": DummyClassifier(),
+    "Logistic Regression": lr_pipe,
+    "Random Forest": rf_pipe,
+    "Random Forest with Non-Default Settings": rf_pipe_b, 
+    "LightGBM": lgbm_pipe,
+    "LightGBM with Non-Default Settings": lgbm_pipe_b,
+}
+
+results = {}
+
+for (name, model) in classifiers.items():
+    results[name] = mean_std_cross_val_scores(
+        model, X_train, y_train, return_train_score=True, scoring="f1_weighted"
+    )
+```
+
+```{python cv_models_results_py}
+Markdown(pd.DataFrame(results).T.to_markdown())
+```
+
+The logistic regression model has the best validation score. It also performs better than the baseline dummy model that only predicts the most common class in the training data. Let's tune it.
+
+```{python tuning_py}
+#| output: false
+#| warning: false
+
+param_grid = {
+    "logisticregression__class_weight": [None, "balanced"],
+    "logisticregression__C": [0.001, 0.01, 0.1, 1.0, 10, 100, 500, 1000],
+}
+
+gs = GridSearchCV(
+    lr_pipe,
+    param_grid=param_grid,
+    scoring="f1_weighted",
+    n_jobs=-1,
+    return_train_score=True
+)
+gs.fit(X_train, y_train)
+```
+
+```{python tuning_results_py}
+cv_results = pd.DataFrame(gs.cv_results_)[
+    [
+        "mean_train_score",
+        "std_train_score",
+        "mean_test_score",
+        "std_test_score",
+        "param_logisticregression__class_weight", 
+        "param_logisticregression__C",
+        "mean_fit_time",
+        "rank_test_score",
+    ]
+].set_index("rank_test_score").sort_index()
+
+Markdown(cv_results.to_markdown())
+```
+
+From the table above, we can see that setting `class_weight=None` and `C=100`, `500`, or `1000` yields the best mean validation score. There is also little variation between the validation scores across folds (`std_test_score = 0.024966`), indicating that the model has a stable performance and is not overly sensitive to the subset of the training data it sees. Since validation performance is the same across these values of C, we will select the more regularized model (`C=100`) to prioritize generalization, reduce the risk of overfitting, and improve coefficient stability.
+
+```{python select_model_py}
+best_lr_pipe = make_pipeline(
+  preprocessor, LogisticRegression(class_weight=None, C=100, random_state=123, max_iter=300)
+)
+best_lr_pipe.fit(X_train, y_train)
+```
+
+:::
+
 #### 5. Model Interpretation
+
+::: {.panel-tabset}
+## R
 
 First, we will calculate the P-value (as `polr()`does not calculate it) and we are going to exponentiate the estimates for easier interpretation of the log-odds.
 
@@ -460,7 +904,58 @@ We can interpret these estimates:
 -   `agree_covid_approach`: Mostly agreeing with a partner's approach to COVID vs mostly disagreeing is associated with 230% higher odds of better relationship quality.
 -   `agree_covid_approach`: Completely agreeing with a partner's approach to COVID vs mostly agreeing is associated with 80% higher odds of better relationship quality.
 
+## Python
+
+Now, we can take a look at the feature importances via the absolute value of the coefficients of the logistic regression model that we fitted.
+
+```{python feature_importances_py}
+# get absolute value coefficients into a dataframe
+feature_names = X.columns
+classes = best_lr_pipe.named_steps['logisticregression'].classes_
+
+abs_coef_df = pd.DataFrame(
+    np.abs(best_lr_pipe.named_steps['logisticregression'].coef_.T),
+    columns=classes,
+    index=feature_names
+)
+
+abs_coef_long = (
+    abs_coef_df.reset_index()
+    .melt(id_vars="index", var_name="class", value_name="absolute_value_coefficient")
+    .rename(columns={"index": "feature"})
+)
+
+# clean up labels for visualization
+abs_coef_long["class"] = abs_coef_long["class"].str.replace("_", " ").str.title()
+abs_coef_long["feature"] = abs_coef_long["feature"].str.replace("_", " ").str.title()
+
+# make visualization
+alt.Chart(abs_coef_long).mark_bar().encode(
+    x=alt.X("absolute_value_coefficient").title("| Coefficient |"),
+    y=alt.Y("feature").sort("x").title("Feature"),
+).properties(width=150, height=150).facet(
+    facet=alt.Facet("class").title("Relationship Quality").sort("descending"), columns=2
+).resolve_scale(
+    y="independent"
+)
+```
+
+Above, we can see that the feature "Partner Had Covid" is the most influential predictor for the "Very Poor" and "Poor" relationship quality classes.  
+For the "Good" and "Fair" classes, the most important feature is "Subject Had Covid".  
+Meanwhile, "Sex Frequency" is the strongest predictor for the "Excellent" class.
+
+:::: {.callout-note}
+These feature importances reflect how the model uses the features to make predictions, but they do **not** imply statisical, causal, or real-world effects/associations.
+
+We will also see in the subsequent part of the analysis that the model does not have a very high performance and these specific feature importances may not be helpful in practical applications, but are investigated in this analysis for demonstration purposes.
+::::
+
+:::
+
 #### 6. Prediction
+
+::: {.panel-tabset}
+## R
 
 With our fitted model, we are now able to make predictions on new examples. Based on behavioral and COVID-19 related variables, we can predict the probabilities of the different levels of perceived `relationship_quality` for a specific subject. Focusing on the levels that were associated with statistically significant factors:
 
@@ -498,7 +993,140 @@ We can note that a subject involved in a same-sex couple, who has sex once a mon
 
 On the other hand, a subject involved in a different-sex couple, who has sex two or three times a month, flirts with their partner on a daily basis, has not fought with their partner in the last week, experienced no change in income during the pandemic, has a partially vaccinated partner, and mostly agrees with their partner's approach to COVID, has a 78% probability of perceiving their relationship quality as `excellent`.
 
+## Python
+
+Let's see how well our model predicts on the training data and unseen data, then compare it to a baseline dummy model. First, via a confusion matrix:
+
+:::: {.panel-tabset}
+### On the train set:
+```{python confusion_matrix_py}
+cm = ConfusionMatrixDisplay.from_estimator(
+    best_lr_pipe,
+    X_train,
+    y_train,
+    labels=["very_poor", "poor", "fair", "good", "excellent"],
+    display_labels=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+)
+```
+
+### On the test set:
+```{python confusion_matrix_test_py}
+cm = ConfusionMatrixDisplay.from_estimator(
+    best_lr_pipe,
+    X_test,
+    y_test,
+    labels=["very_poor", "poor", "fair", "good", "excellent"],
+    display_labels=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+)
+```
+
+
+### DummyClassifier on the test set:
+```{python confusion_matrix_dummy_py}
+dc = DummyClassifier()
+dc.fit(X_train, y_train)
+
+cm = ConfusionMatrixDisplay.from_estimator(
+    dc,
+    X_test,
+    y_test,
+    labels=["very_poor", "poor", "fair", "good", "excellent"],
+    display_labels=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+)
+```
+
+::::
+
+From the above confusion matrices, we can observe that the findings from the training set and testing set are similar:
+
+- The "Excellent" category has the largest number of correct predictions.
+- Predictions for the true "Very Poor", "Poor", and "Fair" qualities are scattered across multiple categories.
+- Predictions for the true "Good" quality are concentrated at "Excellent" and "Good".
+- The model tends to predict higher relationship quality. This may be partly due to the small number of samples for the lower relationship quality classes.
+- The model appears to have difficulty distinguishing between "Good" and "Excellent" classes.
+
+Additionally, as expected, the baseline dummy model only predicts the "Excellent" class.
+
+
+Let's take a look at some metrics:
+
+:::: {.panel-tabset}
+### On the train set:
+```{python train_metrics_py}
+#| warning: false
+
+y_pred_train = best_lr_pipe.predict(X_train)
+print(
+    classification_report(
+        y_train,
+        y_pred_train,
+        labels=["very_poor", "poor", "fair", "good", "excellent"],
+        target_names=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+    )
+)
+```
+
+::::: {.callout-note}
+Precision is set to 0 for labels with no predicted samples.
+:::::
+
+### On the test set:
+```{python test_metrics_py}
+#| warning: false
+
+y_pred = best_lr_pipe.predict(X_test)
+print(
+    classification_report(
+        y_test,
+        y_pred,
+        labels=["very_poor", "poor", "fair", "good", "excellent"],
+        target_names=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+    )
+)
+```
+
+::::: {.callout-note}
+Precision is set to 0 for labels with no predicted samples.
+:::::
+
+### DummyClassifier on the test set:
+```{python dummy_metrics_py}
+#| warning: false
+
+y_pred_dummy = dc.predict(X_test)
+print(
+    classification_report(
+        y_test,
+        y_pred_dummy,
+        labels=["very_poor", "poor", "fair", "good", "excellent"],
+        target_names=["Very Poor", "Poor", "Fair", "Good", "Excellent"],
+    )
+)
+```
+
+::::: {.callout-note}
+Precision is set to 0 for labels with no predicted samples.
+:::::
+
+::::
+From the above metrics, we can see that the logistic regression model's test scores are slightly lower than its train scores. This indicates that the model is not overfitting to the training data.
+
+We can also see that the test accuracy is low (0.58), but accuracy can be misleading with imbalanced data.  
+Meanwhile, the f1-scores (with an unweighted average of 0.29 and a weighted average of 0.56) still indicate that the model is not performing particularly well, especially for the lower relationship quality classes.
+
+The logistic regression model achieves a slightly higher accuracy (0.58) compared to the baseline dummy model (0.50), but we cannot conclude that it performs better solely based on this metric, due to the class imbalance in the data.
+
+Nonetheless, the logistic regression model performs around two times better in terms of the unweighted f1-score average (0.29 vs. 0.13) and the weighted f1-score average (0.56 vs. 0.34), suggesting that it offers more balanced performance across all classes.
+
+:::
+
 ### Discussion
+
+:::: {.callout-note}
+The conclusions regarding the statistical and real-world effects/associations can only be made from the statistical R analysis and **not** the Python analysis.
+
+The Python analysis demonstrates a way to obtain feature importances from a model, but it is important to keep in mind that those feature importances only indicate what the model deems to be important for its predictions. They do **not** imply statisical, causal, or real-world effects/associations.
+::::
 
 This analysis explored how relationship habits, particularly in the context of the COVID-19 pandemic relate to perceived relationship quality across different types of couples. Through the analysis, results highlight that relationship behaviors and shared beliefs meaningfully affect how individuals evaluate their relationships. More specifically, we could conclude the following:
 
