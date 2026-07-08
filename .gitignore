@@ -6,3 +6,5 @@
 /.quarto/
 renv/library/
 _site/
+.positai
+.Renviron
