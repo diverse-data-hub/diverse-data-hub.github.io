@@ -61,7 +61,6 @@ library(treemapify)
 library(janitor)
 library(car)
 library(ggthemes)
-library(ggalt)
 library(FSA)
 
 ```
