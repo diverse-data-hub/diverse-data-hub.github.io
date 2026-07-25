@@ -15,7 +15,7 @@ Use Binder to explore and run this dataset and analysis interactively in your br
 
 ## About the Data
 
-This data set provides yearly, country-level information on LGBTQ+ rights, economic indicators, and education spending from 2001 to 2023. It is compiled from Our World in Data, with primary sources including Equaldex, the World Bank, and other open-access data sets.
+This dataset provides yearly, country-level information on LGBTQ+ rights, economic indicators, and education spending from 2001 to 2023. It is compiled from Our World in Data, with primary sources including Equaldex, the World Bank, and other open-access data sets.
 
 The data enables cross-country and temporal comparisons of LGBTQ+ rights and economic/education metrics, exploration of relationships between rights and economic development, and identification of regional and temporal trends.
 
@@ -33,7 +33,7 @@ Amid ongoing challenges to LGBTQ+ rights worldwide, this dataset supports analys
 
 <div class="description-grid">
   <div class="field-label">CSV Name</div><div class="field-value">globalrights.csv</div>
-  <div class="field-label">Data Set Characteristics</div><div class="field-value">Multivariate, Panel (Country-Year)</div>
+  <div class="field-label">Dataset Characteristics</div><div class="field-value">Multivariate, Panel (Country-Year)</div>
   <div class="field-label">Subject Area</div><div class="field-value">Human Rights, Public Policy, International Development</div>
   <div class="field-label">Associated Tasks</div><div class="field-value">Classification, Regression, Comparative Analysis</div>
   <div class="field-label">Feature Type</div><div class="field-value">Categorical, Float, Integer</div>

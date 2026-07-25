@@ -15,13 +15,13 @@ Use Binder to explore and run this dataset and analysis interactively in your br
 
 ## About the Data
 
-This adapted data set contains historical records of every NCAA Division I Women’s Basketball Tournament appearance since the tournament began in 1982 up until 2018. Sourced from official NCAA, the adapted data set captures tournament results across more than four decades of collegiate women’s basketball. All data is sourced from the NCAA and contains the data behind the story [The Rise and Fall Of Women's NCAA Tournament Dynasties](https://fivethirtyeight.com/features/louisiana-tech-was-the-uconn-of-the-80s/).
+This adapted dataset contains historical records of every NCAA Division I Women’s Basketball Tournament appearance since the tournament began in 1982 up until 2018, capturing tournament results across more than four decades of collegiate women’s basketball. All data is sourced from the NCAA and contains the data behind the story [The Rise and Fall Of Women's NCAA Tournament Dynasties](https://fivethirtyeight.com/features/louisiana-tech-was-the-uconn-of-the-80s/).
 
 The rise in popularity of the NCAA Women’s March Madness, fueled by athletes like Caitlin Clark and Paige Bueckers, reflects a broader cultural shift in the recognition of women’s sports. Beyond entertainment and athletic achievement, women’s participation in sport has social and professional benefits.
 
-As Beth A. Brooke notes in her article [Here’s Why Women Who Play Sports Are More Successful](https://www.linkedin.com/pulse/heres-why-women-who-play-sports-more-successful-brooke-marciniak/), research from EY shows that 94% of women in executive leadership roles played sports, and over half competed at the university level. Participation in sports help develop skills such as resilience, teamwork, and competitiveness, traits that critical for career success.
+As Beth A. Brooke notes in her article [Here’s Why Women Who Play Sports Are More Successful](https://www.linkedin.com/pulse/heres-why-women-who-play-sports-more-successful-brooke-marciniak/), research from EY shows that 94% of women in executive leadership roles played sports, and over half competed at the university level. Participation in sports helps develop skills such as resilience, teamwork, and competitiveness, traits that are critical for career success.
 
-Analyzing NCAA Women's March Madness results and promoting visibility of women in sports, beyond exercising our data skills, supports advocation for equity, opportunity, and empowerment of women in leadership.
+Analyzing NCAA Women's March Madness results and promoting visibility of women in sports supports advocacy for equity, opportunity, and empowerment of women in leadership.
 
 ### Download
 
@@ -35,7 +35,7 @@ Analyzing NCAA Women's March Madness results and promoting visibility of women i
 
 <div class="description-grid">
   <div class="field-label">CSV Name</div><div class="field-value">womensmarchmadness.csv</div>
-  <div class="field-label">Data Set Characteristics</div><div class="field-value">Multivariate</div>
+  <div class="field-label">Dataset Characteristics</div><div class="field-value">Multivariate</div>
   <div class="field-label">Subject Area</div><div class="field-value">Women In Sports</div>
   <div class="field-label">Associated Tasks</div><div class="field-value">Regression, Classification</div>
   <div class="field-label">Feature Type</div><div class="field-value">Factor, Integer, Numeric</div>
@@ -78,7 +78,7 @@ Analyzing NCAA Women's March Madness results and promoting visibility of women i
 
 ## Attribution
 
-Data sourced from FiveThirtyEight's NCAA Women's Basketball Tournament data set, available under a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/). Original data set: [FiveThirtyEight GitHub Repository](https://github.com/fivethirtyeight/data/tree/master/ncaa-womens-basketball-tournament). Story: [Louisiana Tech Was the UConn of the '80s](https://fivethirtyeight.com/features/louisiana-tech-was-the-uconn-of-the-80s/).
+Data sourced from FiveThirtyEight's NCAA Women's Basketball Tournament dataset, available under a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/). Original dataset: [FiveThirtyEight GitHub Repository](https://github.com/fivethirtyeight/data/tree/master/ncaa-womens-basketball-tournament). Story: [Louisiana Tech Was the UConn of the '80s](https://fivethirtyeight.com/features/louisiana-tech-was-the-uconn-of-the-80s/).
 
 
 Brooke-Marciniak, B. A. (2016, February 7). Here’s why women who play sports are more successful. [LinkedIn article](https://www.linkedin.com/pulse/heres-why-women-who-play-sports-more-successful-brooke-marciniak/).

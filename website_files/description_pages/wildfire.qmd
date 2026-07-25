@@ -15,11 +15,11 @@ Use Binder to explore and run this dataset and analysis interactively in your br
 
 ## About the Data
 
-This data set contains information on wildfires in Canada, compiled from official government sources under the Open Government Licence – Alberta.
+This dataset contains information on wildfires in Canada, compiled from official government sources under the Open Government Licence – Alberta.
 
 The data was gathered to monitor, assess, and respond to wildfire risks across different regions. Wildfires have far-reaching environmental, social, and economic consequences. From an equity and inclusion perspective, analyzing wildfire data can reveal geographic and resource-based disparities in detection and containment efforts, and highlight how certain populations face greater risks due to climate change and limited infrastructure.
 
-In particular, Alberta experiences some of the most severe and frequent wildfires in Canada due to its vast forested areas, dry climate, and increasing temperatures linked to climate change. Wildfires in Alberta can lead to widespread evacuations, destroy homes and livelihoods, and disproportionately affect rural and Indigenous communities, who may lack access to adequate emergency services and infrastructure. Understanding the patterns of wildfire occurrence and spread helps policymakers, environmental planners, and emergency services allocate resources more equitably and implement effective mitigation strategies. This data set enables data-driven approaches to reduce the impact of wildfires and support more resilient and inclusive disaster management practices across Alberta and beyond.
+Alberta in particular experiences some of the most severe and frequent wildfires in Canada due to its vast forested areas, dry climate, and increasing temperatures linked to climate change. Wildfires in Alberta can lead to widespread evacuations, destroy homes and livelihoods, and disproportionately affect rural and Indigenous communities, who may lack access to adequate emergency services and infrastructure. Understanding the patterns of wildfire occurrence and spread helps policymakers, environmental planners, and emergency services allocate resources more equitably and implement effective mitigation strategies. This dataset enables data-driven approaches to reduce the impact of wildfires and support more resilient and inclusive disaster management practices across Alberta and beyond.
 
 ### Download
 
@@ -33,7 +33,7 @@ In particular, Alberta experiences some of the most severe and frequent wildfire
 
 <div class="description-grid">
   <div class="field-label">CSV Name</div><div class="field-value">wildfire.csv</div>
-  <div class="field-label">Data Set Characteristics</div><div class="field-value">Multivariate</div>
+  <div class="field-label">Dataset Characteristics</div><div class="field-value">Multivariate</div>
   <div class="field-label">Subject Area</div><div class="field-value">Climate Change</div>
   <div class="field-label">Associated Tasks</div><div class="field-value">Classification, Time Series, Geospatial Analysis</div>
   <div class="field-label">Feature Type</div><div class="field-value">Categorical, Integer</div>
@@ -93,5 +93,5 @@ In particular, Alberta experiences some of the most severe and frequent wildfire
 
 ## Attribution
 
-Data sourced from the Government of Alberta via the Government of Canada's Open Government Portal, available under an [Open Government Licence - Alberta](https://open.alberta.ca/licence). Original data set: [Historical wildfire data: 2006-2024](https://open.canada.ca/data/en/dataset/a221e7a0-4f46-4be7-9c5a-e29de9a3447e).
+Data sourced from the Government of Alberta via the Government of Canada's Open Government Portal, available under an [Open Government Licence - Alberta](https://open.alberta.ca/licence). Original dataset: [Historical wildfire data: 2006-2024](https://open.canada.ca/data/en/dataset/a221e7a0-4f46-4be7-9c5a-e29de9a3447e).
 

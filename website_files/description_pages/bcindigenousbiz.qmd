@@ -15,11 +15,11 @@ Use Binder to explore and run this dataset and analysis interactively in your br
 
 ## About the Data
 
-The BC Indigenous Business Listings data set provides a detailed look at Indigenous-owned businesses operating throughout British Columbia. Compiled in 2025 by the Government of British Columbia and shared under the [Open Government Licence - British Columbia](https://www2.gov.bc.ca/gov/content/data/policy-standards/data-policies/open-data/open-government-licence-bc), this static data set reflects the state of Indigenous businesses at the time it was created and serves as a vital resource for understanding Indigenous entrepreneurship in the area.
+The BC Indigenous Business Listings dataset provides a detailed look at Indigenous-owned businesses operating throughout British Columbia. Compiled in 2025 by the Government of British Columbia and shared under the [Open Government Licence - British Columbia](https://www2.gov.bc.ca/gov/content/data/policy-standards/data-policies/open-data/open-government-licence-bc), this static dataset reflects the state of Indigenous businesses at the time it was created and serves as a vital resource for understanding Indigenous entrepreneurship in the area.
 
 It includes information such as business names, industries, ownership types, and geographic locations, which offers important insights into economic activities within Indigenous communities. This data set showcases the wide ranging participation of Indigenous peoples in the economy, bringing attention to communities that have often been overlooked or underrepresented in traditional business directories and economic plans.
 
-By analyzing this data, policymakers, Indigenous economic development organizations, and researchers can spot geographic trends, industry hubs, and recognize gaps in the system. The data set also sheds light on the distribution of Indigenous businesses across various traditional territories, including urban and rural environments and distinguishing between resource-based and service oriented sectors.
+By analyzing this data, policymakers, Indigenous economic development organizations, and researchers can spot geographic trends, industry hubs, and recognize gaps in the system. The dataset also sheds light on the distribution of Indigenous businesses across various traditional territories, including urban and rural environments and distinguishing between resource-based and service oriented sectors.
 
 ### Download
 
@@ -39,7 +39,7 @@ bcindigenousbiz.csv
 :::
 
 ::: field-label
-Data set Characteristics
+Dataset Characteristics
 :::
 
 ::: field-value
@@ -117,4 +117,4 @@ Yes
 
 ## Attribution
 
-Data sourced from the Government of British Columbia via the Government of Canada's Open Government Portal, available under an [Open Government Licence – British Columbia](https://www2.gov.bc.ca/gov/content/data/policy-standards/data-policies/open-data/open-government-licence-bc). Original data set: [BC Indigenous Business Listings](https://open.canada.ca/data/en/dataset/bdc81d33-1ab5-4882-9764-8701e8971bb7).
+Data sourced from the Government of British Columbia via the Government of Canada's Open Government Portal, available under an [Open Government Licence – British Columbia](https://www2.gov.bc.ca/gov/content/data/policy-standards/data-policies/open-data/open-government-licence-bc). Original dataset: [BC Indigenous Business Listings](https://open.canada.ca/data/en/dataset/bdc81d33-1ab5-4882-9764-8701e8971bb7).

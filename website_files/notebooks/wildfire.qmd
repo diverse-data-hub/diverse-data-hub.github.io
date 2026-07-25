@@ -13,7 +13,7 @@ if (Sys.getenv("GITHUB_ACTIONS") == "true") {
 }
 ```
 
-### Key Features of the Data Set
+### Key Features of the Dataset
 
 Each row represents a single wildfire incident and includes information such as:
 
@@ -28,7 +28,7 @@ Each row represents a single wildfire incident and includes information such as:
 
 ### Purpose and Use Cases
 
-This data set is designed to support analysis of:
+This dataset is designed to support analysis of:
 
 -   Factors contributing to the spread, intensity, and size of wildfires
 
@@ -75,7 +75,7 @@ The goal is to explore a predictive logistic regression model, tune its hyperpar
 ## R
 ```{r load-libraries, results = "hide", warning = FALSE, message = FALSE}
 # Data
-library(diversedata)      # Diverse Data Hub data sets
+library(diversedata)      # Diverse Data Hub datasets
 
 # Core libraries
 library(tidyverse)        
@@ -350,7 +350,7 @@ wildfire_by_true_cause = (
 alt.Chart(wildfire_by_true_cause).mark_bar().encode(
     x=alt.X("prop_large:Q").title("Proportion of Fires > 200 ha"),
     y=alt.Y("true_cause").sort("x").title("True Cause"),
-).properties(title="Proportion of Large Fires by True Cause", width=500, height=300)
+).properties(title="Proportion of Large Fires by True Cause", width=600, height=400)
 ```
 :::
 
@@ -397,13 +397,15 @@ $$
 $$
 \mathbf{x}_i = 
 \left( 
-\text{temperature}_i, 
+\begin{aligned}
+& \text{temperature}_i, 
 \text{wind\_speed}_i, 
 \text{relative\_humidity}_i, 
-\text{fire\_spread\_rate}_i, 
-\text{fire\_type}_i, 
+\text{fire\_spread\_rate}_i, \\
+& \text{fire\_type}_i, 
 \text{fuel\_type}_i, 
 \text{ia\_access}_i 
+\end{aligned}
 \right)
 $$
 
@@ -416,12 +418,14 @@ $$
 where the linear predictor is:
 
 $$
+\begin{aligned}
 \eta_i = \beta_0 
 + \beta_1 \cdot \text{temperature}_i 
 + \beta_2 \cdot \text{wind\_speed}_i 
-+ \beta_3 \cdot \text{relative\_humidity}_i 
-+ \beta_4 \cdot \text{fire\_spread\_rate}_i 
++ \beta_3 \cdot \text{relative\_humidity}_i \\
+&\quad + \beta_4 \cdot \text{fire\_spread\_rate}_i 
 + \boldsymbol{\beta}_{\text{cat}}^\top \mathbf{x}_{i,\text{cat}}
+\end{aligned}
 $$
 
 Here:
@@ -614,7 +618,7 @@ This plot shows the marginal effect of `relative_humidity` on the predicted prob
 plot_comparisons(model, variables = "relative_humidity", by = "fire_type")
 ```
 
-When comparing the marginal effect of relative humidity across fire types, we found that three fire types showed almost no change in large fire probability as humidity increased. However, one fire type exhibited a noticeably stronger negative effect. This suggests that humidity plays a more meaningful role in suppressing fire growth for certain fire types likely those that are more sensitive to moisture availability, such as crown fires—while having minimal effect on others.
+When comparing the marginal effect of relative humidity across fire types, we found that three fire types showed almost no change in large fire probability as humidity increased. However, one fire type exhibited a noticeably stronger negative effect. This suggests that humidity plays a more meaningful role in suppressing fire growth for certain fire types-likely those that are more sensitive to moisture availability, such as crown fires—while having minimal effect on others.
 
 ## Python
 

@@ -12,7 +12,7 @@ if (Sys.getenv("GITHUB_ACTIONS") == "true") {
 }
 ```
 
-### Key Features of the Data set
+### Key Features of the Dataset
 
 Each row represents a single company's gender assessment in a given year and includes organizational details, overall scores, and performance on various gender-related indicators:
 
@@ -24,7 +24,7 @@ Each row represents a single company's gender assessment in a given year and inc
 The Overall Gender Assessment Score is a weighted composite score derived from six thematic areas, as shown below:
 
 | **Theme** | **Category**              | **Weight (%)** | **Description**                                                                  |
-|-----------|---------------------------|----------------|----------------------------------------------------------------------------------|
+|-----------|---------------------------|---------------------|------------------------------------------------------------------------|
 | A         | Governance and Strategy   | 20%            | Integration of gender equality in corporate governance and strategic frameworks. |
 | B         | Representation            | 17.5%          | Gender balance in leadership, workforce, and management.                         |
 | C         | Compensation and Benefits | 17.5%          | Pay equity, benefits, and family-friendly policies.                              |
@@ -36,7 +36,7 @@ The final overall score is computed out of 35, based on these weighted component
 
 ### Purpose and Use Cases
 
-This data set supports analysis of:
+This dataset supports analysis of:
 
 -   Gender equity performance across industries, regions, and ownership types.
 
@@ -50,7 +50,7 @@ This data set supports analysis of:
 
 ### Objective
 
-Gender equality in the workplace is a critical goal for sustainable and inclusive development. Companies are increasingly being evaluated not only on financial metrics but also on their social and governance performance, including how they support gender equity. This data set offers a standardized assessment of a company's gender-related policies and practices across the world.
+Gender equality in the workplace is a critical goal for sustainable and inclusive development. Companies are increasingly being evaluated not only on financial metrics but also on their social and governance performance, including how they support gender equity. This dataset offers a standardized assessment of a sample of companies' gender-related policies and practices across the world.
 
 To explore these dynamics, we focus on the following key questions:
 
@@ -401,7 +401,7 @@ Before applying ANOVA to compare gender assessment scores across ownership types
 
 **1. Independence of Observations**
 
--   Observations within and across groups must be independent: This assumption is satisfied by the data set design, provided that each company appears only once. This assumption is generally satisfied by the data set design, provided that each company appears only once and that there is no clustering of related firms or repeated measurements. Since our data set includes one record per company without repeated measures, we consider the independence assumption to be reasonably met.
+-   Observations within and across groups must be independent: This assumption is generally satisfied by the dataset design, provided that each company appears only once and that there is no clustering of related firms or repeated measurements. Since our dataset includes one record per company without repeated measurements, we consider the independence assumption to be reasonably met.
 
 **2. Normality of Residuals**
 
@@ -478,7 +478,7 @@ To evaluate whether the score differs across different types of business ownersh
 
 -   Independent Groups: Each `business` (or observation) belongs to only one ownership type. This ensures group independence.
 
--   Independent Observations: Each row in the data set represents a unique business entity, so the observations are independent.
+-   Independent Observations: Each row in the dataset represents a unique business entity, so the observations are independent.
 
 ::: {.panel-tabset}
 ## R
@@ -535,8 +535,8 @@ Pairwise comparisons using Dunn’s test (with Bonferroni correction) indicate s
 
 ### Discussion
 
-This analysis highlights notable disparities in gender assessment performance across industries, ownership types, and regions. Industries demonstrated varying levels of engagement with gender equity, with the Personal & Household Products sector achieving the highest average scores. In contrast, the Pension Funds industry consistently lagged behind, pointing to potential structural or cultural barriers that may impede progress in specific sectors.
+This analysis highlights notable disparities in gender assessment performance across industries, ownership types, and regions. Industries demonstrated varying levels of success with gender equity, with the Personal & Household Products sector achieving the highest average scores. In contrast, the Pension Funds industry consistently lagged behind, pointing to potential structural or cultural barriers that may impede progress in specific sectors.
 
 Ownership structure played a critical role in performance. Government-owned companies significantly outperformed both privately held and publicly traded firms. In contrast, publicly traded companies, despite their visibility and access to resources, showed relatively poor performance.
 
-Despite the insights provided, this analysis faces some limitations. While average scores are useful for summarizing overall trends, they can hide meaningful differences within subgroup like firm size or revenue.
+Despite the insights provided, this analysis faces some limitations. While average scores are useful for summarizing overall trends, they can hide meaningful differences within subgroup like firm size or revenue. 

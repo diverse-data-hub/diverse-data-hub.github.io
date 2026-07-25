@@ -13,7 +13,7 @@ if (Sys.getenv("GITHUB_ACTIONS") == "true") {
 }
 ```
 
-### **Key Features of the Data Set**
+### **Key Features of the Dataset**
 
 Each row represents a single country’s record for a specific year and includes information such as GDP per capita, education spending, and the legal status of various LGBTQ+ rights and protections.
 
@@ -27,7 +27,7 @@ Each row represents a single country’s record for a specific year and includes
 
 ### **Purpose and Use Cases**
 
-This data set is designed to support analysis of:
+This dataset is designed to support analysis of:
 
 -   Global trends in LGBTQ+ rights over time
 
@@ -45,9 +45,9 @@ It enables cross-country comparisons and longitudinal analysis using harmonized 
 
 ### **Objective**
 
-**Which variables in the data set contain missing values, and how can we handle them appropriately to ensure a complete and unbiased analysis?**
+**Which variables in the dataset contain missing values, and how can we handle them appropriately to ensure a complete and unbiased analysis?**
 
-This case study explores patterns of missing data in a global LGBTQ+ rights data set that includes economic and legal indicators such as GDP per capita, education spending. Using a variety of visualization tools, we aim to identify where and how missing values occur across different variables.
+This case study explores patterns of missing data in a global LGBTQ+ rights dataset that includes economic and legal indicators such as GDP per capita, education spending. Using a variety of visualization tools, we aim to identify where and how missing values occur across different variables.
 
 Rather than ignoring or arbitrarily removing incomplete data, we apply imputation techniques to fill missing values.
 
@@ -288,13 +288,13 @@ The aggregation plot provides a clear overview of missingness across variables i
 
 Given the extent of missing data observed in the aggregation plot, we will take a closer look at selected variables to better understand the underlying patterns of missingness. Specifically, we focus on the following variables:
 
--   `gdp-per-capita` and `edu-spend`, as key continuous indicators of national economic and educational investment. These variables are central to many of the analyses in this data set and missingness here may influence statistical outcomes if not properly addressed.
+-   `gdp-per-capita` and `edu-spend` as key continuous indicators of national economic and educational investment. These variables are central to many of the analyses in this data set and missingness here may influence statistical outcomes if not properly addressed.
 
 -   `same-sex-marriage` represents a key dimension of legal recognition for LGBTQ+ individuals. This categorical variable shows substantial missingness, which may reflect patterns tied to reporting practices or regional legal disparities in the recognition of same-sex unions. It includes seven categories that capture the varying legal statuses across countries: Banned, Civil union or other partnership, Unrecognized, Unregistered cohabitation, Legal, Varies by region, and Foreign same-sex marriages recognized only.
 
 #### **3. Spinogram and Spineplot**
 
-So far, we have gained a high-level overview of missingness across the data set. To dig deeper, we now examine how missing values in one variable relate to the categories of another. This helps us understand whether missingness may be random or related to other features in the data.
+So far, we have gained a high-level overview of missingness across the dataset. To dig deeper, we now examine how missing values in one variable relate to the categories of another. This helps us understand whether missingness may be random or related to other features in the data.
 
 The function `spineMiss()` from the `{VIM}` R package is used for this purpose. It produces a spineplot, a type of bar chart that visualizes the distribution of missing vs. non-missing values in a variable (in this case, `gdp`) across the levels of a categorical variable (in this case, `same-sex-marriage`).
 
@@ -396,7 +396,7 @@ This widespread but uneven distribution suggests that the missingness in educati
 
 #### **4.** Multivariate Imputation by Chained Equations (MICE) using PMM
 
-We used [MICE](https://www.jstatsoft.org/article/view/v045i03) with predictive mean matching (PMM) because it is well-suited to data sets with multiple partially missing variables, allows for realistic value imputation, and accommodates the MAR mechanism observed in o
+We used [MICE](https://www.jstatsoft.org/article/view/v045i03) with predictive mean matching (PMM) because it is well-suited to datasets with multiple partially missing variables, allows for realistic value imputation, and accommodates the MAR mechanism observed in our dataset. 
 
 Through earlier visualizations (like `spineMiss` and `mosaicMiss`), we observed that the missing values in `gdp` and `edu_spend` depend on other variables (e.g., marriage status). This suggests the data are Missing at Random (MAR) where imputation models should account for relationships between variables.
 
