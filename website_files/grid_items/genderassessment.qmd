@@ -2,6 +2,6 @@
   <img src="/website_files/img/genderassessment.png" width="20px" height="20px">
   <h3>Gender Assessment</h3>
   <p>
-    The Gender Assessment data set from the World Benchmarking Alliance evaluates nearly 2,000 of the world’s most influential companies on gender equality. Covering data from 2023 and 2024, the data set highlights early corporate actions and progress on gender issues. It serves as a benchmarking tool for identifying gaps and holding companies accountable for advancing gender equality.
+    The Gender Assessment dataset from the World Benchmarking Alliance evaluates nearly 2,000 of the world’s most influential companies on gender equality. Covering data from 2023 and 2024, the dataset highlights early corporate actions and progress on gender issues. It serves as a benchmarking tool for identifying gaps and holding companies accountable for advancing gender equality.
   </p>
 </a>
