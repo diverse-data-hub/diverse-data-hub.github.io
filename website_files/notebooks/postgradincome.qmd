@@ -1,0 +1,88 @@
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| collapse: true
+library(reticulate)
+if (Sys.getenv("GITHUB_ACTIONS") == "true") {
+  # for running in GitHub Actions (otherwise reticulate can't find diverse_web_env)
+  reticulate::use_python(Sys.getenv("RETICULATE_PYTHON"), required = TRUE)
+} else {
+  # for running locally
+  reticulate::use_condaenv("diverse_web_env", required = TRUE)
+}
+```
+
+### Key Features of the Dataset
+
+
+
+### Purpose and Use Cases
+
+This dataset is designed to support analysis of:
+
+-   
+
+## Case Study
+
+### Objective
+
+
+### Analysis
+
+**Loading Libraries**
+
+::: {.panel-tabset}
+## R
+```{r load-libraries, results = "hide", warning = FALSE, message = FALSE}
+# Data
+library(diversedata)      # Diverse Data Hub datasets
+
+# Core libraries
+library(tidyverse)        
+library(lubridate)      
+
+# Spatial & mapping
+library(sf)               
+library(terra)            
+library(ggmap)            
+library(ggspatial)        
+library(maptiles)         
+library(leaflet)          
+library(leaflet.extras)   
+
+# Visualization & color
+library(viridis)          
+
+# Tables & reporting
+library(gt)               
+library(kableExtra)       
+       
+```
+
+## Python
+```{python load-libraries_py, results = "hide", warning = FALSE, message = FALSE}
+import diversedata as dd
+import numpy as np
+import pandas as pd
+```
+:::
+
+#### 1. Data Cleaning & Processing
+
+
+
+#### 2. Exploratory Data Analysis
+
+
+
+#### 3. Logistic Regression Model
+
+
+
+#### 4. Interpretation/Evaluation of our Model
+
+
+
+### Discussion
+
