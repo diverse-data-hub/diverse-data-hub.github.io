@@ -21,7 +21,7 @@ GRID CONTAINER FOR NOTEBOOK LINK CARDS
   gap: 0.5rem;
   text-decoration: none;
   color: inherit;
-  border: 2px solid rgb(146, 191, 218) ;
+  border: 2px solid rgb(41, 105, 176);
   border-radius: 5px;
   padding: 1rem;
   transition: background-color 0.3s ease, border-color 0.3s ease;
@@ -30,14 +30,14 @@ GRID CONTAINER FOR NOTEBOOK LINK CARDS
 }
 
 .grid-container .grid-item:hover { 
-  background-color: rgba(40, 148, 215, 0.1);
+  background-color: rgba(41, 105, 176, 0.1);
 }
 
 .grid-container .grid-item img { /* image spans both rows and stretches to their total height */
   grid-column: 1;
   grid-row: 1 / span 2;
   width: 180px;         /* fixed width */
-  height: 120px;         
+  height: 120px;          
   object-fit: cover;    /* crop if aspect ratio differs */
   margin: 0;
   align-self: stretch;  /* ensure it stretches vertically */
@@ -62,7 +62,7 @@ CSV DOWNLOAD BUTTONS
 
 .download-button {
   display: inline-block;
-  background-color: rgb(146, 191, 218);
+  background-color: rgb(41, 105, 176);
   color: white;
   padding: 10px 18px;
   font-size: 16px;
@@ -73,7 +73,7 @@ CSV DOWNLOAD BUTTONS
   margin: 0 auto;
 }
 .download-button:hover {
-  background-color: rgb(40, 148, 215);
+  background-color: rgb(33, 85, 143);
 }
 .button-container {
   text-align: center;
@@ -93,7 +93,7 @@ DATASET DESCRIPTION GRID
   background-color: #FFFFFF;
   border-radius: 10px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  border: 4px solid rgb(146, 191, 218);
+  border: 4px solid rgb(41, 105, 176);
 }
 
 .description-grid p {
@@ -128,13 +128,13 @@ Variable Table
   background-color: #FFFFFF;
   border-radius: 10px; 
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); 
-  border: 4px solid rgb(146, 191, 218); 
+  border: 4px solid rgb(41, 105, 176); 
   font-family: sans-serif; 
   margin: 0; 
 }
 
 .styled-table th {
-  background-color: rgb(146, 191, 218); 
+  background-color: rgb(41, 105, 176); 
   color: white; 
   text-align: center; 
   font-weight: bold; 
@@ -155,7 +155,7 @@ Tag Filters
 .tag-filter-container {
   margin-bottom: 1rem;
   padding: 0.5rem;
-  border: 5px solid rgb(146, 191, 218);
+  border: 5px solid rgb(41, 105, 176);
   border-radius: 10px;
   background-color: #f9f9f9;
   display: flex;
@@ -180,9 +180,9 @@ Clear Filters button
 #clear-filters {
   padding: 0.6rem 1.2rem;
   margin: 1rem auto;
-  border: 3px solid rgb(146, 191, 218);
-  background-color: #e8f5ef;
-  color: #2d6a4f;
+  border: 3px solid rgb(41, 105, 176);
+  background-color: #f0f4f9;
+  color: rgb(33, 85, 143);
   font-weight: bold;
   font-size: 1rem;
   border-radius: 8px;
@@ -192,21 +192,23 @@ Clear Filters button
 }
 
 #clear-filters:hover {
-  background-color: rgb(146, 191, 218);
-  border-color: rgb(40, 148, 215);
+  background-color: rgb(41, 105, 176);
+  border-color: rgb(33, 85, 143);
+  color: white;
 }
 
 /*
-Compact hero-banner styling: reduces height, padding, font sizes, solid primary blue
+Compact hero-banner styling: reduces height, padding, font sizes, solid primary tech blue tint
 */
 .hero-banner {
   background-image: none !important;
-  background-color: rgba(146, 191, 218, 0.8) !important;
-  color: black !important; 
+  background-color: rgba(41, 105, 176, 0.15) !important;
+  color: #222 !important; 
   padding: 0.75rem 0.75rem;
   text-align: center;
   border-radius: 30px;
   margin-bottom: 2rem;
+  border: 2px solid rgb(41, 105, 176);
 }
 
 .hero-banner h1 {
@@ -227,9 +229,9 @@ Dataset Toggle
 #dataset-toggle {
   margin-bottom: 1rem;
   padding: 0.5rem;
-  border: 5px solid rgb(146, 191, 218);
+  border: 5px solid rgb(41, 105, 176);
   border-radius: 10px;
-  background-color: rgb(146, 191, 218);
+  background-color: rgb(41, 105, 176);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -239,7 +241,7 @@ Dataset Toggle
 #dataset-toggle label {
   margin-right: 1rem;
   font-weight: bold;
-  color: black;
+  color: white;
 }
 
 #dataset-toggle input[type="checkbox"] {
@@ -267,11 +269,11 @@ Home Page Dataset Grid
 }
 
 /*
- Compact featured-data-sets styling:
- white cards, square cropped images, small padding
+  Compact featured-data-sets styling:
+  white cards, square cropped images, small padding
 */
 #featured-data-sets .grid-container-3 {
-  gap: 0.75rem;                  /* tighter grid spacing */
+  gap: 0.75rem;                 /* tighter grid spacing */
 }
 
 #featured-data-sets .grid-item {
@@ -308,4 +310,30 @@ COLLABORATE COLUMNS WITH PADDING
 */
 #get-involved .column {
   padding: 1rem;
+}
+
+/*
+FOOTER COLOR OVERRIDE
+*/
+footer, .footer, .nav-footer {
+  background-color: rgb(41, 105, 176) !important;
+  color: white !important;
+}
+
+.nav-footer a {
+  color: white !important;
+}
+
+/* 
+TABLE OF CONTENTS
+*/
+.toc h2, .table-of-contents h2, nav#TOC h2,
+.toc h3, .table-of-contents h3, nav#TOC h3 {
+  font-size: 1.25rem; /* Adjust this size to your preference */
+}
+.toc a, .table-of-contents a, nav#TOC a {
+  font-size: 1.1rem;
+}
+.toc li, .table-of-contents li, nav#TOC li {
+  margin-bottom: 0.5rem; /* Adds space below each TOC item */
 }

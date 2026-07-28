@@ -23,7 +23,7 @@ website:
   navbar:
     left:
       - href: website_files/datasets.qmd
-        text: Data Sets
+        text: Datasets
       - href: website_files/citation.qmd
         text: Citation
       - href: website_files/collaborate.qmd
@@ -31,7 +31,7 @@ website:
 
   page-footer:
     right: "This page is built with [Quarto](https://quarto.org/)."
-    background: "rgb(146, 191, 218)"
+    background: "rgb(212, 117, 69)"
 
   sidebar:
 
