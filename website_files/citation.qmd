@@ -1,3 +1,5 @@
+## R Package Citation
+
 Burak, K., Khoda, E. E., Piran, A., Ramirez, F., Subrahmanian, S., and Ta, S. (2025). diversedata: Diverse Data Hub. R Package Version 1.0.0, [https://github.com/diverse-data-hub/diversedata](https://github.com/diverse-data-hub/diversedata)
 
 ```
@@ -11,6 +13,8 @@ Burak, K., Khoda, E. E., Piran, A., Ramirez, F., Subrahmanian, S., and Ta, S. (2
 }
 ```
 
+
+## Python Package Citation
 
 Burak, K., Khoda, E. E., Ta, S., Piran, A., Ramirez, F., and Subrahmanian, S. (2025). diversedata‑py: Diverse Data Hub Python Package. Python Package Version 1.0.3, [https://github.com/diverse-data-hub/diversedata-py](https://github.com/diverse-data-hub/diversedata-py)
 

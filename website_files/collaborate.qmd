@@ -50,5 +50,7 @@ Report bugs or request features for the Python package:
 - [Siddarth Subrahmanian](https://github.com/siddart-1)
 - [Stephanie Ta](https://github.com/Stephanie-Ta)
 - [Jade Chen](https://github.com/jadeeechen)
+- [Jennifer Tsang](https://github.com/jentsang)
+- [Nicole Link](https://github.com/nicolelink33)
 :::
 ::::

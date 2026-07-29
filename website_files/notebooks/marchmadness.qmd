@@ -13,7 +13,7 @@ if (Sys.getenv("GITHUB_ACTIONS") == "true") {
 }
 ```
 
-### Key Features of the Data Set
+### Key Features of the Dataset
 
 Each row represents a single team's appearance in a specific tournament year and includes information such as:
 
@@ -33,7 +33,7 @@ Each row represents a single team's appearance in a specific tournament year and
 
 ### Purpose and Use Cases
 
-This data set is designed to support analysis of:
+This dataset is designed to support analysis of:
 
 -   Team performance over time
 
@@ -51,9 +51,7 @@ This data set is designed to support analysis of:
 
 This analysis explores the relationship between a team’s `seed` and its results on a tournament to evaluate whether teams with lower seeds consistently outperform ones with higher seeds.
 
-By examining historical data, we aim to:
-
--   Identify trends in tournament advancement by seed level
+By examining historical data, we aim to identify trends in tournament advancement by seed level
 
 Seeding is intended to reflect a team’s regular-season performance. In theory, lower-numbered seeds (e.g., #1, #2) are given to the strongest teams, who should be more likely to advance. But upsets, bracket surprises, and standout performances from lower seeds raise questions like "How reliable is seeding as a predictor of success?"
 
@@ -210,7 +208,7 @@ alt.Chart(avg_per_seed).mark_bar().encode(
 ```
 :::
 
-We can note that a teams with a higher seed tend to win more tournaments! We can also see the total amount of tourney wins for each seed.
+We can see that teams with a lower seed tend to win more tournaments! We can also see the total amount of tourney wins for each seed.
 
 ::: {.panel-tabset}
 ## R
@@ -264,11 +262,11 @@ alt.Chart(marchmadness).transform_density(
 
 #### 3. Seed Treatment: Numeric vs Factor
 
-An important decision on this analysis is whether to use `seed` as a numeric or an ordered categorical predictor. Treating `seed` as a numeric explanatory variable assumes that the effect of seed is linear on the log scaled of the amount of `tourney_wins`.
+An important decision in this analysis is whether to use `seed` as a numeric or an ordered categorical predictor. Treating `seed` as a numeric explanatory variable assumes that the effect of seed is linear on the log scaled amount of `tourney_wins`.
 
 To test if this assumption is appropriate, we can compare models that make different assumptions about `seed`. We'll create models using `seed` as both a numeric variable and a factor.
 
-However, first, we need to encode `seed` as an ordered factor.
+First, we need to encode `seed` as an ordered factor.
 
 ::: {.panel-tabset}
 ## R
@@ -393,7 +391,7 @@ lines = alt.Chart(plot_data).mark_line(size=2).encode(
 :::
 
 
-Visually, both models don't appear to be significantly different from each other. Now, if we wanted to formally evaluate which is the better approach we could use likelihood-based model selection tools.
+Visually, the models don't appear to be significantly different from each other. If we wanted to formally evaluate which is the better approach we could use likelihood-based model selection tools.
 
 ::: {.panel-tabset}
 ## R
@@ -474,11 +472,11 @@ Markdown(anova_result.to_markdown(index = False))
 ```
 :::
 
-These results indicate strong evidence that the model with `seed` treated as a factor fits the data significantly better than treating it as a numeric predictor. Therefore, we will proceed by using `seed` as a factor.
+These results indicate strong evidence that the model with `seed` treated as a factor fits the data significantly better than treating it as a numeric predictor. Therefore, we will proceed with using `seed` as a factor.
 
 #### 4. Overdispersion Testing
 
-It is noteworthy that Poisson assumes that the mean is equal to the variance of the count variable. If the variance is much greater, we might need a Negative Binomial model. We can do an dispersion test to evaluate this matter.
+It is noteworthy that Poisson assumes that the mean is equal to the variance of the count variable. If the variance is much greater, we might need a Negative Binomial model. We can do a dispersion test to evaluate this matter.
 
 Letting $Y_i$ be the $ith$ Poisson response in the count regression model, in the presence of equidispersion, $Y_i$ has the following parameters:
 
@@ -535,7 +533,7 @@ Markdown(dispersion_result.to_markdown(index = False))
 
 :::
 
-Since the P-value is much greater than 0.05, we fail to reject the null hypothesis. This suggests that there is no significant evidence of overdispersion in the Poisson model.
+Since the p-value is much greater than 0.05, we fail to reject the null hypothesis. This suggests that there is not significant evidence of overdispersion in the Poisson model.
 
 #### 5. Hypothesis Testing: Are Seed and Wins Associated?
 
@@ -580,8 +578,6 @@ Markdown(poisson_model_factor_summary.to_markdown())
 :::
 
 Based on these results, we can see that `seed` is significantly associated with `tourney_wins`, particularly in changes in levels between lower seeds. These results can be interpreted as:
-
-Seed 2 teams are expected to win 29% fewer games than Seed 1 teams
 
 -   Seed 2 teams are expected to win 29% (1-0.71) fewer games than Seed 1 teams.
 
@@ -653,7 +649,7 @@ ggsave("../img/marchmadness.png", plot = model_plot, width = 6, height = 4, dpi 
 
 This analysis examined the relationship between a team’s tournament seed and its performance in the NCAA Division 1 Women’s Basketball Tournament. The results suggest that:
 
-1.  **Poisson regression supports seeding as a predictor**: The Poisson regression model indicates that seed is a significant predictor of tournament wins, suggesting that higher-ranked teams tend to win more, even between closely ranked seeds.
+1.  **Poisson regression supports seeding as a predictor**: The Poisson regression model indicates that seed is a significant predictor of tournament wins, suggesting that lower-seeded teams tend to win more, even between closely ranked seeds.
 
 2.  **Proper variable coding is essential**: Treating seed as a numeric variable would assume a linear relationship on the log scale of expected tournament wins, meaning each one-unit increase in seed (e.g., from 1 to 2, or 10 to 11) would be associated with the same proportional decrease in wins. This oversimplifies the real pattern. By encoding seed as an ordered factor, the model can estimate distinct effects for each seed level, allowing for more accurate and nuanced interpretation.
 

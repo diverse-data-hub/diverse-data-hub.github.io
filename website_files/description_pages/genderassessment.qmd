@@ -15,11 +15,11 @@ Use Binder to explore and run this dataset and analysis interactively in your br
 
 ## About the Data
 
-The Global Gender Assessment data set provides insights into how companies across various industries and regions perform on a wide range of gender equity measures. This data set includes scores on strategic actions, leadership, grievance mechanisms, pay equity, and many other factors related to gender based practices within corporate environments.
+The Global Gender Assessment dataset provides insights into how companies across various industries and regions perform on a wide range of gender equity measures. This dataset includes scores on strategic actions, leadership, grievance mechanisms, pay equity, and many other factors related to gender-based practices within corporate environments.
 
-Collected in 2023, the data allows for comparative evaluation across countries, sectors, and ownership types (e.g., Public, Private, Government). Each record represents a company and its corresponding evaluation across 28 detailed gender related indicators, offering a comprehensive snapshot of corporate gender responsibility worldwide.
+Collected in 2023, the data allows for comparative evaluation across countries, sectors, and ownership types (e.g., Public, Private, Government). Each record represents a company and its corresponding evaluation across 28 detailed gender related indicators, offering a comprehensive snapshot of corporate gender equity worldwide.
 
-The data set can be used by researchers, policy analysts, and advocacy groups to track progress on corporate gender equity, identify gaps, and support data driven decision making in both public and private sectors.
+The dataset can be used by researchers, policy analysts, and advocacy groups to track progress on corporate gender equity, identify gaps, and support data driven decision making in both public and private sectors.
 
 ### Download
 
@@ -39,7 +39,7 @@ genderassessment.csv
 :::
 
 ::: field-label
-Data set Characteristics
+Dataset Characteristics
 :::
 
 ::: field-value
@@ -137,4 +137,4 @@ Yes
 
 ## Attribution
 
-Data sourced from World Benchmarking Alliance, available under a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/). Original data set: [2024 Gender Assessment data set](https://www.worldbenchmarkingalliance.org/research/2024-gender-assessment-data-set/).
+Data sourced from World Benchmarking Alliance, available under a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/). Original dataset: [2024 Gender Assessment data set](https://www.worldbenchmarkingalliance.org/research/2024-gender-assessment-data-set/).

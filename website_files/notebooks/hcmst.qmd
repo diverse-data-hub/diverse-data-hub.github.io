@@ -13,9 +13,9 @@ if (Sys.getenv("GITHUB_ACTIONS") == "true") {
 }
 ```
 
-### Key Features of the Data Set
+### Key Features of the Dataset
 
-Each row in the data set represents an individual subject and includes the following selected variables:
+Each row in the dataset represents an individual subject and includes the following selected variables:
 
 -   **Subject demographics** (`subject_age`, `subject_sex`, `subject_ethnicity`, `subject_education`, `subject_income_category`, `subject_employment_status`): age, sex, ethnicity, education level, income level, and employment status
 
@@ -29,7 +29,7 @@ Each row in the data set represents an individual subject and includes the follo
 
 ### Purpose and Use Cases
 
-This data set supports investigations into:
+This dataset supports investigations into:
 
 -   Demographic and behavioral predictors of relationship quality.
 
@@ -93,7 +93,7 @@ from sklearn.dummy import DummyClassifier
 
 #### 1. Data Cleaning & Processing
 
-First, we can load our data set (`hcmst` from `diversedata` package), select our specific variables of intereset and remove NAs from our data set.
+We can load our data set (`hcmst` from `diversedata` package), select our specific variables of interest and remove NAs from our dataset.
 
 ::: {.panel-tabset}
 ## R
@@ -155,7 +155,7 @@ hcmst.shape[0]
 
 #### 2. Variable Encoding
 
-We can note that our categorical response follows a specific order. For this reason, we require a model that suits ordinal responses. 
+Our categorical response follows a specific order. For this reason, we require a model that suits ordinal responses. 
 
 We should also encode our explanatory variables as factors (and ordered factors) as needed.
 
@@ -355,12 +355,12 @@ print(f'relationship_quality levels: {hcmst["relationship_quality"].cat.categori
 
 #### 3. Exploratory Data Analysis
 
-We will visualize histograms charts for our different categorical variables. But first, we will see how different groups were sampled in the survey and how different these samples are for same sex couples.
+We will visualize histogram charts for our different categorical variables, but first, we will see how different groups were sampled in the survey and how different these samples are for same sex couples.
 
 ::: {.panel-tabset}
 ## R
 ```{r simple_bar, fig.height=4, fig.width=8}
-# We'll use a color blind friendly pallete:
+# We'll use a color blind friendly palette:
 cbPalette <- c("#0072B2", "#56B4E9", "#999999", "#E69F00", "#009E73", "#F0E442", "#D55E00", "#CC79A7")
 
 ggplot(hcmst, aes(x = same_sex_couple, fill = same_sex_couple)) +
@@ -383,11 +383,11 @@ alt.Chart(hcmst).mark_bar().encode(
     x=alt.X("same_sex_couple").title("Same Sex Couple"),
     y=alt.Y("count()").title("Count"),
     color=alt.Color("same_sex_couple", legend=None),
-).properties(title="Couple Type Distribution", width=350, height=350)
+).properties(title="Couple Type Distribution", width=500, height=350)
 ```
 :::
 
-It can be noted that the sample of `same_sex_couples` is smaller that that of different-sex couples. In the original study, same sex couples were oversampled. For more information on how the survey data was collected, refer to the [original data set](https://data.stanford.edu/hcmst2017).
+It can be noted that the sample of `same_sex_couples` is smaller that that of different-sex couples. In the original study, same sex couples were oversampled. For more information on how the survey data was collected, refer to the [original dataset](https://data.stanford.edu/hcmst2017).
 
 To explore our other variables, we will create a function that will be used for visualization. Since we know that the samples for different types of couples are different, we will use relative frequency in our visualizations.
 
@@ -637,7 +637,7 @@ alt.vconcat(
 ```
 :::
 
-Same-sex and different-sex couples show similar patters in how frequently they engage in sexual activity. However, the overall sample is skewed towards reporting low sex frequency. We can also visualize how often couples flirt with or fight with their partners. The distribution of responses shows a tendency toward lower frequencies of both flirting and fighting.
+Same-sex and different-sex couples show similar patterns in how frequently they engage in sexual activity. However, the overall sample is skewed towards reporting low sex frequency. We can also visualize how often couples flirt with or fight with their partners. The distribution of responses shows a tendency toward lower frequencies of both flirting and fighting.
 
 In the context of the COVID-19 pandemic, it can be noted that most subjects had no change in income during the pandemic, did not have COVID, were fully vaccinated including the booster shot, and completely agreed with their partners in terms of their approach to the pandemic.
 
@@ -652,7 +652,7 @@ ggsave("../img/hcmst.png", plot = hist_flirt_freq, width = 6, height = 4, dpi = 
 ::: {.panel-tabset}
 ## R
 
-We will be assuming and fitting a proportional odds model, which assumes that the log-odds of being in a higher category of the response variable follows a linear relationship with the explanatory variables.
+We will be fitting a proportional odds model, which assumes that the log-odds of being in a higher category of the response variable follows a linear relationship with the explanatory variables.
 
 For our modeling purposes, we will use the `MASS` package, `polr()` function to obtain model estimates.
 
@@ -664,7 +664,7 @@ options(contrasts = c("contr.treatment", "contr.sdif"))
 
 Now, we can fit our model. Noting that `polr()` does not calculate p-values, we can compute them and bind them to our model estimates.
 
-For the purposes of this exercise, we will only use a subset of the variables in our modeling. We will be interested in how behavioral variables, as well as COVID-19 related variables, affect the perception of relationship quality. Additionally, we are interested in seeing if these effects are different for same sex couples.
+For the purposes of this exercise, we will only use a subset of the variables in our modeling. We are interested in how behavioral variables, as well as COVID-19 related variables, affect the perception of relationship quality. Additionally, we are interested in seeing if these effects are different for same sex couples.
 
 ```{r model_fit}
 ordinal_model <- polr(
@@ -722,7 +722,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 Since all of the predictors are ordinal, we'll use `OrdinalEncoder` to encode them. Since there are no missing values, imputation is not needed. This preprocessing is necessary since most `scikit-learn` algorithms require numerical inputs.
 
 :::: {.callout-note}
-`OrdinalEncoder` will encode the levels of an ordinal column(s) to be equally spaced apart. This may not be desireable for some analyses.
+`OrdinalEncoder` will encode the levels of an ordinal column to be equally spaced apart. This may not be desirable for some analyses.
 ::::
 
 ```{python preprocess_py}
@@ -871,7 +871,7 @@ best_lr_pipe.fit(X_train, y_train)
 ::: {.panel-tabset}
 ## R
 
-First, we will calculate the P-value (as `polr()`does not calculate it) and we are going to exponentiate the estimates for easier interpretation of the log-odds.
+First, we will calculate the p-value (as `polr()`does not calculate it) and we are going to exponentiate the estimates for easier interpretation of the log-odds.
 
 ```{r model_int}
 summary_partial_ordinal_model <- cbind(tidy(ordinal_model),
@@ -989,7 +989,7 @@ round(predict(ordinal_model, tibble(
   type = "probs"), 2)
 ```
 
-We can note that a subject involved in a same-sex couple, who has sex once a month or less, flirts with their partner a few times a week, fought with their partner once in the last week, experienced worsened income during the pandemic, is not vaccinated (nor is their partner), and mostly disagrees with their partner's approach to COVID, has a 41% probability of perceiving their relationship quality as `fair`.
+We can note that a subject involved in a same-sex couple, who has sex once a month or less, flirts with their partner a few times a week, fought with their partner once in the last week, experienced lower income during the pandemic, is not vaccinated (nor is their partner), and mostly disagrees with their partner's approach to COVID, has a 41% probability of perceiving their relationship quality as `fair`.
 
 On the other hand, a subject involved in a different-sex couple, who has sex two or three times a month, flirts with their partner on a daily basis, has not fought with their partner in the last week, experienced no change in income during the pandemic, has a partially vaccinated partner, and mostly agrees with their partner's approach to COVID, has a 78% probability of perceiving their relationship quality as `excellent`.
 

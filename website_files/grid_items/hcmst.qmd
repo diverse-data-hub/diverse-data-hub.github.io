@@ -2,6 +2,6 @@
   <img src="/website_files/img/hcmst.png" width="20px" height="20px">
   <h3>How Couples Meet and Stay Together</h3>
   <p>
-    This data set contains information from a 2022 survey of people across the U.S. to understand how couples meet and stay together. It focuses on how relationships were influenced by the COVID-19 pandemic and offers insight at modern relationships, including changes in dating habits and how couples adapted during a challenging time.
+    This dataset contains information from a 2022 survey of people across the U.S. to understand how couples meet and stay together. It focuses on how relationships were influenced by the COVID-19 pandemic and offers insight at modern relationships, including changes in dating habits and how couples adapted during a challenging time.
   </p>
 </a>

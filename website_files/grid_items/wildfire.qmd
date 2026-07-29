@@ -2,6 +2,6 @@
   <img src="/website_files/img/wildfire.png" width="20px" height="40px">
   <h3>Wildfire</h3>
   <p>
-    This data set on Canadian wildfires includes data on fire size, cause, location, detection method, response, and weather. Collected from official sources, it supports wildfire risk assessment and response. It also highlights social and geographic disparities, emphasizing impacts on remote and underserved communities facing climate-related and infrastructure challenges.
+    This dataset on Canadian wildfires includes data on fire size, cause, location, detection method, response, and weather. Collected from official sources, it supports wildfire risk assessment and response. It also highlights social and geographic disparities, emphasizing impacts on remote and underserved communities facing climate-related and infrastructure challenges.
   </p>
 </a>

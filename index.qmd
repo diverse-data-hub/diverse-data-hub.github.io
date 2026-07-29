@@ -1,20 +1,19 @@
-::: {.hero-banner}
+## About Diverse Data Hub
 
 **Diverse Data Hub** is an open educational resource offering curated datasets focused on equity, diversity, inclusion, and other socially relevant topics. It is designed to support students, educators, and researchers in accessing and working with meaningful data.
 
 Datasets can be accessed via the `diversedata` packages for R and Python, allowing for straightforward integration into data science workflows. Each dataset includes detailed documentation and contextual background to support informed exploration and connection to real-world topics. Example case studies are also included to illustrate practical applications.
-:::
 
-## Featured Data Sets 
+## Featured Datasets 
 
 <div class="grid-container featured-section">
 
-<!-- These are the featured data sets -->
+<!-- These are the featured datasets -->
 
 {{< include website_files/grid_items/marchmadness.qmd >}}
 {{< include website_files/grid_items/bcindigenousbiz.qmd >}}
 
-<!-- These are NOT featured data sets -->
+<!-- These are NOT featured datasets -->
 
 <!-- {{< include website_files/grid_items/hcmst.qmd >}} -->
 <!-- {{< include website_files/grid_items/wildfire.qmd >}} -->
@@ -48,18 +47,18 @@ devtools::install_github("diverse-data-hub/diversedata")
 
 #### Usage
 
-Once installed, you can explore the available data sets and their documentation:
+Once installed, you can explore the available datasets and their documentation:
 
 ``` r
 library(diversedata)
 
-# List available data sets
+# List available datasets
 data(package = "diversedata")
 
-# View documentation for a specific data set
+# View documentation for a specific dataset
 ?wildfire
 
-# To load a data set into the environment:
+# To load a dataset into the environment:
 data("wildfire")
 ```
 
@@ -81,7 +80,7 @@ pip install diversedata
 
 #### Usage
 
-Once installed, you can explore the available data sets and their documentation:
+Once installed, you can explore the available datasets and their documentation:
 
 ```python
 import diversedata as dd
