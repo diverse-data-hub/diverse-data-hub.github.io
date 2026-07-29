@@ -13,6 +13,8 @@ dependencies:
   - altair=5.5.0
   - ipykernel
   - pip
+  - pip:
+      - diversedata==1.0.4
   - scikit-learn=1.7
   - r-base[version='>=4.2']
   - matplotlib=3.10.1
@@ -33,4 +35,3 @@ dependencies:
   - r-units
   - r-ragg
   - glib
-prefix: /Users/Nicole/miniforge3/envs/diverse_web_env
