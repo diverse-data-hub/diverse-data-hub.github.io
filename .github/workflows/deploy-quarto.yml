@@ -44,10 +44,16 @@ jobs:
           options(renv.verbose = TRUE)
           renv::restore()
 
-      - name: Remove existing conda environment
-        shell: bash
-        run: |
-          rm -rf ~/miniconda3/envs/diverse_web_env
+      - name: Cache conda
+        uses: actions/cache@v4
+        env:
+          # Increase this value to reset cache if environment.yml has not changed
+          CACHE_NUMBER: 1
+        with:
+          path: ~/conda_pkgs_dir
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
+            hashFiles('environment.yml') }}
 
       - name: Set up conda environment
         uses: conda-incubator/setup-miniconda@v3
@@ -64,10 +70,6 @@ jobs:
       - name: Tell reticulate where conda is
         run: |
           echo "RETICULATE_PYTHON=$CONDA/envs/diverse_web_env/bin/python" >> $GITHUB_ENV
-
-      - name: Fix Conda Library Paths for Expat
-        run: |
-          echo "LD_LIBRARY_PATH=$CONDA/envs/diverse_web_env/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
