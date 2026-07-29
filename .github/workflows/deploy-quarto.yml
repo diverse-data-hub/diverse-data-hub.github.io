@@ -65,6 +65,10 @@ jobs:
         run: |
           echo "RETICULATE_PYTHON=$CONDA/envs/diverse_web_env/bin/python" >> $GITHUB_ENV
 
+      - name: Fix Conda Library Paths for Expat
+        run: |
+          echo "LD_LIBRARY_PATH=$CONDA/envs/diverse_web_env/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
