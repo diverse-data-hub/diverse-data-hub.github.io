@@ -37,32 +37,6 @@ jobs:
           key: ${{ runner.os }}-renv-v2-${{ hashFiles('**/renv.lock') }}
           restore-keys: ${{ runner.os }}-renv-v2-
 
-      - name: Diagnose V8 environment
-        run: |
-          echo "=== OS ==="
-          cat /etc/os-release
-
-          echo "=== R ==="
-          R --version
-          
-          echo "=== Node ==="
-          which node || true
-          node --version || true
-      
-          echo "=== pkg-config ==="
-          pkg-config --modversion libnode || true
-          pkg-config --modversion v8 || true
-      
-          echo "=== Shared libraries ==="
-          ldconfig -p | grep node || true
-          ldconfig -p | grep v8 || true
-
-          echo "=== Available Node library ==="
-          find /usr -name "libnode.so*" 2>/dev/null || true
-          
-          echo "=== Installed packages ==="
-          dpkg -l | grep node || true
-
       - name: Restore packages
         shell: Rscript {0}
         run: |
@@ -70,16 +44,10 @@ jobs:
           options(renv.verbose = TRUE)
           renv::restore()
 
-      - name: Cache conda
-        uses: actions/cache@v4
-        env:
-          # Increase this value to reset cache if environment.yml has not changed
-          CACHE_NUMBER: 2
-        with:
-          path: ~/conda_pkgs_dir
-          key:
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
-            hashFiles('environment.yml') }}
+      - name: Remove existing conda environment
+        shell: bash
+        run: |
+          rm -rf ~/miniconda3/envs/diverse_web_env
 
       - name: Set up conda environment
         uses: conda-incubator/setup-miniconda@v3
