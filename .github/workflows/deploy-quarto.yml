@@ -30,8 +30,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.RENV_PATHS_ROOT }}
-          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-          restore-keys: ${{ runner.os }}-renv-
+          key: ${{ runner.os }}-renv-v2-${{ hashFiles('**/renv.lock') }}
+          restore-keys: ${{ runner.os }}-renv-v2-
 
       - name: Restore packages
         env:
@@ -39,6 +39,8 @@ jobs:
         shell: Rscript {0}
         run: |
           if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv", repos="https://cloud.r-project.org")
+          # Force V8 to reinstall from source using the static library flag
+          renv::install("V8", type = "source")
           renv::restore()
 
       - name: Cache conda
