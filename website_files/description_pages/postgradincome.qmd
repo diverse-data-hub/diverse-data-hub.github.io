@@ -56,7 +56,7 @@ This dataset contains information on median income of Canadian students two year
 | `gender`    | Feature       | Categorical     | "Woman", "Man", or "Total"    | -       | No             |
 | `age_group`  | Feature       | Categorial     | Range of ages, e.g. "15 to 34 years"    | -      | No       |
 | `population_group`   | Feature       | Categorical     | Population group, e.g. "South Asian", "Black", "Visible minority population"    | -          | No             |
-| `value`     | Feature       | Integer     | Median reported income    | 2024 constant Canadian dollars     | No         |
+| `median_income` | Feature       | Integer     | Median reported income    | 2024 constant Canadian dollars     | No         |
 
 :::
 :::
