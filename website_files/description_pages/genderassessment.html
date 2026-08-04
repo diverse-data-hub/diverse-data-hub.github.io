@@ -2,17 +2,23 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.26">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Gender Assessment Data – Diverse Data Hub</title>
 <style>
-code{white-space: pre-wrap;}
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -68,15 +74,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../website_files/img/favicon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-487a93cdea317af5ee2b4f28b55477cc.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-8039d48b1c5dc5309e02f19e3c3aa6d8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -115,7 +120,7 @@ gtag('config', 'G-4QQCPMY56L', { 'anonymize_ip': true});
 </script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -166,7 +171,7 @@ window.Quarto = {
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
     <a class="nav-link" href="../../website_files/datasets.html"> 
-<span class="menu-text">Data Sets</span></a>
+<span class="menu-text">Datasets</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../../website_files/citation.html"> 
@@ -197,7 +202,7 @@ window.Quarto = {
   <li><a href="#download" id="toc-download" class="nav-link" data-scroll-target="#download">Download</a></li>
   <li><a href="#metadata" id="toc-metadata" class="nav-link" data-scroll-target="#metadata">Metadata</a></li>
   <li><a href="#variables" id="toc-variables" class="nav-link" data-scroll-target="#variables">Variables</a></li>
-  <li><a href="#key-features-of-the-data-set" id="toc-key-features-of-the-data-set" class="nav-link" data-scroll-target="#key-features-of-the-data-set">Key Features of the Data set</a></li>
+  <li><a href="#key-features-of-the-dataset" id="toc-key-features-of-the-dataset" class="nav-link" data-scroll-target="#key-features-of-the-dataset">Key Features of the Dataset</a></li>
   <li><a href="#gender-assessment-score-components" id="toc-gender-assessment-score-components" class="nav-link" data-scroll-target="#gender-assessment-score-components">Gender Assessment Score Components</a></li>
   <li><a href="#purpose-and-use-cases" id="toc-purpose-and-use-cases" class="nav-link" data-scroll-target="#purpose-and-use-cases">Purpose and Use Cases</a></li>
   </ul></li>
@@ -256,9 +261,9 @@ window.Quarto = {
 </div>
 <section id="about-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="about-the-data">About the Data</h2>
-<p>The Global Gender Assessment data set provides insights into how companies across various industries and regions perform on a wide range of gender equity measures. This data set includes scores on strategic actions, leadership, grievance mechanisms, pay equity, and many other factors related to gender based practices within corporate environments.</p>
-<p>Collected in 2023, the data allows for comparative evaluation across countries, sectors, and ownership types (e.g., Public, Private, Government). Each record represents a company and its corresponding evaluation across 28 detailed gender related indicators, offering a comprehensive snapshot of corporate gender responsibility worldwide.</p>
-<p>The data set can be used by researchers, policy analysts, and advocacy groups to track progress on corporate gender equity, identify gaps, and support data driven decision making in both public and private sectors.</p>
+<p>The Global Gender Assessment dataset provides insights into how companies across various industries and regions perform on a wide range of gender equity measures. This dataset includes scores on strategic actions, leadership, grievance mechanisms, pay equity, and many other factors related to gender-based practices within corporate environments.</p>
+<p>Collected in 2023, the data allows for comparative evaluation across countries, sectors, and ownership types (e.g., Public, Private, Government). Each record represents a company and its corresponding evaluation across 28 detailed gender related indicators, offering a comprehensive snapshot of corporate gender equity worldwide.</p>
+<p>The dataset can be used by researchers, policy analysts, and advocacy groups to track progress on corporate gender equity, identify gaps, and support data driven decision making in both public and private sectors.</p>
 <section id="download" class="level3">
 <h3 class="anchored" data-anchor-id="download">Download</h3>
 <div class="button-container">
@@ -275,7 +280,7 @@ window.Quarto = {
 <p>genderassessment.csv</p>
 </div>
 <div class="field-label">
-<p>Data set Characteristics</p>
+<p>Dataset Characteristics</p>
 </div>
 <div class="field-value">
 <p>Multivariate</p>
@@ -579,8 +584,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="key-features-of-the-data-set" class="level3">
-<h3 class="anchored" data-anchor-id="key-features-of-the-data-set">Key Features of the Data set</h3>
+<section id="key-features-of-the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="key-features-of-the-dataset">Key Features of the Dataset</h3>
 <p>Each row represents a single company’s gender assessment in a given year and includes organizational details, overall scores, and performance on various gender-related indicators:</p>
 <ul>
 <li><strong>Organizational details</strong> (<code>company</code>, <code>country</code>, <code>region</code>, <code>industry</code>, <code>ownership</code>, <code>year</code>) – Company name, headquarters location, region, industry sector, ownership structure, and assessment year.</li>
@@ -593,9 +598,9 @@ window.Quarto = {
 <table class="caption-top table">
 <colgroup>
 <col style="width: 8%">
-<col style="width: 19%">
-<col style="width: 11%">
-<col style="width: 60%">
+<col style="width: 20%">
+<col style="width: 16%">
+<col style="width: 54%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -648,7 +653,7 @@ window.Quarto = {
 </section>
 <section id="purpose-and-use-cases" class="level3">
 <h3 class="anchored" data-anchor-id="purpose-and-use-cases">Purpose and Use Cases</h3>
-<p>This data set supports analysis of:</p>
+<p>This dataset supports analysis of:</p>
 <ul>
 <li><p>Gender equity performance across industries, regions, and ownership types.</p></li>
 <li><p>Temporal trends in corporate gender assessment scores with a focus on changes over time to track progress or setbacks.</p></li>
@@ -661,7 +666,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="case-study">Case Study</h2>
 <section id="objective" class="level3">
 <h3 class="anchored" data-anchor-id="objective">Objective</h3>
-<p>Gender equality in the workplace is a critical goal for sustainable and inclusive development. Companies are increasingly being evaluated not only on financial metrics but also on their social and governance performance, including how they support gender equity. This data set offers a standardized assessment of a company’s gender-related policies and practices across the world.</p>
+<p>Gender equality in the workplace is a critical goal for sustainable and inclusive development. Companies are increasingly being evaluated not only on financial metrics but also on their social and governance performance, including how they support gender equity. This dataset offers a standardized assessment of a sample of companies’ gender-related policies and practices across the world.</p>
 <p>To explore these dynamics, we focus on the following key questions:</p>
 <p><strong>What is the average Overall Gender Assessment Score by industry, and which industries have the highest and lowest average scores?</strong></p>
 <p><strong>Does ownership type affect gender assessment performance?</strong></p>
@@ -681,8 +686,7 @@ window.Quarto = {
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)  <span class="co"># For kable() function</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)    <span class="co"># For leveneTest()</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggthemes)   <span class="co"># extra ggplot themes</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggalt)  <span class="co"># For geom_dumbbell</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(FSA) <span class="co"># For Dunn's test</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(FSA) <span class="co"># For Dunn's test</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
@@ -1596,18 +1600,18 @@ window.Quarto = {
 <td style="text-align: right;">56</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Investment Consultants</td>
-<td style="text-align: right;">6.38</td>
-<td style="text-align: right;">5.8</td>
-<td style="text-align: right;">6.22</td>
-<td style="text-align: right;">5</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">Real Estate</td>
 <td style="text-align: right;">6.38</td>
 <td style="text-align: right;">6</td>
 <td style="text-align: right;">5.16</td>
 <td style="text-align: right;">147</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Investment Consultants</td>
+<td style="text-align: right;">6.38</td>
+<td style="text-align: right;">5.8</td>
+<td style="text-align: right;">6.22</td>
+<td style="text-align: right;">5</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Waste Management</td>
@@ -2004,26 +2008,24 @@ window.Quarto = {
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(region_wide, <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">2023</span><span class="st">`</span>, <span class="at">xend =</span> <span class="st">`</span><span class="at">2024</span><span class="st">`</span>, <span class="at">y =</span> <span class="fu">reorder</span>(region, <span class="st">`</span><span class="at">2024</span><span class="st">`</span>))) <span class="sc">+</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dumbbell</span>(</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="fl">1.2</span>,  <span class="co"># thinner connecting line</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(region_wide, <span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">reorder</span>(region, <span class="st">`</span><span class="at">2024</span><span class="st">`</span>))) <span class="sc">+</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">2023</span><span class="st">`</span>, <span class="at">xend =</span> <span class="st">`</span><span class="at">2024</span><span class="st">`</span>),</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">1.2</span>,  <span class="co"># thinner connecting line</span></span>
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="st">"#a3c4dc"</span>,       <span class="co"># light blue line</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour_x =</span> <span class="st">"#87CEEB"</span>,     <span class="co"># skyblue for 2023</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour_xend =</span> <span class="st">"#00008B"</span>   <span class="co"># dark blue for 2024</span></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Dummy points to create legend</span></span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">2023</span><span class="st">`</span>, <span class="at">color =</span> <span class="st">"2023"</span>), <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">2024</span><span class="st">`</span>, <span class="at">color =</span> <span class="st">"2024"</span>), <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Year"</span>,</span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"2023"</span> <span class="ot">=</span> <span class="st">"#87CEEB"</span>, <span class="st">"2024"</span> <span class="ot">=</span> <span class="st">"#00008B"</span>)</span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Change in Average Score by Region (2023 to 2024)"</span>,</span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Average Score"</span>, <span class="at">y =</span> <span class="st">"Region"</span></span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_blank</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Plot points for 2023 and 2024</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">2023</span><span class="st">`</span>, <span class="at">color =</span> <span class="st">"2023"</span>), <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">2024</span><span class="st">`</span>, <span class="at">color =</span> <span class="st">"2024"</span>), <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Year"</span>,</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"2023"</span> <span class="ot">=</span> <span class="st">"#87CEEB"</span>, <span class="st">"2024"</span> <span class="ot">=</span> <span class="st">"#00008B"</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Change in Average Score by Region (2023 to 2024)"</span>,</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Average Score"</span>, <span class="at">y =</span> <span class="st">"Region"</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_blank</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2216,7 +2218,7 @@ Not all group means are equal.<br>
 <p>Before applying ANOVA to compare gender assessment scores across ownership types, it is essential to verify that the assumptions underlying the test are met.</p>
 <p><strong>1. Independence of Observations</strong></p>
 <ul>
-<li>Observations within and across groups must be independent: This assumption is satisfied by the data set design, provided that each company appears only once. This assumption is generally satisfied by the data set design, provided that each company appears only once and that there is no clustering of related firms or repeated measurements. Since our data set includes one record per company without repeated measures, we consider the independence assumption to be reasonably met.</li>
+<li>Observations within and across groups must be independent: This assumption is generally satisfied by the dataset design, provided that each company appears only once and that there is no clustering of related firms or repeated measurements. Since our dataset includes one record per company without repeated measurements, we consider the independence assumption to be reasonably met.</li>
 </ul>
 <p><strong>2. Normality of Residuals</strong></p>
 <p>ANOVA assumes that the residuals are normally distributed. We assess this using the Shapiro-Wilk test:</p>
@@ -2314,7 +2316,7 @@ Not all group medians are equal.<br>
 <ul>
 <li><p>Ordinal or Continuous Dependent Variable: The variable <code>score</code> is numeric, satisfying this assumption.</p></li>
 <li><p>Independent Groups: Each <code>business</code> (or observation) belongs to only one ownership type. This ensures group independence.</p></li>
-<li><p>Independent Observations: Each row in the data set represents a unique business entity, so the observations are independent.</p></li>
+<li><p>Independent Observations: Each row in the dataset represents a unique business entity, so the observations are independent.</p></li>
 </ul>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-9-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-1" role="tab" aria-controls="tabset-9-1" aria-selected="true" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-2" role="tab" aria-controls="tabset-9-2" aria-selected="false" href="">Python</a></li></ul>
@@ -2368,10 +2370,28 @@ Kruskal-Wallis chi-squared = 517.7, df = 2, p-value &lt; 2.2e-16</code></pre>
 <pre><code>Warning: Some rows deleted from 'x' and 'g' because missing data.</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Dunn (1964) Kruskal-Wallis multiple comparison</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>  p-values adjusted with the Bonferroni method.</code></pre>
+<pre><code>  Kruskal-Wallis rank sum test
+
+data: x and g
+Kruskal-Wallis chi-squared = 517.7035, df = 2, p-value = 0
+
+                      Dunn's Pairwise Comparison of x by g                      
+                                  (Bonferroni)                                  
+
+Col Mean-│
+Row Mean │   Governme    Private
+─────────┼──────────────────────
+ Private │  -4.232728
+         │     0.0001*
+         │
+  Public │  -18.86741  -16.05231
+         │     0.0000*    0.0000*
+
+FWER = 0.05
+Reject Ho if adjusted p ≤ FWER, where (unadjusted) p = Pr(|Z| ≥ |z|)
+Dunn (1964) Kruskal-Wallis multiple comparison
+
+  p-values adjusted with the Bonferroni method.</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            Comparison          Z      P.unadj        P.adj
@@ -2383,13 +2403,13 @@ Kruskal-Wallis chi-squared = 517.7, df = 2, p-value &lt; 2.2e-16</code></pre>
 </div>
 <div id="tabset-10-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-2-tab">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>gender_data <span class="op">=</span> gender_data.dropna(subset<span class="op">=</span><span class="st">"ownership"</span>)</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>adjusted_p_values <span class="op">=</span> sp.posthoc_dunn(</span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    gender_data, val_col<span class="op">=</span><span class="st">"score"</span>, group_col<span class="op">=</span><span class="st">"ownership"</span>, p_adjust<span class="op">=</span><span class="st">"bonferroni"</span></span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>Markdown(adjusted_p_values.to_markdown())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>gender_data <span class="op">=</span> gender_data.dropna(subset<span class="op">=</span><span class="st">"ownership"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>adjusted_p_values <span class="op">=</span> sp.posthoc_dunn(</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    gender_data, val_col<span class="op">=</span><span class="st">"score"</span>, group_col<span class="op">=</span><span class="st">"ownership"</span>, p_adjust<span class="op">=</span><span class="st">"bonferroni"</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>Markdown(adjusted_p_values.to_markdown())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -2436,14 +2456,14 @@ Kruskal-Wallis chi-squared = 517.7, df = 2, p-value &lt; 2.2e-16</code></pre>
 </section>
 <section id="discussion" class="level3">
 <h3 class="anchored" data-anchor-id="discussion">Discussion</h3>
-<p>This analysis highlights notable disparities in gender assessment performance across industries, ownership types, and regions. Industries demonstrated varying levels of engagement with gender equity, with the Personal &amp; Household Products sector achieving the highest average scores. In contrast, the Pension Funds industry consistently lagged behind, pointing to potential structural or cultural barriers that may impede progress in specific sectors.</p>
+<p>This analysis highlights notable disparities in gender assessment performance across industries, ownership types, and regions. Industries demonstrated varying levels of success with gender equity, with the Personal &amp; Household Products sector achieving the highest average scores. In contrast, the Pension Funds industry consistently lagged behind, pointing to potential structural or cultural barriers that may impede progress in specific sectors.</p>
 <p>Ownership structure played a critical role in performance. Government-owned companies significantly outperformed both privately held and publicly traded firms. In contrast, publicly traded companies, despite their visibility and access to resources, showed relatively poor performance.</p>
 <p>Despite the insights provided, this analysis faces some limitations. While average scores are useful for summarizing overall trends, they can hide meaningful differences within subgroup like firm size or revenue.</p>
 </section>
 </section>
 <section id="attribution" class="level2">
 <h2 class="anchored" data-anchor-id="attribution">Attribution</h2>
-<p>Data sourced from World Benchmarking Alliance, available under a <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>. Original data set: <a href="https://www.worldbenchmarkingalliance.org/research/2024-gender-assessment-data-set/">2024 Gender Assessment data set</a>.</p>
+<p>Data sourced from World Benchmarking Alliance, available under a <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>. Original dataset: <a href="https://www.worldbenchmarkingalliance.org/research/2024-gender-assessment-data-set/">2024 Gender Assessment data set</a>.</p>
 
 
 </section>
