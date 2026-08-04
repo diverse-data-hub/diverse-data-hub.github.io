@@ -24,13 +24,18 @@ add the new data set to the use_data function
 
 ``` use_data(``newData,``bcindigenousbiz,wildfire,globalrights,hcmst,womensmarchmadness,genderassessment,overwrite = TRUE) ```
 
-### 3. Document the new data set
+### 3. Run the Updated Processing Script
+Run the updated processing script to create the .rda file for the new dataset by running the below code in your R Console. 
+
+`source("data-clean/prepare-data.R")`
+
+### 4. Document the new data set
 
 Add a new R script for documentation: **R/newData.R**
 
 Use @format, @source, and @description.
 
-### 4. Build & Check
+### 5. Build & Check
 
 Build the Documentation:
 
@@ -42,7 +47,7 @@ Check and Build the Package:
 
 `devtools::build()`
 
-### 5. Test Access Confirm that the data set can be loaded via:
+### 6. Test Access Confirm that the data set can be loaded via:
 
 `data("newData")`
 
