@@ -47,11 +47,16 @@ This dataset contains information on median income of Canadian students two year
 ::: {.table-container}
 ::: {.styled-table}
 
-| Variable Name                  | Role     | Type        | Description                                                                                       | Units         | Missing Values |
+| Variable Name                  | Role     | Type        | Description         | Units         | Missing Values |
 |--------------------------------|----------|-------------|---------------------------------------------------------------------------------------------------|---------------|----------------|
-| `year`                         | ID       | Integer     | Year in which the wildfire was first detected incident                                            | Year          | No             |
-
-
+| `year`         | ID       | Integer     | Year    | Year          | No             |
+| `location`     | Feature       | Categorical     | Geographical location, e.g. "Canada", "Quebec", etc.| - | No |
+| `educational_qualification`  | Feature    | Categorical     | Type of educational degree received, e.g. "Undergraduate degree"    | -      | No     |
+| `field_of_study`    | Feature       | Categorical     | Topic studied, e.g. "Health and related fields"  | -  | No     |
+| `gender`    | Feature       | Categorical     | "Woman", "Man", or "Total"    | -       | No             |
+| `age_group`  | Feature       | Categorial     | Range of ages, e.g. "15 to 34 years"    | -      | No       |
+| `population_group`   | Feature       | Categorical     | Population group, e.g. "South Asian", "Black", "Visible minority population"    | -          | No             |
+| `value`     | Feature       | Integer     | Median reported income    | 2024 constant Canadian dollars     | No         |
 
 :::
 :::
