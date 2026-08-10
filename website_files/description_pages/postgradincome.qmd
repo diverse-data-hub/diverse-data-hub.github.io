@@ -37,8 +37,8 @@ This dataset contains information on median income of Canadian students two year
   <div class="field-label">Subject Area</div><div class="field-value">Equity, Education, Income Disparity</div>
   <div class="field-label">Associated Tasks</div><div class="field-value">Comparative Analysis, ...</div>
   <div class="field-label">Feature Type</div><div class="field-value">Categorical, Numeric</div>
-  <div class="field-label">Instances</div><div class="field-value">182,143 records</div>
-  <div class="field-label">Features</div><div class="field-value">7</div>
+  <div class="field-label">Instances</div><div class="field-value">16,636 records</div>
+  <div class="field-label">Features</div><div class="field-value">9</div>
   <div class="field-label">Has Missing Values?</div><div class="field-value">No</div>
 </div>
 
