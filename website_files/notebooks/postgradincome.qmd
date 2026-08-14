@@ -19,14 +19,11 @@ if (Sys.getenv("GITHUB_ACTIONS") == "true") {
 
 ### Purpose and Use Cases
 
-This dataset is designed to support analysis of:
-
--   
 
 ## Case Study
 
 ### Objective
-
+Is there evidence of income disparities by gender or ethnicity in recent graduates in Canada?
 
 ### Analysis
 
@@ -42,17 +39,9 @@ library(diversedata)      # Diverse Data Hub datasets
 library(tidyverse)        
 library(lubridate)      
 
-# Spatial & mapping
-library(sf)               
-library(terra)            
-library(ggmap)            
-library(ggspatial)        
-library(maptiles)         
-library(leaflet)          
-library(leaflet.extras)   
-
-# Visualization & color
-library(viridis)          
+# Hypothesis testing
+library(car)
+library(FSA)
 
 # Tables & reporting
 library(gt)               
@@ -62,27 +51,331 @@ library(kableExtra)
 
 ## Python
 ```{python load-libraries_py, results = "hide", warning = FALSE, message = FALSE}
-import diversedata as dd
-import numpy as np
-import pandas as pd
+#import diversedata as dd
+#import numpy as np
+#import pandas as pd
 ```
 :::
 
 #### 1. Data Cleaning & Processing
+::: {.panel-tabset}
+## R
+```{r data_load}
+income_data <- postgradincome |>
+  mutate(
+    across(
+      c(location, educational_qualification, field_of_study, gender, age_group, population_group), 
+      as.factor
+    )
+  ) 
 
+# preview data
+income_data |>
+  head() |>
+  kable()
 
+```
+
+:::
 
 #### 2. Exploratory Data Analysis
+::: {.panel-tabset}
+## R
+**Median Income by Gender**
+```{r eda_1_r}
+
+ggplot(income_data, aes(x = median_income, y = gender)) +
+  geom_violin(trim = FALSE, alpha = 0.6, scale = "width", fill = "skyblue") +
+  geom_boxplot(width = 0.1, color = "black", alpha = 0.7, outlier.shape = NA) +
+  scale_x_continuous(labels = scales::dollar_format()) +
+  labs(
+    title = "Median Income Distribution by Gender",
+    x = "Median Income ($)",
+    y = "Gender"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none", panel.grid.minor = element_blank())
+
+```
+**Median Income by Population Group**
+
+```{r eda_2_r}
+
+ggplot(income_data, aes(
+  x = median_income, 
+  y = fct_reorder(population_group, median_income, .fun = median, .na_rm = TRUE))) +
+  geom_violin(trim = FALSE, alpha = 0.6, scale = "width", fill = "skyblue") +
+  geom_boxplot(width = 0.1, color = "black", alpha = 0.7, outlier.shape = NA) +
+  scale_x_continuous(labels = scales::dollar_format()) +
+  labs(
+    title = "Median Income Distribution by Population Group",
+    subtitle = "Ordered by Median Income",
+    x = "Median Income ($)",
+    y = "Population Group"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none", panel.grid.minor = element_blank())
+
+```
+
+**Median Income by Level of Study**
+```{r eda_3_r}
+
+ggplot(income_data, aes(
+  x = median_income, 
+  y = fct_reorder(educational_qualification, median_income, .fun = median, .na_rm = TRUE))) +
+  geom_violin(trim = FALSE, alpha = 0.6, scale = "width", fill = "skyblue") +
+  geom_boxplot(width = 0.1, color = "black", alpha = 0.7, outlier.shape = NA) +
+  scale_x_continuous(labels = scales::dollar_format()) +
+  scale_y_discrete(labels = scales::label_wrap(width = 35)) +
+  labs(
+    title = "Median Income Distribution by Level of Study",
+    subtitle = "Ordered by Median Income",
+    x = "Median Income ($)",
+    y = "Level of Study"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none", panel.grid.minor = element_blank())
+
+```
+
+**Median Income by Field of Study**
+```{r eda_4_r}
+
+ggplot(income_data, aes(
+  x = median_income, 
+  y = fct_reorder(field_of_study, median_income, .fun = median, .na_rm = TRUE))) +
+  geom_violin(trim = FALSE, alpha = 0.6, scale = "width", fill = "skyblue") +
+  geom_boxplot(width = 0.1, color = "black", alpha = 0.7, outlier.shape = NA) +
+  scale_x_continuous(labels = scales::dollar_format()) +
+  scale_y_discrete(labels = scales::label_wrap(width = 35)) +
+  labs(
+    title = "Median Income Distribution by Field of Study",
+    subtitle = "Ordered by Median Income",
+    x = "Median Income ($)",
+    y = "Field of Study"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none", panel.grid.minor = element_blank())
+
+```
+:::
+
+#### 3. Hypothesis Testing
+
+We want to test if different groups of graduates have significantly different median incomes. We will investigate both gender and population group as a proxy for ethnicity, but let's begin with gender. 
+
+**Hypothesis Testing: Gender**
+
+Our hypotheses are: 
+
+* **Null Hypothesis ($H_0$):** The distributions of median income are identical for both genders.
+* **Alternative Hypothesis ($H_a$):** The distributions of median income are not identical for both genders.
+
+Before we can perform our ANOVA hypothesis test, we need to check if the required assumptions are met: 
+
+1. Independence of Observations
+
+As the dataset includes one row per discrete group of graduates, and there are no repetitions, this dataset satisfactorily fulfills the required independence of observations. 
+
+2. Normality of Residuals
+
+::: {.panel-tabset}
+## R
+```{r qq_plot_r}
+
+anova_gender_model <- aov(median_income ~ gender, data = income_data)
+qqnorm(residuals(anova_gender_model))
+qqline(residuals(anova_gender_model), col = "red", lwd = 2)
+
+```
+:::
+
+Above, we can see that the residuals are not normally distributed, as the points deviate from the red line on both extremes. 
+
+::: {.panel-tabset}
+## R
+```{r residuals_r}
+
+ggplot(data.frame(resids = residuals(anova_gender_model)), aes(x = resids)) +
+  geom_density(fill = "#7EA8F8", alpha = 0.6) +
+  labs(
+    title = "Density Plot of ANOVA Residuals",
+    x = "Residuals",
+    y = "Density"
+  ) +
+  theme_minimal()
+
+```
+:::
+We can see that the residuals are not normally distributed above, but instead are right-skewed. This is typical in income datasets. 
+
+
+3. Homogeneity of Variances - Levene's test
+
+::: {.panel-tabset}
+## R
+```{r variance_r}
+
+leveneTest(median_income ~ gender, data = income_data)
+
+```
+:::
+
+We can see that the variances are not homogeneous in our datset, as the p-value from the Levene's test is smaller than 0.05. 
+
+Since the residuals are not normally distributed and the variances are not homogeneous, we cannot use an ANOVA test. Instead, we will use a non-parametric Kruskal-Wallis test. 
+
+::: {.panel-tabset}
+## R
+```{r kruskal_r}
+
+kruskal.test(median_income ~ gender, data = income_data)
+
+```
+:::
+Since p-value is smaller than 0.05, we can reject the null hypothesis in favor of the alternative, and conclude that there is statistical evidence for a difference in median income between men and women in our dataset. 
+
+**Hypothesis Testing: Population Group**
+
+We can do the same process for income by population group. Our hypotheses are:   
+
+* **Null Hypothesis ($H_0$):** The distributions of median income are identical across all population groups.
+* **Alternative Hypothesis ($H_a$):** The distributions of median income are not identical across all population groups.
+
+
+First we need to re-check our assumptions. 
+
+Assumption checks:
+
+1. Independence of Observations
+
+As the dataset includes one row per discrete group of graduates, and there are no repetitions, this dataset satisfactorily fulfills the required independence of observations. 
+
+2. Normality of Residuals
+
+::: {.panel-tabset}
+## R
+```{r qq_plot_popgroup_r}
+
+anova_popgroup_model <- aov(median_income ~ population_group, data = income_data)
+qqnorm(residuals(anova_popgroup_model))
+qqline(residuals(anova_popgroup_model), col = "red", lwd = 2)
+
+
+```
+:::
+
+::: {.panel-tabset}
+
+## R
+```{r residuals_popgroup_r}
+
+ggplot(data.frame(resids = residuals(anova_popgroup_model)), aes(x = resids)) +
+  geom_density(fill = "#7EA8F8", alpha = 0.6) +
+  labs(
+    title = "Density Plot of ANOVA Residuals",
+    x = "Residuals",
+    y = "Density"
+  ) +
+  theme_minimal()
+
+```
+:::
+
+3. Homogeneity of Variances - Levene's test
+
+::: {.panel-tabset}
+## R
+```{r variance_popgroup_r}
+
+leveneTest(median_income ~ population_group, data = income_data)
+
+```
+:::
+
+Again, since the residuals are not normally distributed and the variances are not homogeneous, we will use a Kruskal-Wallis test. 
+
+::: {.panel-tabset}
+## R
+```{r kruskal_popgroup_r}
+
+kruskal.test(median_income ~ population_group, data = income_data)
+
+```
+:::
+
+Since p-value is smaller than 0.05, we can reject the null hypothesis in favor of the alternative, that the distributions of median income are not identical across all population groups. To find out which groups differ, we need to conduct a Dunn's Post-Hoc test with a Bonferroni correction for multiple comparisons. 
+
+::: {.panel-tabset}
+## R
+```{r dunns_popgroup_r}
+
+# Run Dunn's test with Bonferroni correction
+dunnTest(median_income ~ population_group, data = income_data, method = "bonferroni")
+
+```
+:::
+From both the Kruskal-Wallis and the Dunn's Post-Hoc test, we can see that there are statistically significant differences in median income distributions between different population groups. Notable differences appear around comparing "Not a visible minority" to many groups, including "Arab", "Black", "Latin American", etc. 
 
 
 
-#### 3. Logistic Regression Model
+#### 4. Predictive Model
 
+::: {.panel-tabset}
+## R
+```{r split_data_r}
 
+# Split dataset to train and test sets
+set.seed(42)
 
-#### 4. Interpretation/Evaluation of our Model
+# Determine number of rows for training set
+train_size <- floor(0.8 * nrow(income_data))
+
+# Randomly sample row indices for training
+train_indices <- sample(seq_len(nrow(income_data)), size = train_size)
+
+# Create the training and testing sets
+income_train <- income_data[train_indices, ]
+income_test  <- income_data[-train_indices, ]
+
+```
+:::
+
+::: {.panel-tabset}
+
+## R
+```{r model_r}
+# Fit a standard linear model
+model_lm <- lm(median_income ~ educational_qualification + population_group + gender + field_of_study, 
+               data = income_train)
+
+# View coefficients and summary
+summary(model_lm)
+
+# Predict on test data
+test_results <- income_test %>%
+  mutate(.pred = predict(model_lm, newdata = income_test))
+
+# Calculate RMSE
+sqrt(mean((test_results$median_income - test_results$.pred)^2, na.rm = TRUE))
+```
+:::
+
+Overall, this model performed reasonably well. The Adjusted R-squared ($0.5823$) indicates that this model can explain 58.2% of the variance in median post-graduation income. This number, while not extremely high, provides a good baseline prediction for a complex social and economic dataset. The F-statistic also indicates that this model is doing well. With a p-value of $p < 2.2 \times 10^{-16}$), the model as a whole is statistically significant compared to an intercept-only model, which indicates that the explanatory variables used here do a decent job of explaining income differences. 
+
+We can interpret the coefficients from our model as well. The intercept ($\$31,660$) represents the baseline predicted median income for the reference group (i.e. graduates in the group of "Man" and "Arab", with education in "Career, technical or professional training certificate", and "Agriculture, natural resources and conservation"). All coefficients represent the expected difference in median income relative to the reference category, holding all other variables constant:
+
+* **Gender:** Being a woman, compared to being a man, is associated with a median income that is $\$5,760$ lower, while holding all other variables constant. 
+* **Population Group:** Several groups show significant differences relative to the baseline group, "Arab". For example, "Not a visible minority" shows an estimated premium of $\$9,468$, while groups like Japanese, Multiple visible minorities, and West Asian do not show statistically significant differences ($p > 0.05$) after controlling for education, gender, and field of study.
+* **Educational qualification:** Higher degrees show higher median incomes, as is expected. For example, a Doctoral degree is associated with an increase of about $\$48,088$, and a Professional degree with an increase of about $\$55,218$, while holding all other variables constant. 
+* **Field of Study:** Fields like Health and related fields ($\approx +\$18,065$) and Architecture and engineering ($\approx +\$12,610$) show large positive coefficients, whereas fields like Visual and performing arts ($\approx -\$19,002$) and Humanities ($\approx -\$13,332$) show substantial negative adjustments compared to the baseline field of "Agriculture, natural resources and conservation". 
 
 
 
 ### Discussion
+Results from both the hypothesis testing and model training suggest that income disparity continues to prevail by both gender and ethnicity in the current day. 
+
+
+
 

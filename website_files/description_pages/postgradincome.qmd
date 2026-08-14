@@ -23,11 +23,11 @@ This dataset contains information on median income of Canadian students two year
 
 ### Download
 
-<!-- <div class="button-container"> -->
-<!--   <a href="../../data/clean/wildfire.csv" download class="download-button"> -->
-<!--     Download CSV -->
-<!--   </a> -->
-<!-- </div> -->
+<div class="button-container">
+  <a href="../../data/clean/postgradincome.csv" download class="download-button">
+    Download CSV
+  </a>
+</div>
 
 ### Metadata
 
