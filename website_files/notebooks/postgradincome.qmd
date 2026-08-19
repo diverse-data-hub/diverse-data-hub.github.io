@@ -15,15 +15,36 @@ if (Sys.getenv("GITHUB_ACTIONS") == "true") {
 
 ### Key Features of the Dataset
 
+Each row of this dataset represents a group of graduates and reports the group's median income 2 years after graduation, along with demographic information about the group of graduates:
 
+- **Year** (`year`) -- The year in which income was reported
+- **Location** (`location`) -- The geographical location of the graduates
+- **Educational Information** (`educational_qualification`, `field_of_study`) -- Information on the type and focus of the degree received by the group of graduates
+- **Demographic Information** (`gender`, `age_group`, `population_group`) -- Demographic information on the gender, age, and population group (similar to ethnicity) of the group of graduates
+- **Median Income** (`median_income`) -- The median income of the group of graduates
+- **Number of Graduates** (`number_graduates`) -- The number of individuals that make up the group
 
 ### Purpose and Use Cases
+This dataset supports the analysis of: 
 
+- **Demographic Equity & Disparities:** Examining wage gaps and income distribution across gender and population groups.
+- **Educational Return on Investment (ROI):** Evaluating how different educational qualifications and credential levels impact post-graduation incomes.
+- **Impact of Field of Study:** Comparing incomes across various academic disciplines, from professional and technical trades to the humanities and sciences.
+- **Predictive Modeling:** Building regression or machine learning baselines to estimate expected post-graduate income based on a combination of educational and demographic factors.
+- **Institutional & Policy Insights:** Informing career advisory strategies, educational planning, and equity initiatives for prospective students.
 
 ## Case Study
 
 ### Objective
-Is there evidence of income disparities by gender or ethnicity in recent graduates in Canada?
+Equitable incomes for recent graduates are essential for inclusive labor markets and educational planning. This dataset provides information on post-graduation median incomes in Canada, allowing us to examine how factors like gender, ehtnicity, education type, and field of study intersect and impact incomes. 
+
+To explore these dynamics, we focus on several key questions: 
+
+- Is there evidence of income disparity by gender or ethnicity in recent graduates in Canada?
+- How do educational credentials and fields of study shape incomes across different groups? 
+- To what extent can we predict post-graduation income using these academic and demographic factors? 
+
+Through statistical testing and predictive modeling, we aim to uncover structural wage gaps and identify the primary drivers of post-grad earnings.
 
 ### Analysis
 
