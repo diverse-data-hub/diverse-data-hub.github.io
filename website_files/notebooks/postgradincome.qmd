@@ -100,21 +100,47 @@ income_data |>
 :::
 
 #### 2. Exploratory Data Analysis
+:::{.panel-tabset}
+## R
+**Expanding aggregate rows**
+```{r uncounting}
+
+plotting_data <- income_data |>
+  uncount(weights = number_graduates)
+
+```
+:::
+
+
 ::: {.panel-tabset}
 ## R
 **Median Income by Gender**
 ```{r eda_1_r}
 
-ggplot(income_data, aes(x = median_income, y = gender)) +
-  geom_violin(trim = FALSE, alpha = 0.6, scale = "width", fill = "skyblue") +
-  geom_boxplot(width = 0.1, color = "black", alpha = 0.7, outlier.shape = NA) +
+library(ggdist)
+
+ggplot(income_data, aes(
+  y = gender, 
+  x = median_income)) +
+  stat_halfeye(aes(weight = number_graduates), 
+               adjust = 1.5, 
+               justification = -0.1, 
+               .width = 0, 
+               point_colour = NA, 
+               alpha = 0.6,
+               fill = "darkgreen") +
+  geom_boxplot(aes(weight = number_graduates), 
+               width = 0.15, 
+               outlier.shape = NA, 
+               alpha = 0.7, 
+               color = "black") +
   scale_x_continuous(labels = scales::dollar_format()) +
   labs(
     title = "Median Income Distribution by Gender",
-    x = "Median Income ($)",
-    y = "Gender"
+    y = "Gender",
+    x = "Median Income ($)"
   ) +
-  theme_minimal(base_size = 13) +
+  theme_minimal(base_size = 11) +
   theme(legend.position = "none", panel.grid.minor = element_blank())
 
 ```
@@ -123,18 +149,28 @@ ggplot(income_data, aes(x = median_income, y = gender)) +
 ```{r eda_2_r}
 
 ggplot(income_data, aes(
-  x = median_income, 
-  y = fct_reorder(population_group, median_income, .fun = median, .na_rm = TRUE))) +
-  geom_violin(trim = FALSE, alpha = 0.6, scale = "width", fill = "skyblue") +
-  geom_boxplot(width = 0.1, color = "black", alpha = 0.7, outlier.shape = NA) +
+  y = fct_reorder(population_group, median_income, .fun = median, .na_rm = TRUE), 
+  x = median_income)) +
+  stat_halfeye(aes(weight = number_graduates), 
+               adjust = 1.5, 
+               justification = -0.1, 
+               .width = 0, 
+               point_colour = NA, 
+               alpha = 0.6,
+               fill = "darkgreen") +
+  geom_boxplot(aes(weight = number_graduates), 
+               width = 0.15, 
+               outlier.shape = NA, 
+               alpha = 0.7, 
+               color = "black") +
   scale_x_continuous(labels = scales::dollar_format()) +
   labs(
     title = "Median Income Distribution by Population Group",
     subtitle = "Ordered by Median Income",
-    x = "Median Income ($)",
-    y = "Population Group"
+    y = "Population Group",
+    x = "Median Income ($)"
   ) +
-  theme_minimal(base_size = 13) +
+  theme_minimal(base_size = 11) +
   theme(legend.position = "none", panel.grid.minor = element_blank())
 
 ```
@@ -143,19 +179,29 @@ ggplot(income_data, aes(
 ```{r eda_3_r}
 
 ggplot(income_data, aes(
-  x = median_income, 
-  y = fct_reorder(educational_qualification, median_income, .fun = median, .na_rm = TRUE))) +
-  geom_violin(trim = FALSE, alpha = 0.6, scale = "width", fill = "skyblue") +
-  geom_boxplot(width = 0.1, color = "black", alpha = 0.7, outlier.shape = NA) +
+  y = fct_reorder(educational_qualification, median_income, .fun = median, .na_rm = TRUE), 
+  x = median_income)) +
+  stat_halfeye(aes(weight = number_graduates), 
+               adjust = 1.5, 
+               justification = -0.1, 
+               .width = 0, 
+               point_colour = NA, 
+               alpha = 0.6,
+               fill = "darkgreen") +
+  geom_boxplot(aes(weight = number_graduates), 
+               width = 0.15, 
+               outlier.shape = NA, 
+               alpha = 0.7, 
+               color = "black") +
   scale_x_continuous(labels = scales::dollar_format()) +
   scale_y_discrete(labels = scales::label_wrap(width = 35)) +
   labs(
-    title = "Median Income Distribution by Level of Study",
+    title = "Median Income Distribution by Educational Qualification",
     subtitle = "Ordered by Median Income",
-    x = "Median Income ($)",
-    y = "Level of Study"
+    y = "Educational Qualification",
+    x = "Median Income ($)"
   ) +
-  theme_minimal(base_size = 13) +
+  theme_minimal(base_size = 11) +
   theme(legend.position = "none", panel.grid.minor = element_blank())
 
 ```
@@ -164,19 +210,29 @@ ggplot(income_data, aes(
 ```{r eda_4_r}
 
 ggplot(income_data, aes(
-  x = median_income, 
-  y = fct_reorder(field_of_study, median_income, .fun = median, .na_rm = TRUE))) +
-  geom_violin(trim = FALSE, alpha = 0.6, scale = "width", fill = "skyblue") +
-  geom_boxplot(width = 0.1, color = "black", alpha = 0.7, outlier.shape = NA) +
+  y = fct_reorder(field_of_study, median_income, .fun = median, .na_rm = TRUE), 
+  x = median_income)) +
+  stat_halfeye(aes(weight = number_graduates), 
+               adjust = 1.5, 
+               justification = -0.1, 
+               .width = 0, 
+               point_colour = NA, 
+               alpha = 0.6,
+               fill = "darkgreen") +
+  geom_boxplot(aes(weight = number_graduates), 
+               width = 0.15, 
+               outlier.shape = NA, 
+               alpha = 0.7, 
+               color = "black") +
   scale_x_continuous(labels = scales::dollar_format()) +
   scale_y_discrete(labels = scales::label_wrap(width = 35)) +
   labs(
     title = "Median Income Distribution by Field of Study",
     subtitle = "Ordered by Median Income",
-    x = "Median Income ($)",
-    y = "Field of Study"
+    y = "Field of Study",
+    x = "Median Income ($)"
   ) +
-  theme_minimal(base_size = 13) +
+  theme_minimal(base_size = 11) +
   theme(legend.position = "none", panel.grid.minor = element_blank())
 
 ```
@@ -391,6 +447,47 @@ We can interpret the coefficients from our model as well. The intercept ($\$31,6
 * **Population Group:** Several groups show significant differences relative to the baseline group, "Arab". For example, "Not a visible minority" shows an estimated premium of $\$9,468$, while groups like Japanese, Multiple visible minorities, and West Asian do not show statistically significant differences ($p > 0.05$) after controlling for education, gender, and field of study.
 * **Educational qualification:** Higher degrees show higher median incomes, as is expected. For example, a Doctoral degree is associated with an increase of about $\$48,088$, and a Professional degree with an increase of about $\$55,218$, while holding all other variables constant. 
 * **Field of Study:** Fields like Health and related fields ($\approx +\$18,065$) and Architecture and engineering ($\approx +\$12,610$) show large positive coefficients, whereas fields like Visual and performing arts ($\approx -\$19,002$) and Humanities ($\approx -\$13,332$) show substantial negative adjustments compared to the baseline field of "Agriculture, natural resources and conservation". 
+
+
+::: {.panel-tabset}
+## R
+```{r split_data_weighted_r}
+library(rsample)
+set.seed(42)
+
+# Split dataset to train and test sets using stratified splitting
+# Ensures small and large weight rows are evenly distributed between train and test
+data_split <- initial_split(income_data, prop = 0.8, strata = number_graduates)
+
+# Create the training and testing sets
+income_train_weighted <- training(data_split)
+income_test_weighted  <- testing(data_split)
+
+```
+:::
+
+::: {.panel-tabset}
+```{r weighted_model_r}
+# Fit a weighted linear model
+model_lm_weighted <- lm(median_income ~ educational_qualification + population_group + gender + field_of_study, 
+               data = income_train_weighted,
+               weights = number_graduates)
+
+# View coefficients and summary
+summary(model_lm_weighted)
+
+# Predict on test data
+test_results_weighted <- income_test_weighted %>%
+  mutate(.pred = predict(model_lm_weighted, newdata = income_test_weighted))
+
+# Calculate weighted RMSE
+test_results_weighted %>%
+  summarize(
+    weighted_mse = sum(number_graduates * (median_income - .pred)^2, na.rm = TRUE) / sum(number_graduates, na.rm = TRUE),
+    weighted_rmse = sqrt(weighted_mse)
+  )
+```
+:::
 
 
 
