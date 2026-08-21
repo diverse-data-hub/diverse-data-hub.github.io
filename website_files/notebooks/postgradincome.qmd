@@ -59,6 +59,7 @@ library(diversedata)      # Diverse Data Hub datasets
 # Core libraries
 library(tidyverse)        
 library(lubridate)      
+library(stringr)
 
 # Hypothesis testing
 library(car)
@@ -84,6 +85,7 @@ library(kableExtra)
 ```{r data_load}
 income_data <- postgradincome |>
   mutate(
+    field_of_study = str_remove(field_of_study, "\\s*\\[\\d+\\]$"),
     across(
       c(location, educational_qualification, field_of_study, gender, age_group, population_group), 
       as.factor
@@ -100,17 +102,6 @@ income_data |>
 :::
 
 #### 2. Exploratory Data Analysis
-:::{.panel-tabset}
-## R
-**Expanding aggregate rows**
-```{r uncounting}
-
-plotting_data <- income_data |>
-  uncount(weights = number_graduates)
-
-```
-:::
-
 
 ::: {.panel-tabset}
 ## R
