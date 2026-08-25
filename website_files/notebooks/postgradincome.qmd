@@ -80,6 +80,8 @@ library(kableExtra)
 :::
 
 #### 1. Data Cleaning & Processing
+To clean the data, first we use regex to clean the values in `field_of_study` and remove unnecessary numerical markers, like `[1]`. Then, we convert relevant columns to factor type. 
+
 ::: {.panel-tabset}
 ## R
 ```{r data_load}
@@ -138,6 +140,8 @@ ggplot(income_data, aes(
 **Median Income by Population Group**
 
 ```{r eda_2_r}
+#| fig-width: 8
+#| fig-height: 6
 
 ggplot(income_data, aes(
   y = fct_reorder(population_group, median_income, .fun = median, .na_rm = TRUE), 
@@ -168,6 +172,8 @@ ggplot(income_data, aes(
 
 **Median Income by Level of Study**
 ```{r eda_3_r}
+#| fig-width: 8
+#| fig-height: 6
 
 ggplot(income_data, aes(
   y = fct_reorder(educational_qualification, median_income, .fun = median, .na_rm = TRUE), 
@@ -199,6 +205,8 @@ ggplot(income_data, aes(
 
 **Median Income by Field of Study**
 ```{r eda_4_r}
+#| fig-width: 8
+#| fig-height: 6
 
 ggplot(income_data, aes(
   y = fct_reorder(field_of_study, median_income, .fun = median, .na_rm = TRUE), 
@@ -247,6 +255,7 @@ Before we can perform our ANOVA hypothesis test, we need to check if the require
 As the dataset includes one row per discrete group of graduates, and there are no repetitions, this dataset satisfactorily fulfills the required independence of observations. 
 
 2. Normality of Residuals
+We build a Q-Q plot, where, if the residuals are normally distributed, we would expect the black points to lie close to the red diagonal line. 
 
 ::: {.panel-tabset}
 ## R
@@ -260,6 +269,8 @@ qqline(residuals(anova_gender_model), col = "red", lwd = 2)
 :::
 
 Above, we can see that the residuals are not normally distributed, as the points deviate from the red line on both extremes. 
+
+We can additionally test this normality by making a density plot of the residuals, and visually inspecting the shape of the curve. 
 
 ::: {.panel-tabset}
 ## R
@@ -276,10 +287,11 @@ ggplot(data.frame(resids = residuals(anova_gender_model)), aes(x = resids)) +
 
 ```
 :::
-We can see that the residuals are not normally distributed above, but instead are right-skewed. This is typical in income datasets. 
-
+We can see that the residuals are not normally distributed above, but instead are right-skewed. This is typical in income datasets, as most people have a low to moderate income, while a small number of people earn very high amounts, as discussed in [Passion Driven Statistics](https://alanarnholt.github.io/PDS-Bookdown2/skewed-right-distributions.html). 
 
 3. Homogeneity of Variances - Levene's test
+
+For ANOVA, we also need to check if the different groups have comparable amounts of variance. 
 
 ::: {.panel-tabset}
 ## R
@@ -335,7 +347,6 @@ qqline(residuals(anova_popgroup_model), col = "red", lwd = 2)
 :::
 
 ::: {.panel-tabset}
-
 ## R
 ```{r residuals_popgroup_r}
 
@@ -351,6 +362,8 @@ ggplot(data.frame(resids = residuals(anova_popgroup_model)), aes(x = resids)) +
 ```
 :::
 
+Again, from both the Q-Q plot and the residuals density plot, we can see that the residuals are not normally distributed. 
+
 3. Homogeneity of Variances - Levene's test
 
 ::: {.panel-tabset}
@@ -362,7 +375,9 @@ leveneTest(median_income ~ population_group, data = income_data)
 ```
 :::
 
-Again, since the residuals are not normally distributed and the variances are not homogeneous, we will use a Kruskal-Wallis test. 
+Similarly, since the p-value is less than 0.05, we can conclude that the variances are heterogeneous, and this assumption is violated. 
+
+Therefore, since the residuals are not normally distributed and the variances are not homogeneous, we cannot use ANOVA and instead will use a Kruskal-Wallis test. 
 
 ::: {.panel-tabset}
 ## R
@@ -384,11 +399,14 @@ dunnTest(median_income ~ population_group, data = income_data, method = "bonferr
 
 ```
 :::
+
 From both the Kruskal-Wallis and the Dunn's Post-Hoc test, we can see that there are statistically significant differences in median income distributions between different population groups. Notable differences appear around comparing "Not a visible minority" to many groups, including "Arab", "Black", "Latin American", etc. 
 
 
 
 #### 4. Predictive Model
+
+**Old model: non-weighted - to be deleted**
 
 ::: {.panel-tabset}
 ## R
@@ -411,7 +429,6 @@ income_test  <- income_data[-train_indices, ]
 :::
 
 ::: {.panel-tabset}
-
 ## R
 ```{r model_r}
 # Fit a standard linear model
@@ -430,15 +447,15 @@ sqrt(mean((test_results$median_income - test_results$.pred)^2, na.rm = TRUE))
 ```
 :::
 
-Overall, this model performed reasonably well. The Adjusted R-squared ($0.5823$) indicates that this model can explain 58.2% of the variance in median post-graduation income. This number, while not extremely high, provides a good baseline prediction for a complex social and economic dataset. The F-statistic also indicates that this model is doing well. With a p-value of $p < 2.2 \times 10^{-16}$), the model as a whole is statistically significant compared to an intercept-only model, which indicates that the explanatory variables used here do a decent job of explaining income differences. 
+**New model - weighted**
 
-We can interpret the coefficients from our model as well. The intercept ($\$31,660$) represents the baseline predicted median income for the reference group (i.e. graduates in the group of "Man" and "Arab", with education in "Career, technical or professional training certificate", and "Agriculture, natural resources and conservation"). All coefficients represent the expected difference in median income relative to the reference category, holding all other variables constant:
+To understand the factors driving median income and identify variations across groups, we will build a linear regression model. Because our dataset is aggregated, where each row represents a group of individuals rather than a single person, we need to use the number of individuals contained in the `number_graduates` column as the weight of each row in data splitting as well as model training and evaluation. 
 
-* **Gender:** Being a woman, compared to being a man, is associated with a median income that is $\$5,760$ lower, while holding all other variables constant. 
-* **Population Group:** Several groups show significant differences relative to the baseline group, "Arab". For example, "Not a visible minority" shows an estimated premium of $\$9,468$, while groups like Japanese, Multiple visible minorities, and West Asian do not show statistically significant differences ($p > 0.05$) after controlling for education, gender, and field of study.
-* **Educational qualification:** Higher degrees show higher median incomes, as is expected. For example, a Doctoral degree is associated with an increase of about $\$48,088$, and a Professional degree with an increase of about $\$55,218$, while holding all other variables constant. 
-* **Field of Study:** Fields like Health and related fields ($\approx +\$18,065$) and Architecture and engineering ($\approx +\$12,610$) show large positive coefficients, whereas fields like Visual and performing arts ($\approx -\$19,002$) and Humanities ($\approx -\$13,332$) show substantial negative adjustments compared to the baseline field of "Agriculture, natural resources and conservation". 
+Our modeling workflow is structured as follows:
 
+* **Data Splitting:** We partition the weighted dataset into training and test sets to ensure unbiased evaluation.
+* **Coefficient & Group Analysis:** We examine the model's learned coefficients and their statistical significance to uncover key drivers and differences between groups.
+* **Performance Evaluation:** We assess model generalizability by calculating the root mean squared error (RMSE) of our predictions on the test set.
 
 ::: {.panel-tabset}
 ## R
@@ -458,6 +475,7 @@ income_test_weighted  <- testing(data_split)
 :::
 
 ::: {.panel-tabset}
+## R
 ```{r weighted_model_r}
 # Fit a weighted linear model
 model_lm_weighted <- lm(median_income ~ educational_qualification + population_group + gender + field_of_study, 
@@ -466,7 +484,21 @@ model_lm_weighted <- lm(median_income ~ educational_qualification + population_g
 
 # View coefficients and summary
 summary(model_lm_weighted)
+```
+:::
 
+Overall, this model performed reasonably well. The Adjusted R-squared ($0.6491$) indicates that this model can explain 64.91% of the variance in median post-graduation income. This number, while not extremely high, provides a good baseline prediction for a complex social and economic dataset. The F-statistic also indicates that this model is doing well. With a p-value of $p < 2.2 \times 10^{-16}$), the model as a whole is statistically significant compared to an intercept-only model, which indicates that the explanatory variables used here do a decent job of explaining income differences. 
+
+We can interpret the coefficients from our model as well. The intercept ($\$31,044$) represents the baseline predicted median income for the reference group (i.e. graduates in the group of "Man" and "Arab", with education in "Career, technical or professional training certificate", and "Agriculture, natural resources and conservation"). All coefficients represent the expected difference in median income relative to the reference category, holding all other variables constant:
+
+* **Gender:** Being a woman, compared to being a man, is associated with a median income that is $\$4,884$ lower, while holding all other variables constant. 
+* **Population Group:** Several groups show significant differences relative to the baseline group, "Arab". For example, "Not a visible minority" shows an estimated increase of $\$7,136$, while groups like Japanese, Multiple visible minorities, and West Asian do not show statistically significant differences ($p > 0.05$) after controlling for education, gender, and field of study.
+* **Educational qualification:** Higher degrees show higher median incomes, as is expected. For example, a Doctoral degree is associated with an increase of $\$54,592$, and a Professional degree with an increase of about $\$56,240$, while holding all other variables constant. 
+* **Field of Study:** Fields like Health and related fields ($\approx +\$14,448$) and Architecture and engineering ($\approx +\$12,102$) show large positive coefficients, whereas fields like Visual and performing arts ($\approx -\$17,637$) and Humanities ($\approx -\$16,249$) show substantial negative adjustments compared to the baseline field of "Agriculture, natural resources and conservation". 
+
+::: {.panel-tabset}
+## R
+```{r weighted_model_eval_r}
 # Predict on test data
 test_results_weighted <- income_test_weighted %>%
   mutate(.pred = predict(model_lm_weighted, newdata = income_test_weighted))
@@ -477,10 +509,18 @@ test_results_weighted %>%
     weighted_mse = sum(number_graduates * (median_income - .pred)^2, na.rm = TRUE) / sum(number_graduates, na.rm = TRUE),
     weighted_rmse = sqrt(weighted_mse)
   )
+
+# Display income range for comparison
+min(income_data$median_income)
+max(income_data$median_income)
+mean(income_data$median_income)
+
 ```
 :::
 
+To further evaluate our model's generalizability, we can generate predictions on the test set and calculate the weighted root mean squared error (RMSE). The resulting test RMSE is $\$12,135$. 
 
+To put this error into perspective, we can compare it against the broader distribution of median incomes in our dataset, which spans from $\$3,900$ to $\$270,200$ with a mean of $\$62,173$. An RMSE of roughly $\$12,000$. represents about 20% of the average income value. This indicates that while there is room for higher precision, the model captures the overall trend effectively without large-scale deviation.
 
 ### Discussion
 Results from both the hypothesis testing and model training suggest that income disparity continues to prevail by both gender and ethnicity in the current day. 
