@@ -403,51 +403,7 @@ dunnTest(median_income ~ population_group, data = income_data, method = "bonferr
 From both the Kruskal-Wallis and the Dunn's Post-Hoc test, we can see that there are statistically significant differences in median income distributions between different population groups. Notable differences appear around comparing "Not a visible minority" to many groups, including "Arab", "Black", "Latin American", etc. 
 
 
-
 #### 4. Predictive Model
-
-**Old model: non-weighted - to be deleted**
-
-::: {.panel-tabset}
-## R
-```{r split_data_r}
-
-# Split dataset to train and test sets
-set.seed(42)
-
-# Determine number of rows for training set
-train_size <- floor(0.8 * nrow(income_data))
-
-# Randomly sample row indices for training
-train_indices <- sample(seq_len(nrow(income_data)), size = train_size)
-
-# Create the training and testing sets
-income_train <- income_data[train_indices, ]
-income_test  <- income_data[-train_indices, ]
-
-```
-:::
-
-::: {.panel-tabset}
-## R
-```{r model_r}
-# Fit a standard linear model
-model_lm <- lm(median_income ~ educational_qualification + population_group + gender + field_of_study, 
-               data = income_train)
-
-# View coefficients and summary
-summary(model_lm)
-
-# Predict on test data
-test_results <- income_test %>%
-  mutate(.pred = predict(model_lm, newdata = income_test))
-
-# Calculate RMSE
-sqrt(mean((test_results$median_income - test_results$.pred)^2, na.rm = TRUE))
-```
-:::
-
-**New model - weighted**
 
 To understand the factors driving median income and identify variations across groups, we will build a linear regression model. Because our dataset is aggregated, where each row represents a group of individuals rather than a single person, we need to use the number of individuals contained in the `number_graduates` column as the weight of each row in data splitting as well as model training and evaluation. 
 
@@ -511,9 +467,9 @@ test_results_weighted %>%
   )
 
 # Display income range for comparison
-min(income_data$median_income)
-max(income_data$median_income)
-mean(income_data$median_income)
+cat(sprintf("Minimum median income: $%s\n", format(min(income_data$median_income), big.mark = ",")))
+cat(sprintf("Maximum median income: $%s\n", format(max(income_data$median_income), big.mark = ",")))
+cat(sprintf("Mean median income: $%s\n", format(round(mean(income_data$median_income), 0), big.mark = ",")))
 
 ```
 :::
@@ -554,6 +510,57 @@ cat(sprintf("Absolute Error: $%s\n", format(round(ex_diff, 2), big.mark = ",")))
 Looking at this specific test case of a group of graduates from our test set, the true median income and our model's predicted median income give us a clear concrete example of how the model performs on an individual level. 
 
 Given that our test set RMSE is $12,135, individual discrepancies like this align fairly well with our overall error metrics. It illustrates that while the model captures the structural baseline and general trajectory of graduate earnings quite well, localized variance among specific demographic and educational intersections can still produce deviations of around five to twenty thousand dollars.
+
+
+
+
+#### Interaction Effects
+
+Above, we used a solely additive model, meaning that we assumed that the effects of each explanatory variable on the income prediction were independent of each other. Let's investigate an interactive model, which allows the effect of one variable to depend on the level of another. We will examine whether gender wage disparities vary across different academic areas, by incorporating interaction terms between gender and field of study into our model. This allows us to test whether specific fields exhibit wider or narrower wage gaps between men and women, after controlling for educational qualifications and population groups. It is important to note here, that we are restricting this investigation to only interaction terms between two variables, gender and field of study, as including interaction terms between all four explanatory variables can lead to severe overfitting, singularities due to uncommon combinations, and uninterpretable parameter explosion. These issues, and methods to work around them, are discussed further [here](https://medium.com/@TingyuZou/when-analyzing-complex-data-researchers-often-encounter-relationships-that-cannot-be-captured-by-1d9dccf14583). 
+
+
+::: {.panel-tabset}
+## R
+```{r inter_model_r}
+# Fit a weighted linear model with interaction effects
+model_lm_inter <- lm(median_income ~ (educational_qualification + population_group + gender * field_of_study), 
+               data = income_train_weighted,
+               weights = number_graduates)
+
+# View coefficients and summary
+summary(model_lm_inter)
+```
+:::
+
+::: {.panel-tabset}
+## R
+```{r inter_model_eval_r}
+# Predict on test data
+test_results_inter <- income_test_weighted %>%
+  mutate(.pred = predict(model_lm_inter, newdata = income_test_weighted))
+
+# Calculate weighted RMSE
+test_results_inter %>%
+  summarize(
+    weighted_mse = sum(number_graduates * (median_income - .pred)^2, na.rm = TRUE) / sum(number_graduates, na.rm = TRUE),
+    weighted_rmse = sqrt(weighted_mse)
+  )
+
+# Display income range for comparison
+cat(sprintf("Minimum median income: $%s\n", format(min(income_data$median_income), big.mark = ",")))
+cat(sprintf("Maximum median income: $%s\n", format(max(income_data$median_income), big.mark = ",")))
+cat(sprintf("Mean median income: $%s\n", format(round(mean(income_data$median_income), 0), big.mark = ",")))
+
+```
+:::
+
+The inclusion of the gender - field of study interactions modestly improves model fit, raising the adjusted R-squared to $0.6594$. While a general baseline gender penalty persists across many fields, where women earn an estimated $\$7,205$ less than men holding other factors constant, the magnitude of this gap varies significantly by discipline:
+
+* **Exacerbated Disparities in Tech & Trades:** In fields like **mathematics, computer, and information sciences** ($\-$ $\$5,435$ interaction) and **personal, protective, and transportation services** ($\-$ $\$9,159$ interaction), the negative interaction coefficients indicate a structurally wider gender gap.
+* **Neutralization in Health:** Conversely, **health and related fields** exhibit a significant positive interaction ($\approx +\$10,597$, $p < 0.001$), which effectively neutralizes or reverses the baseline gender penalty in those specific credentials. 
+
+These findings suggest that post-graduation wage disparities are not uniform across the labor market, but are instead heavily mediated by the specific career paths graduates pursue. With further analysis and investigation, other interaction terms may be significant, and provide more detailed insights into wage disparities. 
+
 
 ### Discussion
 Results from both the hypothesis testing and model training suggest that income disparity continues to prevail by both gender and ethnicity in the current day. 
