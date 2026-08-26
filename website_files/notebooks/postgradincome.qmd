@@ -522,6 +522,39 @@ To further evaluate our model's generalizability, we can generate predictions on
 
 To put this error into perspective, we can compare it against the broader distribution of median incomes in our dataset, which spans from $\$3,900$ to $\$270,200$ with a mean of $\$62,173$. An RMSE of roughly $\$12,000$. represents about 20% of the average income value. This indicates that while there is room for higher precision, the model captures the overall trend effectively without large-scale deviation.
 
+To ground our evaluation in a concrete example, we can inspect a single row from our test set. By comparing the model's predicted income against the true reported value for this group, we can see how the model performs on an individual data point while accounting for its corresponding sample weight.
+
+::: {.panel-tabset}
+## R
+```{r single_example_r}
+
+# Select a single row from the test set (e.g. the first row)
+example_row <- income_test_weighted |> 
+  slice(2)
+
+# Generate the prediction for this specific row
+example_pred <- predict(model_lm_weighted, newdata = example_row)
+
+# Calculate difference in predicted and true median incomes
+ex_true <- example_row$median_income
+ex_diff <- abs(ex_true - example_pred)
+
+# Display the attributes and values of our test case
+cat(sprintf("Educational Qualification: %s\n", example_row$educational_qualification))
+cat(sprintf("Field of Study: %s\n", example_row$field_of_study))
+cat(sprintf("Gender: %s\n", example_row$gender))
+cat(sprintf("Population Group: %s\n", example_row$population_group))
+cat(sprintf("Number of Graduates in Group (Weight): %s\n", format(example_row$number_graduates, big.mark = ",")))
+cat(sprintf("True Median Income: $%s\n", format(round(ex_true, 2), big.mark = ",")))
+cat(sprintf("Predicted Median Income: $%s\n", format(round(example_pred, 2), big.mark = ",")))
+cat(sprintf("Absolute Error: $%s\n", format(round(ex_diff, 2), big.mark = ",")))
+```
+:::
+
+Looking at this specific test case of a group of graduates from our test set, the true median income and our model's predicted median income give us a clear concrete example of how the model performs on an individual level. 
+
+Given that our test set RMSE is $12,135, individual discrepancies like this align fairly well with our overall error metrics. It illustrates that while the model captures the structural baseline and general trajectory of graduate earnings quite well, localized variance among specific demographic and educational intersections can still produce deviations of around five to twenty thousand dollars.
+
 ### Discussion
 Results from both the hypothesis testing and model training suggest that income disparity continues to prevail by both gender and ethnicity in the current day. 
 
