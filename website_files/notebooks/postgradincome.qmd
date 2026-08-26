@@ -514,7 +514,7 @@ Given that our test set RMSE is $12,135, individual discrepancies like this alig
 
 
 
-#### Interaction Effects
+##### Predictive Model with Interaction Effects
 
 Above, we used a solely additive model, meaning that we assumed that the effects of each explanatory variable on the income prediction were independent of each other. Let's investigate an interactive model, which allows the effect of one variable to depend on the level of another. We will examine whether gender wage disparities vary across different academic areas, by incorporating interaction terms between gender and field of study into our model. This allows us to test whether specific fields exhibit wider or narrower wage gaps between men and women, after controlling for educational qualifications and population groups. It is important to note here, that we are restricting this investigation to only interaction terms between two variables, gender and field of study, as including interaction terms between all four explanatory variables can lead to severe overfitting, singularities due to uncommon combinations, and uninterpretable parameter explosion. These issues, and methods to work around them, are discussed further [here](https://medium.com/@TingyuZou/when-analyzing-complex-data-researchers-often-encounter-relationships-that-cannot-be-captured-by-1d9dccf14583). 
 
@@ -554,17 +554,22 @@ cat(sprintf("Mean median income: $%s\n", format(round(mean(income_data$median_in
 ```
 :::
 
-The inclusion of the gender - field of study interactions modestly improves model fit, raising the adjusted R-squared to $0.6594$. While a general baseline gender penalty persists across many fields, where women earn an estimated $\$7,205$ less than men holding other factors constant, the magnitude of this gap varies significantly by discipline:
+The inclusion of the interactions between gender and field of study modestly improves model fit, raising the adjusted R-squared to $0.6594$. While a general baseline gender penalty persists across many fields, where women earn an estimated $\$7,205$ less than men holding other factors constant, the magnitude of this gap varies significantly by discipline:
 
-* **Exacerbated Disparities in Tech & Trades:** In fields like **mathematics, computer, and information sciences** ($\-$ $\$5,435$ interaction) and **personal, protective, and transportation services** ($\-$ $\$9,159$ interaction), the negative interaction coefficients indicate a structurally wider gender gap.
-* **Neutralization in Health:** Conversely, **health and related fields** exhibit a significant positive interaction ($\approx +\$10,597$, $p < 0.001$), which effectively neutralizes or reverses the baseline gender penalty in those specific credentials. 
+* **Exacerbated Disparities in Tech & Trades:** In fields like **mathematics, computer, and information sciences** ($-\$5,435$ interaction) and **personal, protective, and transportation services** ($-\$9,159$ interaction), the negative interaction coefficients indicate a structurally wider gender gap.
+* **Neutralization in Health:** Conversely, **health and related fields** exhibit a significant positive interaction ($\approx +\$10,597$), which effectively neutralizes or reverses the baseline gender penalty in those specific credentials. 
 
 These findings suggest that post-graduation wage disparities are not uniform across the labor market, but are instead heavily mediated by the specific career paths graduates pursue. With further analysis and investigation, other interaction terms may be significant, and provide more detailed insights into wage disparities. 
 
 
 ### Discussion
-Results from both the hypothesis testing and model training suggest that income disparity continues to prevail by both gender and ethnicity in the current day. 
 
+This analysis highlights some clear, persistent income gaps among recent Canadian graduates across gender, ethnicity, education levels, and fields of study. Our initial data exploration and hypothesis testing (using Kruskal-Wallis and Dunn's tests) confirmed that income distributions are not equal across gender and population groups, revealing statistically significant gaps, particularly when comparing visible minority groups to non-visible minority graduates.
 
+Building on that, our predictive models showed that a mix of education and demographic factors can explain about 66% of the variance in post-grad earnings. The baseline additive weighted model showed that higher degrees (like professional and doctoral credentials) and certain fields of study (like engineering and health) drive big earnings boosts, while a baseline wage penalty still sticks around for certain groups. 
+
+To dig deeper, adding gender-by-field-of-study interaction effects showed that wage gaps are not uniform across all areas of labor. While a general gap persists across many areas, fields like tech (math and computer science) and certain trades actually have wider gaps, while health-related fields manage to neutralize or even reverse the baseline penalty for women. 
+
+Even with these insights, the analysis has some limitations. Because the dataset is aggregated at the group level instead of tracking individuals over time, our models rely on group weights and might miss smaller-scale details, like local cost-of-living differences or specific employer factors, that shape real-world earnings.
 
 
