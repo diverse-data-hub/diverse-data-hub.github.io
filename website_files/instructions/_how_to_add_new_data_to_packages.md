@@ -61,3 +61,4 @@ Within the [Python package repository](https://github.com/diverse-data-hub/diver
 1. Place the data set's `.csv` file in the `src/diversedata/data/` directory.
 2. Place the data set's description in a `.txt` file in the `src/diversedata/data_descriptions/` directory.
 3. Ensure both files have the same root filename (i.e., the part before the file extension). This name will be used to load the dataset and display its description when using the package.
+4. To trigger the GitHub Actions workflow and automatically deploy the package to PyPI, format the commit message as "**feat**: add <name of dataset>". 
