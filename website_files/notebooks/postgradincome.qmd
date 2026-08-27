@@ -52,7 +52,7 @@ Through statistical testing and predictive modeling, we aim to uncover structura
 
 ::: {.panel-tabset}
 ## R
-```{r load-libraries, results = "hide", warning = FALSE, message = FALSE}
+```{r load-libraries_r, results = "hide", warning = FALSE, message = FALSE}
 # Data
 library(diversedata)      # Diverse Data Hub datasets
 
@@ -60,6 +60,9 @@ library(diversedata)      # Diverse Data Hub datasets
 library(tidyverse)        
 library(lubridate)      
 library(stringr)
+
+# Plotting
+library(ggdist)
 
 # Hypothesis testing
 library(car)
@@ -73,9 +76,17 @@ library(kableExtra)
 
 ## Python
 ```{python load-libraries_py, results = "hide", warning = FALSE, message = FALSE}
-#import diversedata as dd
-#import numpy as np
-#import pandas as pd
+import diversedata as dd
+import numpy as np
+import pandas as pd
+from IPython.display import Markdown
+
+# Plotting
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import seaborn as sns
+import textwrap
+
 ```
 :::
 
@@ -84,7 +95,7 @@ To clean the data, first we use regex to clean the values in `field_of_study` an
 
 ::: {.panel-tabset}
 ## R
-```{r data_load}
+```{r data_load_r}
 income_data <- postgradincome |>
   mutate(
     field_of_study = str_remove(field_of_study, "\\s*\\[\\d+\\]$"),
@@ -101,6 +112,29 @@ income_data |>
 
 ```
 
+## Python
+```{python data_load_py}
+
+# Will need to switch data loading step when PyPI is updated!
+#income_data = dd.load_data("postgradincome")
+income_data = pd.read_csv("../../data/clean/postgradincome.csv")
+income_data['field_of_study'] = income_data['field_of_study'].str.replace(r"\s*\[\d+\]$", "", regex=True)
+
+cols_to_factor = [
+  "location", 
+  "educational_qualification",
+    "field_of_study",
+    "gender",
+    "age_group",
+    "population_group"
+]
+
+income_data[cols_to_factor] = income_data[cols_to_factor].astype("category")
+
+Markdown(income_data.head().to_markdown())
+
+```
+
 :::
 
 #### 2. Exploratory Data Analysis
@@ -109,8 +143,6 @@ income_data |>
 ## R
 **Median Income by Gender**
 ```{r eda_1_r}
-
-library(ggdist)
 
 ggplot(income_data, aes(
   y = gender, 
@@ -137,6 +169,7 @@ ggplot(income_data, aes(
   theme(legend.position = "none", panel.grid.minor = element_blank())
 
 ```
+
 **Median Income by Population Group**
 
 ```{r eda_2_r}
@@ -233,6 +266,213 @@ ggplot(income_data, aes(
   ) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "none", panel.grid.minor = element_blank())
+
+```
+
+## Python
+
+**Median Income by Gender**
+```{python eda_1_py}
+
+# Expand the dataframe based on 'number_graduates' weight 
+# (This acts like the aes(weight = ...) parameter in R)
+expanded_data = income_data.loc[
+    np.repeat(income_data.index, income_data["number_graduates"].astype(int))
+]
+
+# Set up the visual style
+sns.set_theme(style="whitegrid")
+fig, ax = plt.subplots(figsize=(8, 5))
+
+# Draw the half-eye / distribution and boxplot components using the expanded data
+sns.violinplot(
+    data=expanded_data,
+    x="median_income",
+    y="gender",
+    split=True,
+    color="darkgreen",
+    inner="box",
+    alpha=0.6,
+    bw_adjust=2,
+    ax=ax,
+)
+
+# Format labels and axes
+ax.set_title("Median Income Distribution by Gender", fontsize=13, pad=12)
+ax.set_ylabel("Gender", fontsize=11)
+ax.set_xlabel("Median Income ($)", fontsize=11)
+
+# Format x-axis as currency
+formatter = ticker.StrMethodFormatter("${x:,.0f}")
+ax.xaxis.set_major_formatter(formatter)
+
+# Clean up grid lines
+ax.grid(True, which="major", alpha=0.5)
+ax.grid(False, which="minor")
+
+plt.tight_layout()
+plt.show()
+
+```
+**Median Income by Population Group**
+
+```{python eda_2_py}
+
+# Set up the visual style
+sns.set_theme(style="whitegrid")
+fig, ax = plt.subplots(figsize=(8, 7))
+
+# Compute order based on median income (ascending order)
+group_order = (
+    expanded_data.groupby("population_group")["median_income"]
+    .median()
+    .sort_values(ascending=True)
+    .index
+)
+
+# Draw the half-eye / distribution and boxplot components using the expanded data
+sns.violinplot(
+    data=expanded_data,
+    x="median_income",
+    y="population_group",
+    order = group_order,
+    split=True,
+    color="darkgreen",
+    inner="box",
+    alpha=0.6,
+    bw_adjust=2,
+    ax=ax,
+)
+
+# Format labels and axes
+ax.set_title("Median Income Distribution by Population Group", fontsize=13, pad=15, loc='left')
+ax.text(
+    0.0, 1.02, "Ordered by Median Income", 
+    transform=ax.transAxes, fontsize=10, color="gray"
+)
+ax.set_ylabel("Population Group", fontsize=11)
+ax.set_xlabel("Median Income ($)", fontsize=11)
+
+# Format x-axis as currency
+formatter = ticker.StrMethodFormatter("${x:,.0f}")
+ax.xaxis.set_major_formatter(formatter)
+
+# Clean up grid lines
+ax.grid(True, which="major", alpha=0.5)
+ax.grid(False, which="minor")
+
+plt.tight_layout()
+plt.show()
+
+```
+
+**Median Income by Level of Study**
+```{python eda_3_py}
+
+# Set up the visual style
+sns.set_theme(style="whitegrid")
+fig, ax = plt.subplots(figsize=(8, 7))
+
+# Compute order based on median income (ascending order)
+group_order = (
+    expanded_data.groupby("educational_qualification")["median_income"]
+    .median()
+    .sort_values(ascending=True)
+    .index
+)
+
+# Draw the half-eye / distribution and boxplot components using the expanded data
+sns.violinplot(
+    data=expanded_data,
+    x="median_income",
+    y="educational_qualification",
+    order = group_order,
+    split=True,
+    color="darkgreen",
+    inner="box",
+    alpha=0.6,
+    bw_adjust=2,
+    ax=ax,
+)
+
+# Format labels and axes
+current_labels = [textwrap.fill(label.get_text(), width=35) for label in ax.get_yticklabels()]
+ax.set_yticklabels(current_labels)
+
+ax.set_title("Median Income Distribution by Educational Qualification", fontsize=13, pad=15, loc='left')
+ax.text(
+    0.0, 1.02, "Ordered by Median Income", 
+    transform=ax.transAxes, fontsize=10, color="gray"
+)
+
+ax.set_ylabel("Educational Qualification", fontsize=11)
+ax.set_xlabel("Median Income ($)", fontsize=11)
+
+# Format x-axis as currency
+formatter = ticker.StrMethodFormatter("${x:,.0f}")
+ax.xaxis.set_major_formatter(formatter)
+
+# Clean up grid lines
+ax.grid(True, which="major", alpha=0.5)
+ax.grid(False, which="minor")
+
+plt.tight_layout()
+plt.show()
+
+```
+
+**Median Income by Field of Study**
+```{python eda_4_py}
+
+# Set up the visual style
+sns.set_theme(style="whitegrid")
+fig, ax = plt.subplots(figsize=(8, 7))
+
+# Compute order based on median income (ascending order)
+group_order = (
+    expanded_data.groupby("field_of_study")["median_income"]
+    .median()
+    .sort_values(ascending=True)
+    .index
+)
+
+# Draw the half-eye / distribution and boxplot components using the expanded data
+sns.violinplot(
+    data=expanded_data,
+    x="median_income",
+    y="field_of_study",
+    order = group_order,
+    split=True,
+    color="darkgreen",
+    inner="box",
+    alpha=0.6,
+    bw_adjust=2,
+    ax=ax,
+)
+
+# Format labels and axes
+current_labels = [textwrap.fill(label.get_text(), width=35) for label in ax.get_yticklabels()]
+ax.set_yticklabels(current_labels)
+
+ax.set_title("Median Income Distribution by Field of Study", fontsize=13, pad=15, loc='left')
+ax.text(
+    0.0, 1.02, "Ordered by Median Income", 
+    transform=ax.transAxes, fontsize=10, color="gray"
+)
+
+ax.set_ylabel("Field of Study", fontsize=11)
+ax.set_xlabel("Median Income ($)", fontsize=11)
+
+# Format x-axis as currency
+formatter = ticker.StrMethodFormatter("${x:,.0f}")
+ax.xaxis.set_major_formatter(formatter)
+
+# Clean up grid lines
+ax.grid(True, which="major", alpha=0.5)
+ax.grid(False, which="minor")
+
+plt.tight_layout()
+plt.show()
 
 ```
 :::
