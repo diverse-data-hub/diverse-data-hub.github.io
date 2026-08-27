@@ -1,0 +1,60 @@
+---
+title: "Labour Force Status for Adults with Disabilities"
+toc: true
+toc-depth: 4
+toc-location: right
+sidebar: false
+---
+
+## About the Data
+
+This dataset investigates the labour force status for adults with disabilities in Canada, categorized by disability type, global severity, age, sex, and geography. Compiled by Statistics Canada, this data provides a macro-level view of how intersecting demographic factors impact employment outcomes and labour market inclusion for individuals living with disabilities.
+
+** ADD MORE RESEARCH TO SUPPORT **
+
+These statistics are important for evaluating the efficacy of provincial and federal financial support systems (such as the Canada Disability Benefit and provincial disability assistance programs) and highlight the systemic barriers that specific demographic groups face when seeking employment.
+
+### Download
+
+<div class="button-container">
+  <a href="../../data/clean/labourforcewithdisabilities.csv" download class="download-button">
+    Download CSV
+  </a>
+</div>
+
+### Metadata
+
+<div class="description-grid">
+  <div class="field-label">CSV Name</div><div class="field-value">labourforcewithdisabilities.csv</div>
+  <div class="field-label">Dataset Characteristics</div><div class="field-value">Multivariate, Aggregated</div>
+  <div class="field-label">Subject Area</div><div class="field-value">Equity, Disability, Labour Economics</div>
+  <div class="field-label">Associated Tasks</div><div class="field-value">Regression, Comparative Analysis</div>
+  <div class="field-label">Feature Type</div><div class="field-value">Categorical, Numeric</div>
+  <div class="field-label">Instances</div><div class="field-value">4,343 records</div>
+  <div class="field-label">Features</div><div class="field-value">7</div>
+  <div class="field-label">Has Missing Values?</div><div class="field-value">No</div>
+</div>
+
+### Variables
+
+::: {.table-container}
+::: {.styled-table}
+
+| Variable Name           | Role      | Type        | Description                                                                 | Missing Values |
+|-------------------------|-----------|-------------|-----------------------------------------------------------------------------|----------------|
+| `geography`             | Feature   | Categorical | Province or territory location, e.g., "Ontario", "British Columbia"         | No             |
+| `sex`                   | Feature   | Categorical | Sex of the respondents: "Males" or "Females"                                | No             |
+| `age_group`             | Feature   | Categorical | Age bracket, e.g., "15 to 24 years", "25 to 34 years"                       | No             |
+| `disability_type`       | Feature   | Categorical | Specific impairment type or "All disability types"                          | No             |
+| `global_severity`       | Feature   | Categorical | Severity level: "Mild", "Moderate", "Severe", "Very Severe"                 | No             |
+| `labour_force_status`   | Feature   | Categorical | Status metric, e.g., "Employment Rate", "Total labour force"                | No             |
+| `value`                 | Feature   | Numeric     | The corresponding percentage rate or raw population headcount               | No             |
+
+:::
+:::
+
+{{< include ../notebooks/labourforcewithdisabilities.qmd >}} 
+
+## Attribution
+
+Data sourced from Statistics Canada via the Government of Canada's Open Government Portal, available under an Open Government Licence - Canada. Original dataset: [Labour force status for adults with disabilities by disability type](https://open.canada.ca/data/en/dataset/92aeb8dc-c7ca-4f44-81df-fdaf289d23fd).
