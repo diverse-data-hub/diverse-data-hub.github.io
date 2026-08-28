@@ -87,6 +87,13 @@ import matplotlib.ticker as ticker
 import seaborn as sns
 import textwrap
 
+# Hypothesis Testing
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from scipy import stats
+import scikit_posthocs as sp
+
+
 ```
 :::
 
@@ -506,6 +513,18 @@ qqnorm(residuals(anova_gender_model))
 qqline(residuals(anova_gender_model), col = "red", lwd = 2)
 
 ```
+
+## Python
+```{python qq_plot_py}
+
+anova_model = smf.ols("median_income ~ C(gender)", data=income_data).fit()
+residuals = anova_model.resid
+fig = sm.qqplot(residuals, line="45", fit=True)
+
+plt.title("Normal Q-Q Plot of ANOVA Residuals", fontsize=12)
+plt.show()
+
+```
 :::
 
 Above, we can see that the residuals are not normally distributed, as the points deviate from the red line on both extremes. 
@@ -526,7 +545,40 @@ ggplot(data.frame(resids = residuals(anova_gender_model)), aes(x = resids)) +
   theme_minimal()
 
 ```
+
+## Python
+```{python residuals_py}
+
+resid_df = pd.DataFrame({"resids": residuals})
+
+# Set visual style
+sns.set_theme(style="whitegrid")
+fig, ax = plt.subplots(figsize=(8, 5), layout="constrained")
+
+# Create the density plot (equivalent to geom_density)
+sns.kdeplot(
+    data=resid_df,
+    x="resids",
+    fill=True,
+    color="#7EA8F8",
+    alpha=0.6,
+    ax=ax,
+)
+
+# Format titles and labels (Left-aligned title)
+ax.set_title("Density Plot of ANOVA Residuals", fontsize=13, pad=15, loc="left")
+ax.set_xlabel("Residuals", fontsize=11)
+ax.set_ylabel("Density", fontsize=11)
+
+# Clean grid lines
+ax.grid(True, which="major", alpha=0.5)
+ax.grid(False, which="minor")
+
+plt.show()
+
+```
 :::
+
 We can see that the residuals are not normally distributed above, but instead are right-skewed. This is typical in income datasets, as most people have a low to moderate income, while a small number of people earn very high amounts, as discussed in [Passion Driven Statistics](https://alanarnholt.github.io/PDS-Bookdown2/skewed-right-distributions.html). 
 
 3. Homogeneity of Variances - Levene's test
@@ -540,6 +592,22 @@ For ANOVA, we also need to check if the different groups have comparable amounts
 leveneTest(median_income ~ gender, data = income_data)
 
 ```
+
+## Python
+```{python variance_py}
+
+# Group the median_income values by the categories in 'gender'
+# We use a list comprehension to pass each group's data as a separate argument to stats.levene
+groups = [group["median_income"].values for _, group in income_data.groupby("gender")]
+
+# Run Levene's test (using the default median-based center)
+levene_result = stats.levene(*groups, center="median")
+
+print(f"Statistic: {levene_result.statistic:.4f}")
+print(f"p-value: {levene_result.pvalue:.4f}")
+
+```
+
 :::
 
 We can see that the variances are not homogeneous in our datset, as the p-value from the Levene's test is smaller than 0.05. 
@@ -553,7 +621,19 @@ Since the residuals are not normally distributed and the variances are not homog
 kruskal.test(median_income ~ gender, data = income_data)
 
 ```
+
+## Python
+```{python kruskal_py}
+
+kruskal_result = stats.kruskal(*groups)
+
+print(f"H-statistic: {kruskal_result.statistic:.4f}")
+print(f"p-value: {kruskal_result.pvalue:.4f}")
+
+```
+
 :::
+
 Since p-value is smaller than 0.05, we can reject the null hypothesis in favor of the alternative, and conclude that there is statistical evidence for a difference in median income between men and women in our dataset. 
 
 **Hypothesis Testing: Population Group**
@@ -584,6 +664,18 @@ qqline(residuals(anova_popgroup_model), col = "red", lwd = 2)
 
 
 ```
+
+## Python
+```{python qq_plot_popgroup_py}
+
+anova_popgroup_model = smf.ols("median_income ~ C(population_group)", data=income_data).fit()
+residuals_popgroup = anova_popgroup_model.resid
+fig = sm.qqplot(residuals_popgroup, line="45", fit=True)
+
+plt.title("Normal Q-Q Plot of ANOVA Residuals", fontsize=12)
+plt.show()
+
+```
 :::
 
 ::: {.panel-tabset}
@@ -600,6 +692,39 @@ ggplot(data.frame(resids = residuals(anova_popgroup_model)), aes(x = resids)) +
   theme_minimal()
 
 ```
+
+## Python
+```{python residuals_popgroup_r}
+
+resid_popgroup_df = pd.DataFrame({"resids": residuals_popgroup})
+
+# Set visual style
+sns.set_theme(style="whitegrid")
+fig, ax = plt.subplots(figsize=(8, 5), layout="constrained")
+
+# Create the density plot (equivalent to geom_density)
+sns.kdeplot(
+    data=resid_popgroup_df,
+    x="resids",
+    fill=True,
+    color="#7EA8F8",
+    alpha=0.6,
+    ax=ax,
+)
+
+# Format titles and labels (Left-aligned title)
+ax.set_title("Density Plot of ANOVA Residuals", fontsize=13, pad=15, loc="left")
+ax.set_xlabel("Residuals", fontsize=11)
+ax.set_ylabel("Density", fontsize=11)
+
+# Clean grid lines
+ax.grid(True, which="major", alpha=0.5)
+ax.grid(False, which="minor")
+
+plt.show()
+
+```
+
 :::
 
 Again, from both the Q-Q plot and the residuals density plot, we can see that the residuals are not normally distributed. 
@@ -613,6 +738,22 @@ Again, from both the Q-Q plot and the residuals density plot, we can see that th
 leveneTest(median_income ~ population_group, data = income_data)
 
 ```
+
+## Python
+```{python variance_popgroup_py}
+
+# Group the median_income values by the categories in 'population_group'
+# We use a list comprehension to pass each group's data as a separate argument to stats.levene
+groups_pop = [group["median_income"].values for _, group in income_data.groupby("population_group")]
+
+# Run Levene's test (using the default median-based center)
+levene_result_pop = stats.levene(*groups_pop, center="median")
+
+print(f"Statistic: {levene_result_pop.statistic:.4f}")
+print(f"p-value: {levene_result_pop.pvalue:.4f}")
+
+```
+
 :::
 
 Similarly, since the p-value is less than 0.05, we can conclude that the variances are heterogeneous, and this assumption is violated. 
@@ -626,6 +767,17 @@ Therefore, since the residuals are not normally distributed and the variances ar
 kruskal.test(median_income ~ population_group, data = income_data)
 
 ```
+
+## Python
+```{python kruskal_popgroup_py}
+
+kruskal_result_pop = stats.kruskal(*groups_pop)
+
+print(f"H-statistic: {kruskal_result_pop.statistic:.4f}")
+print(f"p-value: {kruskal_result_pop.pvalue:.4f}")
+
+```
+
 :::
 
 Since p-value is smaller than 0.05, we can reject the null hypothesis in favor of the alternative, that the distributions of median income are not identical across all population groups. To find out which groups differ, we need to conduct a Dunn's Post-Hoc test with a Bonferroni correction for multiple comparisons. 
@@ -638,6 +790,21 @@ Since p-value is smaller than 0.05, we can reject the null hypothesis in favor o
 dunnTest(median_income ~ population_group, data = income_data, method = "bonferroni")
 
 ```
+
+## Python
+```{python dunns_popgroup_py}
+
+dunn_results = sp.posthoc_dunn(
+    expanded_data, 
+    val_col="median_income", 
+    group_col="population_group", 
+    p_adjust="bonferroni"
+)
+
+print(dunn_results)
+
+```
+
 :::
 
 From both the Kruskal-Wallis and the Dunn's Post-Hoc test, we can see that there are statistically significant differences in median income distributions between different population groups. Notable differences appear around comparing "Not a visible minority" to many groups, including "Arab", "Black", "Latin American", etc. 
