@@ -1,0 +1,500 @@
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| collapse: true
+library(reticulate)
+if (Sys.getenv("GITHUB_ACTIONS") == "true") {
+  # for running in GitHub Actions
+  reticulate::use_python(Sys.getenv("RETICULATE_PYTHON"), required = TRUE)
+} else {
+  # for running locally
+  reticulate::use_condaenv("diverse_web_env", required = TRUE)
+}
+
+```
+
+### Key Features of the Dataset
+
+Each row of this dataset represents an aggregated demographic group of adults with disabilities and reports their labour force status metrics:
+
+-   **Location** (`geography`) -- The Canadian province or territory of the respondents.
+-   **Demographic Information** (`sex`, `age_group`) -- Information on the sex and age bracket of the group.
+-   **Disability Profile** (`disability_type`, `global_severity`) -- The specific type of impairment and the overall severity level of the disability (ranging from Mild to Very Severe).
+-   **Labour Force Metric** (`labour_force_status`) -- The specific employment metric being reported, such as the employment rate, unemployment rate, or total labour force population count.
+-   **Reported Value** (`value`) -- The numerical percentage or population headcount corresponding to the labour force status.
+
+### Purpose and Use Cases
+
+This dataset supports the analysis of:
+
+-   **Employment Equity & Barriers:** Examining how the severity and specific classification of a disability impact an individual's likelihood of securing employment.
+-   **Intersectionality in the Labour Market:** Evaluating the combined effects of age, sex, and varying levels of disability severity on workforce participation.
+-   **Geographic Disparities:** Comparing employment outcomes for individuals with disabilities across different Canadian provinces and territories to identify regional inequalities.
+-   **Predictive Modeling:** Building fractional regression baselines to estimate expected employment probabilities based on a combination of medical and demographic factors.
+-   **Institutional & Policy Insights:** Informing the distribution of federal and provincial social assistance (such as the Canada Disability Benefit), adjusting earnings exemption limits, and designing targeted vocational rehabilitation programs.
+
+## Case Study
+
+### Objective
+
+Equitable employment is a cornerstone of financial independence and social inclusion for adults living with disabilities. In Canada, federal and provincial governments provide essential financial assistance, such as the upcoming Canada Disability Benefit (CDB) and provincial support programs, to help bridge the income gap. However, the reliance on these support systems and the ability to find sustainable employment are heavily influenced by a complex intersection of demographic factors.
+
+To better understand the structural barriers within the Canadian labour market, this case study leverages Statistics Canada data to evaluate employment outcomes. We focus on several key questions:
+
+-   **How does the global severity of a disability impact the likelihood of employment?**
+-   **Are there significant disparities in employment rates across different age groups and sexes?**
+-   **To what extent does geographical location (province or territory) affect labour force inclusion?**
+
+By conducting exploratory data analysis and fitting a weighted fractional logit regression model, we aim to statistically quantify the primary drivers of employment for individuals with disabilities. This analysis provides an educational framework for understanding how data can inform public policy, optimize vocational rehabilitation resources, and highlight regional or demographic gaps in the current social.
+
+### Analysis
+
+**Loading Libraries**
+
+::: panel-tabset
+## R
+
+```{r load-libraries_r, results = "hide", warning = FALSE, message = FALSE}
+# Data
+library(diversedata)      # Diverse Data Hub datasets
+
+# Core libraries
+library(tidyverse)
+library(knitr)
+
+# Statistical Modeling
+library(broom)
+
+```
+
+## Python
+
+```{python load-libraries_py, results = "hide", warning = FALSE, message = FALSE}
+import pandas as pd
+import numpy as np
+from IPython.display import Markdown
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+```
+:::
+
+#### 1. Data Cleaning & Processing
+
+**Note:** When working with aggregated government data, metrics like "Employment Rate" are often pre-calculated percentages. To use these in a logistical or fractional regression model, we must convert them into a 0-1 proportion.
+
+::: panel-tabset
+## R
+
+```{r data_prep_r}
+# Reading data
+labour_force <- labourforcewithdisabilities
+
+# Filter for the target disability category to avoid double-counting
+df_all_disabilities <- labour_force |>
+  filter(disability_type == 'All disability types')
+
+# Separate the employment rates from the population counts
+df_rates <- df_all_disabilities |>
+  filter(labour_force_status == 'Employment Rate') |>
+  rename(employment_rate = value)
+
+df_pop <- df_all_disabilities |>
+  filter(labour_force_status == 'Total labour force') |>
+  rename(population_weight = value)
+
+# Merge to align rates with their respective population weights
+merge_cols <- c('geography', 'sex', 'age_group', 'global_severity')
+
+labour_force_clean <- df_rates |>
+  select(all_of(merge_cols), employment_rate) |>
+  inner_join(df_pop |> select(all_of(merge_cols), population_weight), by = merge_cols) |>
+  drop_na(employment_rate, population_weight) |>
+  # Convert rate to a 0-1 proportion for the Fractional Logit model
+  mutate(employment_proportion = employment_rate / 100.0)
+
+# Preview data
+labour_force_clean |>
+  head() |>
+  kable()
+
+```
+
+## Python
+
+```{python data_prep_py}
+# Reading data
+# Will need to switch data loading step when PyPI is updated!
+#labour_force = dd.load_data("labourforcewithdisabilities")
+labour_force = pd.read_csv("../../data/clean/labourforcewithdisabilities.csv")
+
+# Filter for the target disability category to avoid double-counting
+df_all_disabilities = labour_force[labour_force['disability_type'] == 'All disability types']
+
+# Separate the employment rates from the population counts
+df_rates = df_all_disabilities[df_all_disabilities['labour_force_status'] == 'Employment Rate'].copy()
+df_pop = df_all_disabilities[df_all_disabilities['labour_force_status'] == 'Total labour force'].copy()
+
+# Rename the 'value' columns before merging
+df_rates = df_rates.rename(columns={'value': 'employment_rate'})
+df_pop = df_pop.rename(columns={'value': 'population_weight'})
+
+# Merge to align rates with their respective population weights
+merge_cols = ['geography', 'sex', 'age_group', 'global_severity']
+labour_force_clean = pd.merge(df_rates[merge_cols + ['employment_rate']], 
+                    df_pop[merge_cols + ['population_weight']], 
+                    on=merge_cols, 
+                    how='inner')
+
+# Drop any rows with suppressed or missing data
+labour_force_clean = labour_force_clean.dropna(subset=['employment_rate', 'population_weight'])
+
+# Convert rate to a 0-1 proportion for the Fractional Logit model
+labour_force_clean['employment_proportion'] = labour_force_clean['employment_rate'] / 100.0
+
+Markdown(labour_force_clean.head().to_markdown())
+
+
+```
+:::
+
+#### 2. Exploratory Data Analysis
+
+Before applying predictive modeling or inferential tests, visual exploration provides an intuitive baseline of how employment rates vary across individual demographic factors.
+
+------------------------------------------------------------------------
+
+**Employment Rate by Severity Level**
+
+This visualization evaluates the relationship between disability severity and employment outcomes. It aggregates reported employment rates across four global severity tiers: Mild, Moderate, Severe, and Very Severe.
+
+::: panel-tabset
+## R
+
+```{r eda_severity_r, fig.width=8, fig.height=4.5}
+sev_order <- c("Mild", "Moderate", "Severe", "Very Severe")
+
+ggplot(labour_force_clean, aes(
+  x = employment_rate, 
+  y = factor(global_severity, levels = rev(sev_order)), # rev() plots Mild at the top
+  fill = factor(global_severity, levels = sev_order)    # Maps light-to-dark logically
+)) +
+  stat_summary(fun = "mean", geom = "bar", width = 0.6) +
+  scale_fill_brewer(palette = "Reds") +
+  labs(
+    title = "Mean Employment Rate by Severity Level",
+    x = "Employment Rate (%)",
+    y = "Global Severity"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 13),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+## Python
+
+```{python eda_severity_py}
+sev_order = ["Mild", "Moderate", "Severe", "Very Severe"]
+
+plt.figure(figsize=(8, 4.5))
+sns.barplot(
+    data=labour_force_clean,
+    x="employment_rate",
+    y="global_severity",
+    hue="global_severity",
+    order=sev_order,
+    hue_order=sev_order,
+    errorbar=None,
+    palette="Reds",
+    legend=False,
+    width=0.6,
+)
+
+plt.title("Mean Employment Rate by Severity Level", fontsize=13, fontweight="bold", pad=12)
+plt.xlabel("Employment Rate (%)", fontsize=11)
+plt.ylabel("Global Severity", fontsize=11)
+plt.grid(True, alpha=0.5)
+plt.tight_layout()
+plt.show()
+
+```
+:::
+
+A clear negative trajectory emerges between impairment severity and labour market participation. Individuals classified with Mild disabilities experience employment rates approaching 70%, whereas the likelihood of holding a job declines sharply as severity transitions to Moderate, Severe, and Very Severe.
+
+------------------------------------------------------------------------
+
+**Employment Rate by Age Group**
+
+This plot examines labour force engagement across different stages of working life, from youth entering the workforce to older adults approaching retirement.
+
+::: panel-tabset
+## R
+
+```{r eda_age_r, fig.width=8, fig.height=4.5}
+age_order <- c("15 to 24 years", "25 to 34 years", "35 to 44 years", "45 to 54 years", "55 to 64 years")
+
+ggplot(labour_force_clean, aes(
+  x = employment_rate, 
+  y = factor(age_group, levels = rev(age_order)), 
+  fill = factor(age_group, levels = age_order)
+)) +
+  stat_summary(fun = "mean", geom = "bar", width = 0.6) +
+  scale_fill_brewer(palette = "Blues") +
+  labs(
+    title = "Mean Employment Rate by Age Group",
+    x = "Employment Rate (%)",
+    y = "Age Group"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 13),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+## Python
+
+```{python eda_age_py}
+age_order = [
+    "15 to 24 years", "25 to 34 years", 
+    "35 to 44 years", "45 to 54 years", "55 to 64 years"
+]
+
+plt.figure(figsize=(8, 4.5))
+sns.barplot(
+    data=labour_force_clean,
+    x="employment_rate",
+    y="age_group",
+    hue="age_group",
+    order=age_order,
+    hue_order=age_order,
+    errorbar=None,
+    palette="Blues",
+    legend=False,
+    width=0.6,
+)
+
+plt.title("Mean Employment Rate by Age Group", fontsize=13, fontweight="bold", pad=12)
+plt.xlabel("Employment Rate (%)", fontsize=11)
+plt.ylabel("Age Group", fontsize=11)
+plt.grid(True, alpha=0.5)
+plt.tight_layout()
+plt.show()
+
+```
+:::
+
+Employment rates follow a distinct bell curve across age categories. Working-age adults in the core brackets (25 to 54 years) maintain the highest average employment rates. Conversely, youth (15 to 24 years) and older adults (55 to 64 years) experience substantial penalties, reflecting transition barriers for new labour market entrants and early exits from the workforce near retirement age.
+
+------------------------------------------------------------------------
+
+**Employment Rate by Sex**
+
+This comparison breaks down average employment rates between males and females in the dataset to highlight gender-based participation gaps.
+
+::: panel-tabset
+## R
+
+```{r eda_sex_r, fig.width=8, fig.height=3.5}
+sex_order <- c("Females", "Males")
+
+ggplot(labour_force_clean, aes(
+  x = employment_rate, 
+  y = factor(sex, levels = rev(sex_order)), 
+  fill = factor(sex, levels = sex_order)
+)) +
+  stat_summary(fun = "mean", geom = "bar", width = 0.5) +
+  scale_fill_brewer(palette = "Greens") +
+  labs(
+    title = "Mean Employment Rate by Sex",
+    x = "Employment Rate (%)",
+    y = "Sex"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 13),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+## Python
+
+```{python eda_sex_py}
+sex_order = ["Females", "Males"]
+
+plt.figure(figsize=(8, 3.5))
+sns.barplot(
+    data=labour_force_clean,
+    x="employment_rate",
+    y="sex",
+    hue="sex",
+    order=sex_order,
+    hue_order=sex_order,
+    errorbar=None,
+    palette="Greens",
+    legend=False,
+    width=0.5,
+)
+
+plt.title("Mean Employment Rate by Sex", fontsize=13, fontweight="bold", pad=12)
+plt.xlabel("Employment Rate (%)", fontsize=11)
+plt.ylabel("Sex", fontsize=11)
+plt.grid(True, alpha=0.5)
+plt.tight_layout()
+plt.show()
+
+```
+:::
+
+Males display a marginally higher mean employment rate compared to females. While this gap is narrower than the disparities observed across age brackets or severity levels, it indicates that gender intersects with disability to shape workforce attachment.
+
+------------------------------------------------------------------------
+
+**Employment Rate by Province and Territory**
+
+This chart displays geographic variation in employment rates across Canadian provinces and territories, ordered from highest to lowest mean employment rate.
+
+::: panel-tabset
+## R
+
+```{r eda_geo_r, fig.width=8, fig.height=6}
+ggplot(labour_force_clean, aes(
+  x = employment_rate, 
+  y = reorder(geography, employment_rate, FUN = mean), 
+  fill = reorder(geography, employment_rate, FUN = mean)
+)) +
+  stat_summary(fun = "mean", geom = "bar", width = 0.6) +
+  scale_fill_viridis_d(option = "magma") +
+  labs(
+    title = "Mean Employment Rate by Province/Territory",
+    subtitle = "Ordered by Mean Employment Rate",
+    x = "Employment Rate (%)",
+    y = "Province / Territory"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 13),
+    plot.subtitle = element_text(color = "gray40", size = 10),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+## Python
+
+```{python eda_geo_py}
+# Calculate means and order ascending to match R's color scaling
+geo_means = labour_force_clean.groupby("geography")["employment_rate"].mean().sort_values(ascending=True)
+geo_order_asc = geo_means.index.tolist()
+
+# Reverse for the y-axis so the highest value sits at the top of the plot
+geo_order_desc = geo_order_asc[::-1]
+
+plt.figure(figsize=(8, 6))
+sns.barplot(
+    data=labour_force_clean,
+    x="employment_rate",
+    y="geography",
+    hue="geography",
+    order=geo_order_desc,       # Plot highest at top
+    hue_order=geo_order_asc,    # Map magma lowest-to-highest to match R
+    errorbar=None,
+    palette="magma",
+    legend=False,
+    width=0.6,
+)
+
+plt.title("Mean Employment Rate by Province/Territory", fontsize=13, fontweight="bold", pad=15, loc="left")
+plt.xlabel("Employment Rate (%)", fontsize=11)
+plt.ylabel("Province / Territory", fontsize=11)
+plt.grid(True, alpha=0.5)
+plt.tight_layout()
+plt.show()
+
+```
+:::
+
+Regional variations highlight differences in economic conditions and social support frameworks. Western provinces such as Saskatchewan and Alberta report higher average employment rates, while Quebec and Atlantic provinces tend to show lower baseline figures. Although northern territories (Yukon and Nunavut) appear at the top of the raw rankings, these estimates stem from smaller sample sizes with high suppression rates and require careful interpretation through weighted modeling.
+
+#### 3. Weighted Fractional Logit Regression
+
+**Note:** We use a Generalized Linear Model (GLM) with a `Binomial` (or `quasibinomial`) family to handle fractional response variables (proportions between 0 and 1). By passing our population headcounts into the `weights` argument, the model evaluates the dataset as millions of surveyed individuals rather than treating each aggregated row equally. This provides the statistical power necessary to validate our EDA findings.
+
+We explicitly set reference groups for the categorical variables, the coefficients will show the effect relative to: `Ontario`, `Males`, `25-34 years`, and `Mild severity`.
+
+::: panel-tabset
+## R
+
+```{r weighted_glm_r}
+# Explicitly setting reference groups for the categorical variables
+labour_force_clean <- labour_force_clean |>
+  mutate(
+    geography = relevel(factor(geography), ref = "Ontario"),
+    sex = relevel(factor(sex), ref = "Males"),
+    age_group = relevel(factor(age_group), ref = "25 to 34 years"),
+    global_severity = relevel(factor(global_severity), ref = "Mild")
+  )
+
+# Fit the GLM with quasibinomial family and population weights
+weighted_glm <- glm(
+  employment_proportion ~ geography + sex + age_group + global_severity,
+  data = labour_force_clean,
+  family = quasibinomial(link = "logit"),
+  weights = population_weight
+)
+
+tidy(weighted_glm) |>
+  mutate(across(where(is.numeric), ~round(.x, 4))) |>
+  kable()
+
+```
+
+## Python
+
+```{python weighted_glm_py}
+# Define formula explicitly setting the reference group for each demographic
+formula = (
+    "employment_proportion ~ "
+    "C(geography, Treatment(reference='Ontario')) + "
+    "C(sex, Treatment(reference='Males')) + "
+    "C(age_group, Treatment(reference='25 to 34 years')) + "
+    "C(global_severity, Treatment(reference='Mild'))"
+)
+
+# Fit a Generalized Linear Model with Binomial family and population weights
+weighted_glm_py = smf.glm(
+    formula=formula, 
+    data=labour_force_clean, 
+    family=sm.families.Binomial(), 
+    var_weights=labour_force_clean['population_weight']
+).fit()
+
+print(weighted_glm_py.summary())
+
+```
+:::
+
+### Discussion
+
+The model establishes a clear reference point: a Male, aged 25 to 34 years, located in Ontario, with a Mild disability. The intercept log-odds ($0.9377$) converts to a baseline expected employment rate of roughly **71.8%**.
+
+Holding all other variables constant, we can isolate specific systemic barriers:
+
+-   **Severity Penalty:** Moving from a Mild disability to Moderate ($-0.4496$), Severe ($-0.9263$), or Very Severe ($-1.5372$) strictly and significantly decreases the likelihood of employment.
+-   **Age Penalty:** Youth aged 15 to 24 face the steepest overall age penalty in the model ($-1.2410$). Older adults aged 55 to 64 face a substantial drop ($-0.6809$) as they approach retirement.
+-   **Data Sparsity:** Nunavut returns a high $p$-value ($0.176$), validating our EDA assumption that the territory's sample size is too volatile to draw reliable inferential conclusions without wider confidence intervals.
+
+Understanding these exact log-odds penalties allows educational and governmental institutions to see exactly where current social safety nets and vocational programs are succeeding, and where they are falling short.
