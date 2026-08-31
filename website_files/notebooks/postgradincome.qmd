@@ -68,6 +68,9 @@ library(ggdist)
 library(car)
 library(FSA)
 
+# Modelling
+library(rsample)
+
 # Tables & reporting
 library(gt)               
 library(kableExtra)       
@@ -93,7 +96,8 @@ import statsmodels.formula.api as smf
 from scipy import stats
 import scikit_posthocs as sp
 
-
+# Modelling
+from sklearn.model_selection import train_test_split
 ```
 :::
 
@@ -282,7 +286,6 @@ ggplot(income_data, aes(
 ```{python eda_1_py}
 
 # Expand the dataframe based on 'number_graduates' weight 
-# (This acts like the aes(weight = ...) parameter in R)
 expanded_data = income_data.loc[
     np.repeat(income_data.index, income_data["number_graduates"].astype(int))
 ]
@@ -352,7 +355,7 @@ sns.violinplot(
 )
 
 # Format labels and axes
-ax.set_title("Median Income Distribution by Population Group", fontsize=13, pad=15, loc='left')
+ax.set_title("Median Income Distribution by Population Group", fontsize=13, pad=20, loc='left')
 ax.text(
     0.0, 1.02, "Ordered by Median Income", 
     transform=ax.transAxes, fontsize=10, color="gray"
@@ -373,7 +376,7 @@ plt.show()
 
 ```
 
-**Median Income by Level of Study**
+**Median Income by Educational Qualification**
 ```{python eda_3_py}
 
 # Set up the visual style
@@ -406,7 +409,7 @@ sns.violinplot(
 current_labels = [textwrap.fill(label.get_text(), width=35) for label in ax.get_yticklabels()]
 ax.set_yticklabels(current_labels)
 
-ax.set_title("Median Income Distribution by Educational Qualification", fontsize=13, pad=15, loc='left')
+ax.set_title("Median Income Distribution by Educational Qualification", fontsize=13, pad=20, loc='left')
 ax.text(
     0.0, 1.02, "Ordered by Median Income", 
     transform=ax.transAxes, fontsize=10, color="gray"
@@ -461,7 +464,7 @@ sns.violinplot(
 current_labels = [textwrap.fill(label.get_text(), width=35) for label in ax.get_yticklabels()]
 ax.set_yticklabels(current_labels)
 
-ax.set_title("Median Income Distribution by Field of Study", fontsize=13, pad=15, loc='left')
+ax.set_title("Median Income Distribution by Field of Study", fontsize=13, pad=20, loc='left')
 ax.text(
     0.0, 1.02, "Ordered by Median Income", 
     transform=ax.transAxes, fontsize=10, color="gray"
@@ -486,23 +489,21 @@ plt.show()
 
 #### 3. Hypothesis Testing
 
-We want to test if different groups of graduates have significantly different median incomes. We will investigate both gender and population group as a proxy for ethnicity, but let's begin with gender. 
+To evaluate whether different demographics experience significantly different median incomes, we begin by investigating gender. 
 
-**Hypothesis Testing: Gender**
+::: {.callout-note appearance="simple"}
+## Statistical Hypotheses (Gender)
+* **$H_0$ (Null):** The distributions of median income are identical across genders.
+* **$H_a$ (Alternative):** The distributions of median income are not identical across genders.
+:::
 
-Our hypotheses are: 
+Before performing an ANOVA test, we must verify its underlying statistical assumptions:
 
-* **Null Hypothesis ($H_0$):** The distributions of median income are identical for both genders.
-* **Alternative Hypothesis ($H_a$):** The distributions of median income are not identical for both genders.
+1. **Independence of Observations:**  
+   Because the dataset contains distinct aggregate rows per graduate subgroup with no repeated measures, the independence assumption is reasonably satisfied.
 
-Before we can perform our ANOVA hypothesis test, we need to check if the required assumptions are met: 
-
-1. Independence of Observations
-
-As the dataset includes one row per discrete group of graduates, and there are no repetitions, this dataset satisfactorily fulfills the required independence of observations. 
-
-2. Normality of Residuals
-We build a Q-Q plot, where, if the residuals are normally distributed, we would expect the black points to lie close to the red diagonal line. 
+2. **Normality of Residuals:**  
+   We examine the residuals using a Q-Q plot. If normality holds, the residual points should closely track the 45-degree reference line.
 
 ::: {.panel-tabset}
 ## R
@@ -581,9 +582,8 @@ plt.show()
 
 We can see that the residuals are not normally distributed above, but instead are right-skewed. This is typical in income datasets, as most people have a low to moderate income, while a small number of people earn very high amounts, as discussed in [Passion Driven Statistics](https://alanarnholt.github.io/PDS-Bookdown2/skewed-right-distributions.html). 
 
-3. Homogeneity of Variances - Levene's test
-
-For ANOVA, we also need to check if the different groups have comparable amounts of variance. 
+3. **Homogeneity of Variances - Levene's test**
+    For ANOVA, we also need to check if the different groups have comparable amounts of variance. 
 
 ::: {.panel-tabset}
 ## R
@@ -638,21 +638,20 @@ Since p-value is smaller than 0.05, we can reject the null hypothesis in favor o
 
 **Hypothesis Testing: Population Group**
 
-We can do the same process for income by population group. Our hypotheses are:   
+Following the same analytical framework, we evaluate whether median incomes differ significantly across population groups. 
 
-* **Null Hypothesis ($H_0$):** The distributions of median income are identical across all population groups.
-* **Alternative Hypothesis ($H_a$):** The distributions of median income are not identical across all population groups.
+::: {.callout-note appearance="simple"}
+## Statistical Hypotheses (Population Group)
+* **$H_0$ (Null):** The distributions of median income are identical across all population groups.
+* **$H_a$ (Alternative):** The distributions of median income are not identical across all population groups.
+:::
 
+Next, we verify the underlying assumptions for our test:
 
-First we need to re-check our assumptions. 
+1. **Independence of Observations:**  
+   Because the dataset contains distinct aggregate rows per graduate subgroup with no repeated measures, the independence assumption remains satisfied.
 
-Assumption checks:
-
-1. Independence of Observations
-
-As the dataset includes one row per discrete group of graduates, and there are no repetitions, this dataset satisfactorily fulfills the required independence of observations. 
-
-2. Normality of Residuals
+2. **Normality of Residuals:**  
 
 ::: {.panel-tabset}
 ## R
@@ -694,7 +693,7 @@ ggplot(data.frame(resids = residuals(anova_popgroup_model)), aes(x = resids)) +
 ```
 
 ## Python
-```{python residuals_popgroup_r}
+```{python residuals_popgroup_py}
 
 resid_popgroup_df = pd.DataFrame({"resids": residuals_popgroup})
 
@@ -729,7 +728,7 @@ plt.show()
 
 Again, from both the Q-Q plot and the residuals density plot, we can see that the residuals are not normally distributed. 
 
-3. Homogeneity of Variances - Levene's test
+3. **Homogeneity of Variances - Levene's test**
 
 ::: {.panel-tabset}
 ## R
@@ -822,8 +821,7 @@ Our modeling workflow is structured as follows:
 
 ::: {.panel-tabset}
 ## R
-```{r split_data_weighted_r}
-library(rsample)
+```{r split_data_r}
 set.seed(42)
 
 # Split dataset to train and test sets using stratified splitting
@@ -833,6 +831,31 @@ data_split <- initial_split(income_data, prop = 0.8, strata = number_graduates)
 # Create the training and testing sets
 income_train_weighted <- training(data_split)
 income_test_weighted  <- testing(data_split)
+
+```
+
+## Python
+```{python split_data_py}
+
+np.random.seed(42)
+
+# Bin the continuous 'number_graduates' column into discrete strata 
+# (Stratified splitting in scikit-learn requires categorical bins)
+income_data["graduate_strata"] = pd.qcut(
+    income_data["number_graduates"], q=5, labels=False, duplicates="drop"
+)
+
+# Perform an 80/20 stratified split 
+income_train_weighted, income_test_weighted = train_test_split(
+    income_data,
+    test_size=0.2,
+    stratify=income_data["graduate_strata"],
+    random_state=42,
+)
+
+# Optional: Drop the temporary strata column if you no longer need it
+#income_train_weighted = income_train_weighted.drop(columns=["graduate_strata"])
+#income_test_weighted = income_test_weighted.drop(columns=["graduate_strata"])
 
 ```
 :::
@@ -848,11 +871,27 @@ model_lm_weighted <- lm(median_income ~ educational_qualification + population_g
 # View coefficients and summary
 summary(model_lm_weighted)
 ```
+
+## Python
+```{python weighted_model_py}
+
+# Fit the weighted linear model using statsmodels formula interface (WLS)
+# statsmodels automatically handles categorical columns (factors) using formula syntax
+model_lm_weighted = smf.wls(
+    formula="median_income ~ educational_qualification + population_group + gender + field_of_study",
+    data=income_train_weighted,
+    weights=income_train_weighted["number_graduates"]
+).fit()
+
+# View coefficients and summary
+print(model_lm_weighted.summary())
+
+```
 :::
 
-Overall, this model performed reasonably well. The Adjusted R-squared ($0.6491$) indicates that this model can explain 64.91% of the variance in median post-graduation income. This number, while not extremely high, provides a good baseline prediction for a complex social and economic dataset. The F-statistic also indicates that this model is doing well. With a p-value of $p < 2.2 \times 10^{-16}$), the model as a whole is statistically significant compared to an intercept-only model, which indicates that the explanatory variables used here do a decent job of explaining income differences. 
+Overall, this model performed reasonably well. The Adjusted R-squared ($0.649$ in R and $0.648$ in Python) indicates that this model can explain ~64.85% of the variance in median post-graduation income. This number, while not extremely high, provides a good baseline prediction for a complex social and economic dataset. The F-statistic also indicates that this model is doing well. With a p-value of $p < 2.2 \times 10^{-16}$), the model as a whole is statistically significant compared to an intercept-only model, which indicates that the explanatory variables used here do a decent job of explaining income differences. 
 
-We can interpret the coefficients from our model as well. The intercept ($\$31,044$) represents the baseline predicted median income for the reference group (i.e. graduates in the group of "Man" and "Arab", with education in "Career, technical or professional training certificate", and "Agriculture, natural resources and conservation"). All coefficients represent the expected difference in median income relative to the reference category, holding all other variables constant:
+We can interpret the coefficients from our model as well. The below interpretation uses the values from the R model, but similar interpretations can be made from the Python model as well. The intercept ($\$31,044$) represents the baseline predicted median income for the reference group (i.e. graduates in the group of "Man" and "Arab", with education in "Career, technical or professional training certificate", and "Agriculture, natural resources and conservation"). All coefficients represent the expected difference in median income relative to the reference category, holding all other variables constant:
 
 * **Gender:** Being a woman, compared to being a man, is associated with a median income that is $\$4,884$ lower, while holding all other variables constant. 
 * **Population Group:** Several groups show significant differences relative to the baseline group, "Arab". For example, "Not a visible minority" shows an estimated increase of $\$7,136$, while groups like Japanese, Multiple visible minorities, and West Asian do not show statistically significant differences ($p > 0.05$) after controlling for education, gender, and field of study.
@@ -879,9 +918,37 @@ cat(sprintf("Maximum median income: $%s\n", format(max(income_data$median_income
 cat(sprintf("Mean median income: $%s\n", format(round(mean(income_data$median_income), 0), big.mark = ",")))
 
 ```
+
+## Python
+```{python weighted_model_eval_py}
+
+# Predict on test data
+income_test_weighted = income_test_weighted.copy()
+income_test_weighted[".pred"] = model_lm_weighted.predict(income_test_weighted)
+
+# Calculate weighted RMSE
+weights = income_test_weighted["number_graduates"]
+actual = income_test_weighted["median_income"]
+pred = income_test_weighted[".pred"]
+
+weighted_mse = np.sum(weights * (actual - pred) ** 2) / np.sum(weights)
+weighted_rmse = np.sqrt(weighted_mse)
+
+print(f"Weighted RMSE: {weighted_rmse:.4f}")
+
+# Display income range and mean for comparison 
+min_inc = income_data["median_income"].min()
+max_inc = income_data["median_income"].max()
+mean_inc = income_data["median_income"].mean()
+
+print(f"Minimum median income: ${min_inc:,.0f}")
+print(f"Maximum median income: ${max_inc:,.0f}")
+print(f"Mean median income: ${mean_inc:,.0f}")
+
+```
 :::
 
-To further evaluate our model's generalizability, we can generate predictions on the test set and calculate the weighted root mean squared error (RMSE). The resulting test RMSE is $\$12,135$. 
+To further evaluate our model's generalizability, we can generate predictions on the test set and calculate the weighted root mean squared error (RMSE). The resulting test RMSE is $\$12,135$ in R and $\$11,009$ in Python. 
 
 To put this error into perspective, we can compare it against the broader distribution of median incomes in our dataset, which spans from $\$3,900$ to $\$270,200$ with a mean of $\$62,173$. An RMSE of roughly $\$12,000$. represents about 20% of the average income value. This indicates that while there is room for higher precision, the model captures the overall trend effectively without large-scale deviation.
 
@@ -912,11 +979,43 @@ cat(sprintf("True Median Income: $%s\n", format(round(ex_true, 2), big.mark = ",
 cat(sprintf("Predicted Median Income: $%s\n", format(round(example_pred, 2), big.mark = ",")))
 cat(sprintf("Absolute Error: $%s\n", format(round(ex_diff, 2), big.mark = ",")))
 ```
+
+## Python
+```{python single_example_py}
+
+# Select a single row from the test set
+example_row = income_test_weighted.iloc[[1]]
+
+# Generate the prediction for this specific row
+example_pred = model_lm_weighted.predict(example_row).iloc[0]
+
+# Calculate difference in predicted and true median incomes
+ex_true = example_row["median_income"].values[0]
+ex_diff = abs(ex_true - example_pred)
+
+# Extract attributes for easy printing
+ex_edu = example_row["educational_qualification"].values[0]
+ex_field = example_row["field_of_study"].values[0]
+ex_gender = example_row["gender"].values[0]
+ex_pop = example_row["population_group"].values[0]
+ex_grads = example_row["number_graduates"].values[0]
+
+# Display the attributes and values (equivalent to cat/sprintf statements)
+print(f"Educational Qualification: {ex_edu}")
+print(f"Field of Study: {ex_field}")
+print(f"Gender: {ex_gender}")
+print(f"Population Group: {ex_pop}")
+print(f"Number of Graduates in Group (Weight): {ex_grads:,.0f}")
+print(f"True Median Income: ${ex_true:,.2f}")
+print(f"Predicted Median Income: ${example_pred:,.2f}")
+print(f"Absolute Error: ${ex_diff:,.2f}")
+
+```
 :::
 
 Looking at this specific test case of a group of graduates from our test set, the true median income and our model's predicted median income give us a clear concrete example of how the model performs on an individual level. 
 
-Given that our test set RMSE is $12,135, individual discrepancies like this align fairly well with our overall error metrics. It illustrates that while the model captures the structural baseline and general trajectory of graduate earnings quite well, localized variance among specific demographic and educational intersections can still produce deviations of around five to twenty thousand dollars.
+Given that our test set RMSE is $\$11,000$ to $\$12,000$, individual discrepancies like this align fairly well with our overall error metrics. It illustrates that while the model captures the structural baseline and general trajectory of graduate earnings quite well, localized variance among specific demographic and educational intersections can still produce deviations of around five to twenty thousand dollars.
 
 
 
@@ -936,6 +1035,21 @@ model_lm_inter <- lm(median_income ~ (educational_qualification + population_gro
 
 # View coefficients and summary
 summary(model_lm_inter)
+```
+
+## Python
+```{python inter_model_py}
+
+# Fit the weighted linear model with interactions 
+model_lm_inter = smf.wls(
+    formula="median_income ~ educational_qualification + population_group + gender * field_of_study",
+    data=income_train_weighted,
+    weights=income_train_weighted["number_graduates"]
+).fit()
+
+# View coefficients and summary
+print(model_lm_inter.summary())
+
 ```
 :::
 
@@ -959,9 +1073,39 @@ cat(sprintf("Maximum median income: $%s\n", format(max(income_data$median_income
 cat(sprintf("Mean median income: $%s\n", format(round(mean(income_data$median_income), 0), big.mark = ",")))
 
 ```
+
+## Python
+```{python inter_model_eval_py}
+
+# Predict on test data using the interaction model
+income_test_weighted = income_test_weighted.copy()
+income_test_weighted[".pred_inter"] = model_lm_inter.predict(income_test_weighted)
+
+# Calculate weighted RMSE for the interaction model
+weights = income_test_weighted["number_graduates"]
+actual = income_test_weighted["median_income"]
+pred_inter = income_test_weighted[".pred_inter"]
+
+weighted_mse_inter = np.sum(weights * (actual - pred_inter) ** 2) / np.sum(weights)
+weighted_rmse_inter = np.sqrt(weighted_mse_inter)
+
+print(f"Interaction Model Weighted RMSE: ${weighted_rmse_inter:,.0f}")
+
+# Display income range and mean for comparison
+min_inc = income_data["median_income"].min()
+max_inc = income_data["median_income"].max()
+mean_inc = income_data["median_income"].mean()
+
+print(f"Minimum median income: ${min_inc:,.0f}")
+print(f"Maximum median income: ${max_inc:,.0f}")
+print(f"Mean median income: ${mean_inc:,.0f}")
+
+```
 :::
 
-The inclusion of the interactions between gender and field of study modestly improves model fit, raising the adjusted R-squared to $0.6594$. While a general baseline gender penalty persists across many fields, where women earn an estimated $\$7,205$ less than men holding other factors constant, the magnitude of this gap varies significantly by discipline:
+The inclusion of the interactions between gender and field of study modestly improves model fit, raising the adjusted R-squared to $0.6594$ in R and $0.658$ in Python. Again, all below interpretations are based on the R model, but similar discussion can be made from the Python model as well. 
+
+While a general baseline gender penalty persists across many fields, where women earn an estimated $\$7,205$ less than men holding other factors constant, the magnitude of this gap varies significantly by discipline:
 
 * **Exacerbated Disparities in Tech & Trades:** In fields like **mathematics, computer, and information sciences** ($-\$5,435$ interaction) and **personal, protective, and transportation services** ($-\$9,159$ interaction), the negative interaction coefficients indicate a structurally wider gender gap.
 * **Neutralization in Health:** Conversely, **health and related fields** exhibit a significant positive interaction ($\approx +\$10,597$), which effectively neutralizes or reverses the baseline gender penalty in those specific credentials. 
