@@ -81,7 +81,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-8039d48b1c5dc5309e02f19e3c3aa6d8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-7635940eafe074717b829e9a35a9fbbb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -245,20 +245,14 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled" title="Try it live!">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Try it live!
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Use Binder to explore and run this dataset and analysis interactively in your browser with <code>R</code>. Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.</p>
-<p>👉 <a href="https://mybinder.org/v2/gh/jadeeechen/diversedata-notebooks/HEAD?urlpath=lab/tree/hcmst.ipynb" target="_blank" rel="noopener">Launch on Binder</a></p>
-</div>
-</div>
+<!--
+::: {.callout-note icon="terminal" title="Try it live!"}
+Use Binder to explore and run this dataset and analysis interactively in your browser with `R`. Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.
+
+👉 [Launch on Binder](https://mybinder.org/v2/gh/jadeeechen/diversedata-notebooks/HEAD?urlpath=lab/tree/hcmst.ipynb){target="_blank" rel="noopener"}
+
+:::
+-->
 <section id="about-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="about-the-data">About the Data</h2>
 <p>This dataset is adapted from the original dataset <a href="https://data.stanford.edu/hcmst2017">How Couples Meet and Stay Together 2017, 2022</a>. This study, led by researchers from Stanford University, surveyed 1,722 U.S. adults in 2022 to explore how relationships form and change with time and focused on dating habits and the impact of the COVID-19 pandemic on relationships.</p>
@@ -1393,9 +1387,9 @@ occur. Because of that, the test results might be invalid.</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Omnibus</td>
-<td style="text-align: right;">92.41</td>
+<td style="text-align: right;">92.40</td>
 <td style="text-align: right;">96</td>
-<td style="text-align: right;">0.58</td>
+<td style="text-align: right;">0.59</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">same_sex_coupleYes</td>
@@ -1730,42 +1724,42 @@ Note
 <tr class="odd">
 <td style="text-align: left;">Dummy</td>
 <td style="text-align: left;">0.001 (+/- 0.000)</td>
-<td style="text-align: left;">0.002 (+/- 0.001)</td>
+<td style="text-align: left;">0.001 (+/- 0.000)</td>
 <td style="text-align: left;">0.356 (+/- 0.001)</td>
 <td style="text-align: left;">0.356 (+/- 0.000)</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Logistic Regression</td>
-<td style="text-align: left;">0.032 (+/- 0.007)</td>
-<td style="text-align: left;">0.003 (+/- 0.001)</td>
+<td style="text-align: left;">0.028 (+/- 0.006)</td>
+<td style="text-align: left;">0.003 (+/- 0.000)</td>
 <td style="text-align: left;">0.565 (+/- 0.031)</td>
 <td style="text-align: left;">0.578 (+/- 0.017)</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Random Forest</td>
-<td style="text-align: left;">0.097 (+/- 0.004)</td>
-<td style="text-align: left;">0.007 (+/- 0.001)</td>
+<td style="text-align: left;">0.083 (+/- 0.001)</td>
+<td style="text-align: left;">0.006 (+/- 0.000)</td>
 <td style="text-align: left;">0.508 (+/- 0.045)</td>
 <td style="text-align: left;">0.892 (+/- 0.011)</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Random Forest with Non-Default Settings</td>
-<td style="text-align: left;">0.103 (+/- 0.063)</td>
-<td style="text-align: left;">0.006 (+/- 0.001)</td>
+<td style="text-align: left;">0.069 (+/- 0.000)</td>
+<td style="text-align: left;">0.005 (+/- 0.000)</td>
 <td style="text-align: left;">0.516 (+/- 0.013)</td>
 <td style="text-align: left;">0.678 (+/- 0.007)</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">LightGBM</td>
-<td style="text-align: left;">1.489 (+/- 0.138)</td>
-<td style="text-align: left;">0.006 (+/- 0.001)</td>
+<td style="text-align: left;">1.366 (+/- 0.065)</td>
+<td style="text-align: left;">0.005 (+/- 0.001)</td>
 <td style="text-align: left;">0.502 (+/- 0.020)</td>
 <td style="text-align: left;">0.840 (+/- 0.012)</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">LightGBM with Non-Default Settings</td>
-<td style="text-align: left;">0.935 (+/- 0.063)</td>
-<td style="text-align: left;">0.005 (+/- 0.001)</td>
+<td style="text-align: left;">0.876 (+/- 0.052)</td>
+<td style="text-align: left;">0.004 (+/- 0.000)</td>
 <td style="text-align: left;">0.482 (+/- 0.007)</td>
 <td style="text-align: left;">0.713 (+/- 0.016)</td>
 </tr>
@@ -2586,7 +2580,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0250568</td>
 <td style="text-align: left;">nan</td>
 <td style="text-align: right;">500</td>
-<td style="text-align: right;">0.0641114</td>
+<td style="text-align: right;">0.0628315</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
@@ -2596,7 +2590,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0259536</td>
 <td style="text-align: left;">nan</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.0584476</td>
+<td style="text-align: right;">0.0588406</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
@@ -2606,7 +2600,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0249659</td>
 <td style="text-align: left;">nan</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.0553882</td>
+<td style="text-align: right;">0.0553449</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">3</td>
@@ -2616,7 +2610,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0249659</td>
 <td style="text-align: left;">nan</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.0507506</td>
+<td style="text-align: right;">0.0652922</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">5</td>
@@ -2626,7 +2620,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.027971</td>
 <td style="text-align: left;">nan</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">0.0358524</td>
+<td style="text-align: right;">0.0353991</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">6</td>
@@ -2636,7 +2630,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0310936</td>
 <td style="text-align: left;">nan</td>
 <td style="text-align: right;">0.1</td>
-<td style="text-align: right;">0.0242246</td>
+<td style="text-align: right;">0.0300628</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">7</td>
@@ -2646,7 +2640,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0474138</td>
 <td style="text-align: left;">nan</td>
 <td style="text-align: right;">0.01</td>
-<td style="text-align: right;">0.0230145</td>
+<td style="text-align: right;">0.0182898</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">8</td>
@@ -2656,7 +2650,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0269975</td>
 <td style="text-align: left;">balanced</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">0.0288854</td>
+<td style="text-align: right;">0.046099</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">9</td>
@@ -2666,7 +2660,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0272184</td>
 <td style="text-align: left;">balanced</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.0430029</td>
+<td style="text-align: right;">0.0608132</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">10</td>
@@ -2676,7 +2670,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0296336</td>
 <td style="text-align: left;">balanced</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.0529872</td>
+<td style="text-align: right;">0.0636761</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">11</td>
@@ -2686,7 +2680,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0273077</td>
 <td style="text-align: left;">balanced</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.0596269</td>
+<td style="text-align: right;">0.054845</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">12</td>
@@ -2696,7 +2690,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0288766</td>
 <td style="text-align: left;">balanced</td>
 <td style="text-align: right;">500</td>
-<td style="text-align: right;">0.053942</td>
+<td style="text-align: right;">0.080257</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">13</td>
@@ -2706,7 +2700,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0216479</td>
 <td style="text-align: left;">balanced</td>
 <td style="text-align: right;">0.1</td>
-<td style="text-align: right;">0.0237232</td>
+<td style="text-align: right;">0.0321235</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">14</td>
@@ -2716,7 +2710,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0339699</td>
 <td style="text-align: left;">balanced</td>
 <td style="text-align: right;">0.01</td>
-<td style="text-align: right;">0.0122508</td>
+<td style="text-align: right;">0.0171795</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">15</td>
@@ -2726,7 +2720,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0165031</td>
 <td style="text-align: left;">nan</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">0.0136629</td>
+<td style="text-align: right;">0.0188427</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">16</td>
@@ -2736,7 +2730,7 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <td style="text-align: right;">0.0612768</td>
 <td style="text-align: left;">balanced</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">0.0118214</td>
+<td style="text-align: right;">0.014554</td>
 </tr>
 </tbody>
 </table>
