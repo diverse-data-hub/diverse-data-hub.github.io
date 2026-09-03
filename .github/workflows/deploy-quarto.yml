@@ -71,6 +71,10 @@ jobs:
         run: |
           echo "RETICULATE_PYTHON=$CONDA/envs/diverse_web_env/bin/python" >> $GITHUB_ENV
 
+      - name: Hotfix for reticulate libexpat conflict
+        run: |
+          echo 'dyn.load("/home/runner/miniconda3/envs/diverse_web_env/lib/libexpat.so.1", local = FALSE, now = TRUE)' > .Rprofile
+
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
@@ -80,5 +84,3 @@ jobs:
           target: gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Force R/Reticulate to prioritize Conda's system libraries over the runner's default libraries:
-          LD_LIBRARY_PATH: /home/runner/miniconda3/envs/diverse_web_env/lib:${{ env.LD_LIBRARY_PATH }}
