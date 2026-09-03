@@ -73,7 +73,7 @@ jobs:
 
       - name: Hotfix for reticulate libexpat conflict
         run: |
-          echo 'dyn.load("/home/runner/miniconda3/envs/diverse_web_env/lib/libexpat.so.1", local = FALSE, now = TRUE)' > .Rprofile
+          echo 'dyn.load("/home/runner/miniconda3/envs/diverse_web_env/lib/libexpat.so.1", local = FALSE, now = TRUE)' >> .Rprofile
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
