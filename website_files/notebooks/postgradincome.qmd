@@ -126,9 +126,7 @@ income_data |>
 ## Python
 ```{python data_load_py}
 
-# Will need to switch data loading step when PyPI is updated!
-#income_data = dd.load_data("postgradincome")
-income_data = pd.read_csv("../../data/clean/postgradincome.csv")
+income_data = dd.load_data("postgradincome")
 income_data['field_of_study'] = income_data['field_of_study'].str.replace(r"\s*\[\d+\]$", "", regex=True)
 
 cols_to_factor = [
