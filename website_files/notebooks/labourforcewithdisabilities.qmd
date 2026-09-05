@@ -38,15 +38,15 @@ This dataset supports the analysis of:
 
 ### Objective
 
-Equitable employment is a cornerstone of financial independence and social inclusion for adults living with disabilities. In Canada, federal and provincial governments provide essential financial assistance, such as the upcoming Canada Disability Benefit (CDB) and provincial support programs, to help bridge the income gap. However, the reliance on these support systems and the ability to find sustainable employment are heavily influenced by a complex intersection of demographic factors.
+Equitable employment is a cornerstone of financial independence and social inclusion for adults living with disabilities. In Canada, federal and provincial governments provide essential financial assistance, such as the [Canada Disability Benefit (CDB)](https://www.canada.ca/en/services/benefits/disability/canada-disability-benefit.html) and provincial support programs, to help bridge the income gap. However, the reliance on these support systems and the ability to find sustainable employment are heavily influenced by a complex intersection of demographic factors.
 
 To better understand the structural barriers within the Canadian labour market, this case study leverages Statistics Canada data to evaluate employment outcomes. We focus on several key questions:
 
--   **How does the global severity of a disability impact the likelihood of employment?**
--   **Are there significant disparities in employment rates across different age groups and sexes?**
--   **To what extent does geographical location (province or territory) affect labour force inclusion?**
+-   How does the global severity of a disability impact the likelihood of employment?
+-   Are there significant disparities in employment rates across different age groups and sexes?
+-   To what extent does geographical location (province or territory) affect labour force inclusion?
 
-By conducting exploratory data analysis and fitting a weighted fractional logit regression model, we aim to statistically quantify the primary drivers of employment for individuals with disabilities. This analysis provides an educational framework for understanding how data can inform public policy, optimize vocational rehabilitation resources, and highlight regional or demographic gaps in the current social.
+By conducting exploratory data analysis and fitting a regression model, we aim to statistically quantify the primary drivers of employment for individuals with disabilities. This analysis provides an educational framework for understanding how data can inform public policy, optimize vocational rehabilitation resources, and highlight regional or demographic gaps in the current social.
 
 ### Analysis
 
@@ -429,17 +429,20 @@ plt.show()
 
 Regional variations highlight differences in economic conditions and social support frameworks. Western provinces such as Saskatchewan and Alberta report higher average employment rates, while Quebec and Atlantic provinces tend to show lower baseline figures. Although northern territories (Yukon and Nunavut) appear at the top of the raw rankings, these estimates stem from smaller sample sizes with high suppression rates and require careful interpretation through weighted modeling.
 
+
 #### 3. Weighted Fractional Logit Regression
 
-**Note:** We use a Generalized Linear Model (GLM) with a `Binomial` (or `quasibinomial`) family to handle fractional response variables (proportions between 0 and 1). By passing our population headcounts into the `weights` argument, the model evaluates the dataset as millions of surveyed individuals rather than treating each aggregated row equally. This provides the statistical power necessary to validate our EDA findings.
+**Note:** We use a Generalized Linear Model (GLM) with a `Binomial` (or `quasibinomial`) family to handle fractional response variables (proportions between 0 and 1). By passing our population headcounts into the `weights` argument, the model evaluates the dataset as millions of surveyed individuals rather than treating each aggregated row equally. 
 
-We explicitly set reference groups for the categorical variables, the coefficients will show the effect relative to: `Ontario`, `Males`, `25-34 years`, and `Mild severity`.
+**Setting Reference Categories**
+
+Before running a regression, the model needs a baseline to compare everything against. By explicitly setting reference groups, our final coefficients will clearly show the effect relative to: `Ontario`, `Males`, `25 to 34 years`, and `Mild` severity.
 
 ::: panel-tabset
 ## R
 
-```{r weighted_glm_r}
-# Explicitly setting reference groups for the categorical variables
+```{r set_references_r}
+# Explicitly setting reference groups for the categorical variables directly in the dataframe
 labour_force_clean <- labour_force_clean |>
   mutate(
     geography = relevel(factor(geography), ref = "Ontario"),
@@ -448,23 +451,11 @@ labour_force_clean <- labour_force_clean |>
     global_severity = relevel(factor(global_severity), ref = "Mild")
   )
 
-# Fit the GLM with quasibinomial family and population weights
-weighted_glm <- glm(
-  employment_proportion ~ geography + sex + age_group + global_severity,
-  data = labour_force_clean,
-  family = quasibinomial(link = "logit"),
-  weights = population_weight
-)
-
-tidy(weighted_glm) |>
-  mutate(across(where(is.numeric), ~round(.x, 4))) |>
-  kable()
-
 ```
 
 ## Python
 
-```{python weighted_glm_py}
+```{python set_references_py}
 # Define formula explicitly setting the reference group for each demographic
 formula = (
     "employment_proportion ~ "
@@ -474,18 +465,71 @@ formula = (
     "C(global_severity, Treatment(reference='Mild'))"
 )
 
-# Fit a Generalized Linear Model with Binomial family and population weights
+```
+
+:::
+
+**Fitting the Model**
+
+Next, we feed our prepared variables into the GLM. Because the outcome is a proportion, a standard linear model would be inappropriate; instead, the logit link transforms the data into log-odds.
+
+::: panel-tabset
+
+## R
+
+```{r fit_glm_r}
+# Fit the GLM with quasibinomial family (to handle overdispersion) and population weights
+weighted_glm <- glm(
+  employment_proportion ~ geography + sex + age_group + global_severity,
+  data = labour_force_clean,
+  family = quasibinomial(link = "logit"),
+  weights = population_weight
+)
+
+```
+
+## Python
+
+```{python fit_glm_py}
+# Fit a GLM with Binomial family, population weights, 
+# and Pearson's chi-squared scale to account for overdispersion (Quasibinomial equivalent)
 weighted_glm_py = smf.glm(
     formula=formula, 
     data=labour_force_clean, 
     family=sm.families.Binomial(), 
     var_weights=labour_force_clean['population_weight']
-).fit()
+).fit(scale="X2")
 
+```
+
+:::
+
+**Formatting the Output**
+
+Raw model output can be dense and difficult to read. In this final step, we clean up the summary statistics so they are presentation-ready.
+
+::: panel-tabset
+
+## R
+
+```{r display_results_r}
+# Tidy the model output, round numbers for readability, and render a clean table
+tidy(weighted_glm) |>
+  mutate(across(where(is.numeric), ~round(.x, 3))) |>
+  kable()
+
+```
+
+## Python
+
+```{python display_results_py}
+# Print the formatted statsmodels summary table
 print(weighted_glm_py.summary())
 
 ```
+
 :::
+
 
 ### Discussion
 
@@ -493,8 +537,8 @@ The model establishes a clear reference point: a Male, aged 25 to 34 years, loca
 
 Holding all other variables constant, we can isolate specific systemic barriers:
 
--   **Severity Penalty:** Moving from a Mild disability to Moderate ($-0.4496$), Severe ($-0.9263$), or Very Severe ($-1.5372$) strictly and significantly decreases the likelihood of employment.
--   **Age Penalty:** Youth aged 15 to 24 face the steepest overall age penalty in the model ($-1.2410$). Older adults aged 55 to 64 face a substantial drop ($-0.6809$) as they approach retirement.
--   **Data Sparsity:** Nunavut returns a high $p$-value ($0.176$), validating our EDA assumption that the territory's sample size is too volatile to draw reliable inferential conclusions without wider confidence intervals.
+* **Severity Penalty:** Moving from a Mild disability to Moderate ($-0.4496$), Severe ($-0.9263$), or Very Severe ($-1.5372$) strictly and significantly decreases the likelihood of employment.
+* **Age Penalty:** Youth aged 15 to 24 face the steepest overall age penalty in the model ($-1.2410$). Older adults aged 55 to 64 face a substantial drop ($-0.6809$) as they approach retirement.
+* **Data Sparsity:** Nunavut returns a high $p$-value ($0.947$), validating our EDA assumption that the territory's sample size is too volatile to draw reliable inferential conclusions without wider confidence intervals.
 
 Understanding these exact log-odds penalties allows educational and governmental institutions to see exactly where current social safety nets and vocational programs are succeeding, and where they are falling short.
