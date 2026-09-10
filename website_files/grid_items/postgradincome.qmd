@@ -1,0 +1,7 @@
+<a class="grid-item" data-featured="false" data-tags="r" a href="https://diverse-data-hub.github.io/website_files/description_pages/postgradincome.html">
+  <img src="/website_files/img/wildfire.png" width="20px" height="40px">
+  <h3>Post-Grad Income</h3>
+  <p>
+    This dataset on on income of Canadian students two years after graduation includes information about area and level of study, age, gender, and population group of the student, median income, and location in Canada. Collected by Statistics Canada, this dataset supports investigation of income disparities by race, gender, and age. 
+  </p>
+</a>
