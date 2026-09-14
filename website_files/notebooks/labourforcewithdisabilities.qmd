@@ -46,7 +46,7 @@ To better understand the structural barriers within the Canadian labour market, 
 -   Are there significant disparities in employment rates across different age groups and sexes?
 -   To what extent does geographical location (province or territory) affect labour force inclusion?
 
-By conducting exploratory data analysis and fitting a regression model, we aim to statistically quantify the primary drivers of employment for individuals with disabilities. This analysis provides an educational framework for understanding how data can inform public policy, optimize vocational rehabilitation resources, and highlight regional or demographic gaps in the current social.
+By conducting exploratory data analysis and fitting a regression model, we aim to statistically quantify the primary drivers of employment for individuals with disabilities. This analysis provides an educational framework for understanding how data can inform public policy, optimize vocational rehabilitation resources, and highlight regional or demographic gaps in the current society.
 
 ### Analysis
 
@@ -71,6 +71,7 @@ library(broom)
 ## Python
 
 ```{python load-libraries_py, results = "hide", warning = FALSE, message = FALSE}
+import diversedata as dd
 import pandas as pd
 import numpy as np
 from IPython.display import Markdown
@@ -127,9 +128,7 @@ labour_force_clean |>
 
 ```{python data_prep_py}
 # Reading data
-# Will need to switch data loading step when PyPI is updated!
-#labour_force = dd.load_data("labourforcewithdisabilities")
-labour_force = pd.read_csv("../../data/clean/labourforcewithdisabilities.csv")
+labour_force = dd.load_data("labourforcewithdisabilities")
 
 # Filter for the target disability category to avoid double-counting
 df_all_disabilities = labour_force[labour_force['disability_type'] == 'All disability types']
@@ -300,7 +299,7 @@ Employment rates follow a distinct bell curve across age categories. Working-age
 
 **Employment Rate by Sex**
 
-This comparison breaks down average employment rates between males and females in the dataset to highlight gender-based participation gaps.
+This comparison breaks down average employment rates between men and women in the dataset to highlight sex-based participation gaps.
 
 ::: panel-tabset
 ## R
@@ -358,7 +357,7 @@ plt.show()
 ```
 :::
 
-Males display a marginally higher mean employment rate compared to females. While this gap is narrower than the disparities observed across age brackets or severity levels, it indicates that gender intersects with disability to shape workforce attachment.
+Men display a marginally higher mean employment rate compared to women. While this gap is narrower than the disparities observed across age brackets or severity levels, it indicates that sex intersects with disability to shape workforce attachment.
 
 ------------------------------------------------------------------------
 
@@ -430,7 +429,7 @@ plt.show()
 Regional variations highlight differences in economic conditions and social support frameworks. Western provinces such as Saskatchewan and Alberta report higher average employment rates, while Quebec and Atlantic provinces tend to show lower baseline figures. Although northern territories (Yukon and Nunavut) appear at the top of the raw rankings, these estimates stem from smaller sample sizes with high suppression rates and require careful interpretation through weighted modeling.
 
 
-#### 3. Weighted Fractional Logit Regression
+#### 3. Logistic Regression 
 
 **Note:** We use a Generalized Linear Model (GLM) with a `Binomial` (or `quasibinomial`) family to handle fractional response variables (proportions between 0 and 1). By passing our population headcounts into the `weights` argument, the model evaluates the dataset as millions of surveyed individuals rather than treating each aggregated row equally. 
 
@@ -530,15 +529,41 @@ print(weighted_glm_py.summary())
 
 :::
 
+#### 4. Log-Odds Calculation
+
+To make sense of the model's coefficients, we have to remember they are in log-odds. We can convert these back to an intuitive probability (the expected employment rate) using the inverse-logit formula: 
+
+$$Probability = \frac{e^{log\_odds}}{(1 + e^{log\_odds})}$$
+
+**Example 1: The Baseline (Intercept)**
+
+The model's `intercept` ($0.9377$) represents our reference group (a man, aged 25 to 34 years, located in Ontario, with a Mild disability). Plugging this into our formula,
+
+$$\frac{e^{0.9377}}{1 + e^{0.9377}} = 0.7186...$$
+
+gives a baseline expected employment rate of 71.9%.
+
+**Example 2: Demographic Factors (Severity Level)**
+
+Moving from a Mild disability (the baseline) to a Severe disability carries a penalty of $-0.9263$. For our reference group, this changes the total log-odds to $0.0114$ ($0.9377 - 0.9263$). Passing that through our formula, 
+
+$$\frac{e^{0.0114}}{1 + e^{0.0114}} = 0.5028...$$
+
+the expected employment rate drops to 50.3%. 
+
+For a Very Severe disability ($-1.5372$), log-odds drops to $-0.5995$ ($0.9377-1.5372$). Passing that through our formula, 
+
+$$\frac{e^{-0.5995}}{1 + e^{-0.5995}} = 0.3544...$$
+
+
+the employment rate plummets to 35.4%.
 
 ### Discussion
 
-The model establishes a clear reference point: a Male, aged 25 to 34 years, located in Ontario, with a Mild disability. The intercept log-odds ($0.9377$) converts to a baseline expected employment rate of roughly **71.8%**.
+This analysis highlights the structural barriers to employment faced by adults with disabilities across the Canadian labour market. Our initial exploratory data analysis showed clear disparities in workforce participation, revealing a stark negative trajectory between disability severity and employment, alongside distinct age-related and regional gaps.
 
-Holding all other variables constant, we can isolate specific systemic barriers:
+Building on these visualizations, our logistic regression allowed us to quantify these penalties while controlling for intersectional demographic factors. By anchoring our model to a specific baseline (a man, aged 25 to 34, in Ontario, with a Mild disability), we translated log-odds into tangible, real-world probabilities. As demonstrated in our calculations, while this baseline group has an expected employment rate of 72%, the rate decreases rapidly as the level of severity increases. Shifting the severity from Mild to Very Severe cuts the expected employment rate by more than half, dropping it to roughly 35%.
 
-* **Severity Penalty:** Moving from a Mild disability to Moderate ($-0.4496$), Severe ($-0.9263$), or Very Severe ($-1.5372$) strictly and significantly decreases the likelihood of employment.
-* **Age Penalty:** Youth aged 15 to 24 face the steepest overall age penalty in the model ($-1.2410$). Older adults aged 55 to 64 face a substantial drop ($-0.6809$) as they approach retirement.
-* **Data Sparsity:** Nunavut returns a high $p$-value ($0.947$), validating our EDA assumption that the territory's sample size is too volatile to draw reliable inferential conclusions without wider confidence intervals.
+Beyond severity, the model highlights significant demographic hurdles. We observed substantial age penalties for youth (aged 15 to 24) and for older adults (aged 55 to 64) that reflect the distinct challenges of initially entering the workforce and the reality of premature exits for those approaching retirement.
 
-Understanding these exact log-odds penalties allows educational and governmental institutions to see exactly where current social safety nets and vocational programs are succeeding, and where they are falling short.
+Even with these insights, it is important to approach these findings with caution due to the dataset's limitations. Because this data is aggregated at the demographic group level rather than tracking individual outcomes over time, our models rely on population weights and cannot account for granular, individual-level factors, such as the specific nature of a workplace accommodation, local transit accessibility, or isolated employer dynamics. Furthermore, high data sparsity and suppression in regions like Nunavut (reflected in high $p$-values) underscore the difficulty of drawing robust inferential conclusions for smaller populations. Despite these limitations, quantifying these statistical penalties provides a critical framework for policymakers to evaluate exactly where current social safety nets and vocational programs are succeeding, and where targeted interventions are most urgently needed.
