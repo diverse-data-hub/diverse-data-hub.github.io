@@ -24,13 +24,18 @@ add the new data set to the use_data function
 
 ``` use_data(``newData,``bcindigenousbiz,wildfire,globalrights,hcmst,womensmarchmadness,genderassessment,overwrite = TRUE) ```
 
-### 3. Document the new data set
+### 3. Run the Updated Processing Script
+Run the updated processing script to create the .rda file for the new dataset by running the below code in your R Console. 
+
+`source("data-clean/prepare-data.R")`
+
+### 4. Document the new data set
 
 Add a new R script for documentation: **R/newData.R**
 
 Use @format, @source, and @description.
 
-### 4. Build & Check
+### 5. Build & Check
 
 Build the Documentation:
 
@@ -42,7 +47,7 @@ Check and Build the Package:
 
 `devtools::build()`
 
-### 5. Test Access Confirm that the data set can be loaded via:
+### 6. Test Access Confirm that the data set can be loaded via:
 
 `data("newData")`
 
@@ -56,3 +61,4 @@ Within the [Python package repository](https://github.com/diverse-data-hub/diver
 1. Place the data set's `.csv` file in the `src/diversedata/data/` directory.
 2. Place the data set's description in a `.txt` file in the `src/diversedata/data_descriptions/` directory.
 3. Ensure both files have the same root filename (i.e., the part before the file extension). This name will be used to load the dataset and display its description when using the package.
+4. To trigger the GitHub Actions workflow and automatically deploy the package to PyPI, format the commit message as "**feat**: add <name of dataset>". 
