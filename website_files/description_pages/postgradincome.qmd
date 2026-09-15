@@ -17,8 +17,9 @@ sidebar: false
 
 This dataset contains information on median income of Canadian students two years after graduation, compiled by Statistics Canada under the Open Government Licence – Canada. 
 
+The data was gathered to assess and understand economic outcomes and income distributions across diverse demographic and educational segments. From an equity and inclusion perspective, analyzing income data can reveal systemic disparities in post-graduation financial outcomes, shedding light on how factors like gender, ethnicity, and educational field and qualifications intersect with earnings. 
 
-** DESCRIPTION TO COME **
+In Canada, economic outcomes can vary significantly across different fields of study and demographic backgrounds, reflecting broader labor market dynamics and structural barriers. Disparities in income can limit financial stability, career advancement, and long-term economic mobility for underrepresented or marginalized groups. Understanding these disparities helps policymakers, educational institutions, and labor planners design targeted interventions with the hope of minimizing persistent wage gaps and promoting equitable career pathways. 
 
 
 ### Download
