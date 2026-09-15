@@ -1,0 +1,7 @@
+<a class="grid-item" data-featured="false" data-tags="r" a href="https://diverse-data-hub.github.io/website_files/description_pages/labourforcewithdisabilities.html">
+  <img src="/website_files/img/labourforcewithdisabilities.png" width="20px" height="40px">
+  <h3>Labour Force Status for Adults with Disabilities</h3>
+  <p>
+    This dataset details the labour force status of Canadian adults with disabilities. It includes information on geography, sex, age group, disability type, and overall severity level, alongside employment rates and population counts. Collected by Statistics Canada, this dataset supports the investigation of employment barriers, regional disparities, and the intersectional impacts of demographics on workforce participation.
+  </p>
+</a>

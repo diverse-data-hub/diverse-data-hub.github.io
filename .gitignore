@@ -8,3 +8,4 @@ renv/library/
 _site/
 .positai
 .Renviron
+.ipynb_checkpoints/

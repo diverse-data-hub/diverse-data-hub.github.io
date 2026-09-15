@@ -1,0 +1,107 @@
+﻿"Cube Title","Product Id","CANSIM Id",URL,"Cube Notes","Archive Status",Frequency,"Start Reference Period","End Reference Period","Total number of dimensions",Universe,"Variable List"
+"Labour force status for adults with disabilities by disability type",13100348,115-0006,"https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310034801",1;2;3;4;5;15;16,"CURRENT - a cube available to the public and that is current",Occasional,2012-01-01,2012-01-01,6,,
+
+"Dimension ID","Dimension name","Dimension Notes","Dimension Correction Notes","Dimension Definitions"
+1,Geography,,,
+2,Sex,,,
+3,"Age group",2,,
+4,"Disability type",,,
+5,"Global Severity",,,
+6,"Labour force status",6,,
+
+"Dimension ID","Member Name","Classification Code","Member ID","Parent Member ID",Terminated,"Member Notes","Member Correction Notes","Member Geo Attribute Keys","Member Definitions"
+1,Canada,[11124],1,,,,,,
+1,"Newfoundland and Labrador",[10],2,1,,,,,
+1,"Prince Edward Island",[11],3,1,,,,,
+1,"Nova Scotia",[12],4,1,,,,,
+1,"New Brunswick",[13],5,1,,,,,
+1,Quebec,[24],6,1,,,,,
+1,Ontario,[35],7,1,,,,,
+1,Manitoba,[46],8,1,,,,,
+1,Saskatchewan,[47],9,1,,,,,
+1,Alberta,[48],10,1,,,,,
+1,"British Columbia",[59],11,1,,,,,
+1,Yukon,[60],12,1,,,,,
+1,"Northwest Territories",[61],13,1,,,,,
+1,Nunavut,[62],14,1,,,,,
+2,"Both sexes",,1,,,,,,
+2,Males,,2,1,,,,,
+2,Females,,3,1,,,,,
+3,"Total, 15 to 64 years",,1,,,,,,
+3,"15 to 24 years",,2,1,,,,,
+3,"25 to 34 years",,3,1,,,,,
+3,"35 to 44 years",,4,1,,,,,
+3,"45 to 54 years",,5,1,,,,,
+3,"55 to 64 years",,6,1,,,,,
+4,"All disability types",,1,,,,,,
+4,Seeing,,2,1,,,,,
+4,Hearing,,3,1,,,,,
+4,Mobility,,4,1,,,,,
+4,Flexibility,,5,1,,,,,
+4,Dexterity,,6,1,,,,,
+4,Pain,,7,1,,,,,
+4,Learning,,8,1,,,,,
+4,Memory,,9,1,,,,,
+4,Developmental,,10,1,,,,,
+4,"Mental and/or psychological",,11,1,,,,,
+4,"Unknown disability type",,12,1,,,,,
+5,"Total population, severity of disability",,1,,,,,,
+5,Mild,,2,1,,,,,
+5,Moderate,,3,1,,,,,
+5,Severe,,4,1,,,,,
+5,"Very Severe",,5,1,,,,,
+6,"Total labour force",,1,,,,,,
+6,Employed,,2,1,,7,,,
+6,Unemployed,,3,1,,8,,,
+6,"Not in labour force",,4,1,,9,,,
+6,"Participation rate",,5,,,10;11,,,
+6,"Age standardized participation rate",,6,,,11;12,,,
+6,"Employment Rate",,7,,,10;13,,,
+6,"Age standardized employment rate",,8,,,12;13,,,
+6,"Unemployment rate",,9,,,10;14,,,
+6,"Age standardized unemployment rate",,10,,,12;14,,,
+
+Symbol Legend
+Description,Symbol
+"not available for a specific reference period",..
+"less than the limit of detection",<LOD
+"value rounded to 0 (zero) where there is a meaningful distinction between true zero and the value that was rounded",0s
+"data quality: excellent",A
+"data quality: very good",B
+"data quality: good",C
+"data quality: acceptable",D
+"use with caution",E
+"too unreliable to be published.",F
+"not applicable",...
+preliminary,p
+revised,r
+"suppressed to meet the confidentiality requirements of the Statistics Act",x
+terminated,t
+
+"Survey Code","Survey Name"
+3251,"Canadian Survey on Disability"
+
+"Subject Code","Subject Name"
+13,Health
+
+"Note ID",Note
+1,"Source: Statistics Canada, Canadian Survey on Disability, 2012."
+2,"Age is calculated as of May 10, 2011."
+3,"Data quality indicators are based on the coefficient of variation (CV). Quality indicators indicate the following: E - Use with caution (CV from 16.6% to 33.3%) and F - Too unreliable to publish (CV greater than 33.3% or sample size is too small to produce reliable estimates)."
+4,"Collection took place in 2012 for a sample selected from the 2011 population."
+5,"The sum of the values for each category may differ from the total due to rounding."
+6,"Refers to whether a person was employed, unemployed or not in the labour force during the week of Sunday, May 1 to Saturday, May 7, 2011."
+7,"Employed refers to persons who, during the reference period, did any work for pay or profit. This includes those who had a job but were absent from work for reasons such as own illness or disability, personal or family responsibilities, vacation, or labour dispute. It also includes unpaid family work, which is defined as unpaid work contributing directly to the operation of a farm, business or professional practice owned and operated by a related member of the same household."
+8,"Unemployed refers to persons who were available for work during the reference week and who had looked for a job in the previous four weeks; were on temporary layoff during the reference period; or had a new job to start within four weeks from the reference week."
+9,"Not in the labour force refers to persons unwilling or unable to work; that is, they were neither employed nor unemployed."
+10,"All rates in this table are calculated excluding non-response categories (""refusal"", ""don't know"", and ""not stated"") in the denominator."
+11,"The participation rate for a particular group (age, sex, marital status, geographic area, etcetera) is the total labour force in that group, expressed as a percentage of the total population in that group."
+12,"When comparing characteristics of populations who have different age compositions (for example, persons with disabilities tend to be older than persons without disabilities), using an age standardization method allows making more meaningful comparisons between the populations by adjusting differences in the age distributions. In the Canadian Survey on Disability (CSD), age standardization is usually used by adjusting the age distribution in order to match to the age composition of the Canadian population, using the following age groups: ages 15 to 24, 25 to 34, 35 to 44, 45 to 54, and 55 to 64."
+13,"The employment rate for a particular group (age, sex, marital status, geographic area, etcetera) is the number of employed persons in that group, expressed as a percentage of the total population in that group."
+14,"The unemployment rate for a particular group (age, sex, marital status, geographic area, etcetera) is the unemployed in that group, expressed as a percentage of the labour force in that group."
+15,"The supressed categories ""don't know"", ""refused"" and ""not stated"" are included in the calculation of percentages."
+16,"On April 7th, 2017, the age standardized participation rate, age standardized employment rate and age standardized unemployment rate have been corrected. They are now age standardized to the Canadian population instead of each labour force sub population."
+
+"Dimension ID","Member ID","Attribute Key",Title,Label,"Long Label",Value
+
+
