@@ -31,7 +31,6 @@ This dataset supports the analysis of:
 -   **Employment Equity & Barriers:** Examining how the severity and specific classification of a disability impact an individual's likelihood of securing employment.
 -   **Intersectionality in the Labour Market:** Evaluating the combined effects of age, sex, and varying levels of disability severity on workforce participation.
 -   **Geographic Disparities:** Comparing employment outcomes for individuals with disabilities across different Canadian provinces and territories to identify regional inequalities.
--   **Predictive Modeling:** Building fractional regression baselines to estimate expected employment probabilities based on a combination of medical and demographic factors.
 -   **Institutional & Policy Insights:** Informing the distribution of federal and provincial social assistance (such as the Canada Disability Benefit), adjusting earnings exemption limits, and designing targeted vocational rehabilitation programs.
 
 ## Case Study
@@ -178,8 +177,8 @@ sev_order <- c("Mild", "Moderate", "Severe", "Very Severe")
 
 ggplot(labour_force_clean, aes(
   x = employment_rate, 
-  y = factor(global_severity, levels = rev(sev_order)), # rev() plots Mild at the top
-  fill = factor(global_severity, levels = sev_order)    # Maps light-to-dark logically
+  y = factor(global_severity, levels = rev(sev_order)),
+  fill = factor(global_severity, levels = sev_order)
 )) +
   stat_summary(fun = "mean", geom = "bar", width = 0.6) +
   scale_fill_brewer(palette = "Reds") +
@@ -408,8 +407,8 @@ sns.barplot(
     x="employment_rate",
     y="geography",
     hue="geography",
-    order=geo_order_desc,       # Plot highest at top
-    hue_order=geo_order_asc,    # Map magma lowest-to-highest to match R
+    order=geo_order_desc,
+    hue_order=geo_order_asc,
     errorbar=None,
     palette="magma",
     legend=False,
@@ -514,7 +513,7 @@ Raw model output can be dense and difficult to read. In this final step, we clea
 ```{r display_results_r}
 # Tidy the model output, round numbers for readability, and render a clean table
 tidy(weighted_glm) |>
-  mutate(across(where(is.numeric), ~round(.x, 3))) |>
+  mutate(across(where(is.numeric), ~round(.x, 4))) |>
   kable()
 
 ```
@@ -537,7 +536,7 @@ $$Probability = \frac{e^{log\_odds}}{(1 + e^{log\_odds})}$$
 
 **Example 1: The Baseline (Intercept)**
 
-The model's `intercept` ($0.9377$) represents our reference group (a man, aged 25 to 34 years, located in Ontario, with a Mild disability). Plugging this into our formula,
+The model's intercept ($0.9377$) represents our reference group (a man, aged 25 to 34 years, located in Ontario, with a Mild disability). Plugging this into our formula,
 
 $$\frac{e^{0.9377}}{1 + e^{0.9377}} = 0.7186...$$
 
@@ -564,6 +563,6 @@ This analysis highlights the structural barriers to employment faced by adults w
 
 Building on these visualizations, our logistic regression allowed us to quantify these penalties while controlling for intersectional demographic factors. By anchoring our model to a specific baseline (a man, aged 25 to 34, in Ontario, with a Mild disability), we translated log-odds into tangible, real-world probabilities. As demonstrated in our calculations, while this baseline group has an expected employment rate of 72%, the rate decreases rapidly as the level of severity increases. Shifting the severity from Mild to Very Severe cuts the expected employment rate by more than half, dropping it to roughly 35%.
 
-Beyond severity, the model highlights significant demographic hurdles. We observed substantial age penalties for youth (aged 15 to 24) and for older adults (aged 55 to 64) that reflect the distinct challenges of initially entering the workforce and the reality of premature exits for those approaching retirement.
+Beyond severity, the model highlights significant demographic hurdles. We observed substantial age penalties for youth (15 to 24 years) and for older adults (55 to 64 years) that reflect the distinct challenges of initially entering the workforce and the reality of premature exits for those approaching retirement.
 
 Even with these insights, it is important to approach these findings with caution due to the dataset's limitations. Because this data is aggregated at the demographic group level rather than tracking individual outcomes over time, our models rely on population weights and cannot account for granular, individual-level factors, such as the specific nature of a workplace accommodation, local transit accessibility, or isolated employer dynamics. Furthermore, high data sparsity and suppression in regions like Nunavut (reflected in high $p$-values) underscore the difficulty of drawing robust inferential conclusions for smaller populations. Despite these limitations, quantifying these statistical penalties provides a critical framework for policymakers to evaluate exactly where current social safety nets and vocational programs are succeeding, and where targeted interventions are most urgently needed.
