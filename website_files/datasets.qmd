@@ -9,6 +9,7 @@
 {{< include grid_items/bcindigenousbiz.qmd >}}
 {{< include grid_items/genderassessment.qmd >}}
 {{< include grid_items/globalrights.qmd >}}
+{{< include grid_items/labourforcewithdisabilities.qmd >}}
 {{< include grid_items/postgradincome.qmd >}}
 
 :::
