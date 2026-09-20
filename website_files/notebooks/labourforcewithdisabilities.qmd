@@ -79,7 +79,7 @@ import seaborn as sns
 
 #### 1. Data Cleaning & Processing
 
-To prepare the dataset, we first filter for `All disability types` in `disability_type` to prevent double-counting across specific impairments. We then separate the employment rates and total labour force populations into distinct subsets.
+To prepare the dataset, we first filter for `All disability types` in `disability_type` to prevent double-counting across specific impairments. We then separate the `Employment Rate` and `Total labour force` populations into distinct subsets.
 
 ::: panel-tabset
 ## R
@@ -117,7 +117,7 @@ df_pop = df_pop.rename(columns={'value': 'population_weight'})
 ```
 :::
 
-Next, we merge the subsets back together to properly align each rate with its respective population weight. Finally, we convert the employment rate percentage into a 0-1 proportion to prepare it for our regression model. Because there is no missing data in this dataset, we do not need to worry about dropping NA values.
+Next, we merge the subsets back together to properly align each rate with its respective population weight, and convert the employment rate percentage into a 0-1 proportion to prepare it for our regression model. Because there is no missing data in this dataset, we do not need to worry about dropping NA values.
 
 ::: panel-tabset
 
@@ -132,7 +132,7 @@ labour_force_clean <- df_rates |>
   mutate(employment_proportion = employment_rate / 100.0)
 
 # Review total rows
-nrow(marchmadness)
+nrow(labour_force_clean)
 
 # Preview data
 labour_force_clean |>
@@ -154,7 +154,7 @@ labour_force_clean = pd.merge(df_rates[merge_cols + ['employment_rate']],
 labour_force_clean['employment_proportion'] = labour_force_clean['employment_rate'] / 100.0
 
 # Review total rows
-marchmadness.shape[0]
+labour_force_clean.shape[0]
 
 # Preview data
 Markdown(labour_force_clean.head().to_markdown())
@@ -431,7 +431,7 @@ Regional variations highlight differences in economic conditions and social supp
 
 #### 3. Logistic Regression 
 
-**Note:** We use a Generalized Linear Model (GLM) with a `Binomial` family to handle fractional response variables (proportions between 0 and 1). By passing our population headcounts into the `weights` argument, the model evaluates the dataset as millions of surveyed individuals rather than treating each aggregated row equally. 
+We will use a Generalized Linear Model (GLM) with a `Binomial` family to handle fractional response variables (proportions between 0 and 1). By passing our population headcounts into the `weights` argument, the model evaluates the dataset as millions of surveyed individuals rather than treating each aggregated row equally. 
 
 **Setting Reference Categories**
 
