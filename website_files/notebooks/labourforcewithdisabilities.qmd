@@ -55,14 +55,9 @@ By conducting exploratory data analysis and fitting a regression model, we aim t
 ## R
 
 ```{r load-libraries_r, results = "hide", warning = FALSE, message = FALSE}
-# Data
-library(diversedata)      # Diverse Data Hub datasets
-
-# Core libraries
+library(diversedata)
 library(tidyverse)
 library(knitr)
-
-# Statistical Modeling
 library(broom)
 
 ```
@@ -84,20 +79,18 @@ import seaborn as sns
 
 #### 1. Data Cleaning & Processing
 
-**Note:** When working with aggregated government data, metrics like "Employment Rate" are often pre-calculated percentages. To use these in a logistical or fractional regression model, we must convert them into a 0-1 proportion.
+To prepare the dataset, we first filter for `All disability types` in `disability_type` to prevent double-counting across specific impairments. We then separate the `Employment Rate` and `Total labour force` populations into distinct subsets.
 
 ::: panel-tabset
 ## R
 
-```{r data_prep_r}
+```{r data_prep_step1_r}
 # Reading data
 labour_force <- labourforcewithdisabilities
 
-# Filter for the target disability category to avoid double-counting
 df_all_disabilities <- labour_force |>
   filter(disability_type == 'All disability types')
 
-# Separate the employment rates from the population counts
 df_rates <- df_all_disabilities |>
   filter(labour_force_status == 'Employment Rate') |>
   rename(employment_rate = value)
@@ -106,15 +99,40 @@ df_pop <- df_all_disabilities |>
   filter(labour_force_status == 'Total labour force') |>
   rename(population_weight = value)
 
-# Merge to align rates with their respective population weights
+```
+
+## Python
+
+```{python data_prep_step1_py}
+# Reading data
+labour_force = dd.load_data("labourforcewithdisabilities")
+
+df_all_disabilities = labour_force[labour_force['disability_type'] == 'All disability types']
+df_rates = df_all_disabilities[df_all_disabilities['labour_force_status'] == 'Employment Rate'].copy()
+df_pop = df_all_disabilities[df_all_disabilities['labour_force_status'] == 'Total labour force'].copy()
+
+df_rates = df_rates.rename(columns={'value': 'employment_rate'})
+df_pop = df_pop.rename(columns={'value': 'population_weight'})
+
+```
+:::
+
+Next, we merge the subsets back together to properly align each rate with its respective population weight, and convert the employment rate percentage into a 0-1 proportion to prepare it for our regression model. Because there is no missing data in this dataset, we do not need to worry about dropping NA values.
+
+::: panel-tabset
+
+## R
+
+```{r data_prep_step2_r}
 merge_cols <- c('geography', 'sex', 'age_group', 'global_severity')
 
 labour_force_clean <- df_rates |>
   select(all_of(merge_cols), employment_rate) |>
   inner_join(df_pop |> select(all_of(merge_cols), population_weight), by = merge_cols) |>
-  drop_na(employment_rate, population_weight) |>
-  # Convert rate to a 0-1 proportion for the Fractional Logit model
   mutate(employment_proportion = employment_rate / 100.0)
+
+# Review total rows
+nrow(labour_force_clean)
 
 # Preview data
 labour_force_clean |>
@@ -125,36 +143,21 @@ labour_force_clean |>
 
 ## Python
 
-```{python data_prep_py}
-# Reading data
-labour_force = dd.load_data("labourforcewithdisabilities")
-
-# Filter for the target disability category to avoid double-counting
-df_all_disabilities = labour_force[labour_force['disability_type'] == 'All disability types']
-
-# Separate the employment rates from the population counts
-df_rates = df_all_disabilities[df_all_disabilities['labour_force_status'] == 'Employment Rate'].copy()
-df_pop = df_all_disabilities[df_all_disabilities['labour_force_status'] == 'Total labour force'].copy()
-
-# Rename the 'value' columns before merging
-df_rates = df_rates.rename(columns={'value': 'employment_rate'})
-df_pop = df_pop.rename(columns={'value': 'population_weight'})
-
-# Merge to align rates with their respective population weights
+```{python data_prep_step2_py}
 merge_cols = ['geography', 'sex', 'age_group', 'global_severity']
+
 labour_force_clean = pd.merge(df_rates[merge_cols + ['employment_rate']], 
                     df_pop[merge_cols + ['population_weight']], 
                     on=merge_cols, 
                     how='inner')
 
-# Drop any rows with suppressed or missing data
-labour_force_clean = labour_force_clean.dropna(subset=['employment_rate', 'population_weight'])
-
-# Convert rate to a 0-1 proportion for the Fractional Logit model
 labour_force_clean['employment_proportion'] = labour_force_clean['employment_rate'] / 100.0
 
-Markdown(labour_force_clean.head().to_markdown())
+# Review total rows
+labour_force_clean.shape[0]
 
+# Preview data
+Markdown(labour_force_clean.head().to_markdown())
 
 ```
 :::
@@ -394,11 +397,9 @@ ggplot(labour_force_clean, aes(
 ## Python
 
 ```{python eda_geo_py}
-# Calculate means and order ascending to match R's color scaling
 geo_means = labour_force_clean.groupby("geography")["employment_rate"].mean().sort_values(ascending=True)
 geo_order_asc = geo_means.index.tolist()
 
-# Reverse for the y-axis so the highest value sits at the top of the plot
 geo_order_desc = geo_order_asc[::-1]
 
 plt.figure(figsize=(8, 6))
@@ -430,7 +431,7 @@ Regional variations highlight differences in economic conditions and social supp
 
 #### 3. Logistic Regression 
 
-**Note:** We use a Generalized Linear Model (GLM) with a `Binomial` (or `quasibinomial`) family to handle fractional response variables (proportions between 0 and 1). By passing our population headcounts into the `weights` argument, the model evaluates the dataset as millions of surveyed individuals rather than treating each aggregated row equally. 
+We will use a Generalized Linear Model (GLM) with a `Binomial` family to handle fractional response variables (proportions between 0 and 1). By passing our population headcounts into the `weights` argument, the model evaluates the dataset as millions of surveyed individuals rather than treating each aggregated row equally. 
 
 **Setting Reference Categories**
 
@@ -440,7 +441,6 @@ Before running a regression, the model needs a baseline to compare everything ag
 ## R
 
 ```{r set_references_r}
-# Explicitly setting reference groups for the categorical variables directly in the dataframe
 labour_force_clean <- labour_force_clean |>
   mutate(
     geography = relevel(factor(geography), ref = "Ontario"),
@@ -454,7 +454,6 @@ labour_force_clean <- labour_force_clean |>
 ## Python
 
 ```{python set_references_py}
-# Define formula explicitly setting the reference group for each demographic
 formula = (
     "employment_proportion ~ "
     "C(geography, Treatment(reference='Ontario')) + "
@@ -469,14 +468,16 @@ formula = (
 
 **Fitting the Model**
 
-Next, we feed our prepared variables into the GLM. Because the outcome is a proportion, a standard linear model would be inappropriate; instead, the logit link transforms the data into log-odds.
+Next, we feed our prepared variables into the model. We will be using a GLM with a logit link to transform the data into log-odds. We are doing this because our outcome variable is a proportion bounded between 0 and 1; a standard linear model assumes an unbounded continuous outcome and could produce impossible predictions (like employment rates below 0% or above 100%). 
+
+Furthermore, to accurately reflect the true scale of the aggregated data, we apply population weights. We also account for overdispersion—where the data has greater variance than a standard binomial model expects—by using the `quasibinomial` family in R and scaling by Pearson's chi-squared in Python.
+
 
 ::: panel-tabset
 
 ## R
 
 ```{r fit_glm_r}
-# Fit the GLM with quasibinomial family (to handle overdispersion) and population weights
 weighted_glm <- glm(
   employment_proportion ~ geography + sex + age_group + global_severity,
   data = labour_force_clean,
@@ -489,8 +490,6 @@ weighted_glm <- glm(
 ## Python
 
 ```{python fit_glm_py}
-# Fit a GLM with Binomial family, population weights, 
-# and Pearson's chi-squared scale to account for overdispersion (Quasibinomial equivalent)
 weighted_glm_py = smf.glm(
     formula=formula, 
     data=labour_force_clean, 
@@ -511,7 +510,6 @@ Raw model output can be dense and difficult to read. In this final step, we clea
 ## R
 
 ```{r display_results_r}
-# Tidy the model output, round numbers for readability, and render a clean table
 tidy(weighted_glm) |>
   mutate(across(where(is.numeric), ~round(.x, 4))) |>
   kable()
@@ -521,7 +519,6 @@ tidy(weighted_glm) |>
 ## Python
 
 ```{python display_results_py}
-# Print the formatted statsmodels summary table
 print(weighted_glm_py.summary())
 
 ```
