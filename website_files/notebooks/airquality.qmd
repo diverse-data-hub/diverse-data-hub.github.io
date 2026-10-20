@@ -1,0 +1,653 @@
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| collapse: true
+library(reticulate)
+if (Sys.getenv("GITHUB_ACTIONS") == "true") {
+  # for running in GitHub Actions (otherwise reticulate can't find diverse_web_env)
+  reticulate::use_python(Sys.getenv("RETICULATE_PYTHON"), required = TRUE)
+} else {
+  # for running locally
+  reticulate::use_condaenv("diverse_web_env", required = TRUE)
+}
+```
+
+### Key Features of the Dataset
+
+Each row of this dataset represents a point in time, with information on concentrations of atmospheric pollutants :
+
+- **Time** (`time`) -- The date and time of the air quality observation
+- **PM 10** (`pm10`) -- Concentration of particulate matter with diameter smaller than 10 µm (PM10) close to surface (10 meter above ground) in units of µg/m^3. 
+- **PM 2.5** (`pm2_5`) -- Concentration of particulate matter with diameter smaller than 2.5 µm (PM2_5) close to surface (10 meter above ground) in units of µg/m^3. 
+- **Nitrogen Dioxide** (`nitrogen_dioxide`) -- Concentration of the atmospheric gas nitrogen dioxide close to surface (10 meter above ground) in units of µg/m^3. 
+- **US AQI** (`us_aqi`) -- United States Air Quality Index (AQI) calculated for different particulate matter and gases individually. The consolidated us_aqi returns the maximum of all individual indices. Ranges from 0-50 (good), 50-100 (moderate), 100-150 (unhealthy for sensitive groups), 150-200 (unhealthy), 200-300 (very unhealthy) and 300-500 (hazardous).
+
+### Purpose and Use Cases
+This dataset supports the analysis of: 
+
+- **Environmental Equity & Disparities:** Examining how air pollution and particulate matter exposure vary across geographic regions, urban areas, and vulnerable communities.
+- **Public Health Risk Assessment:** Assessing the intersection of air pollution spikes with public health and safety, helping to understand risks associated with respiratory health and extreme climate events like wildfire smoke.
+- **Predictive Modeling & Forecasting:** Building statistical baselines (ARIMA/SARIMA) and machine learning regression pipelines to forecast future particulate matter levels.
+- **Policy & Environmental Insights:** Informing public health advisories, urban planning strategies, and the evaluation of environmental regulations and emissions standards.
+
+## Case Study
+
+### Objective
+
+Clean air and predictable air quality are essential for public health, environmental safety, and community well-being, particularly for vulnerable populations disproportionately affected by pollution. This dataset provides hourly information on particulate matter, both fine particles ($\text{PM}_{2.5}$) and coarse particles ($\text{PM}_{10}$), as well as gaseous pollutants like nitrogen dioxide ($\text{NO}_2$) in Vancouver. These primary pollutants stem heavily from vehicle traffic and combustion sources, as well as industrial emissions and seasonal events such as wildfire smoke. 
+
+Because traffic density is a primary driver, we expect pollutant concentrations to exhibit diurnal cycles, typically peaking during morning and evening rush-hour commutes. Under stagnant atmospheric conditions, however, these pollutants linger, merging into a single sustained daily peak. Furthermore, we anticipate a secondary 7-day weekly cycle, where weekend concentrations drop relative to weekdays due to reduced commuter traffic and commercial activity.
+
+To explore these dynamics and evaluate their predictability, we focus on several key questions:
+
+- How effectively can we forecast particulate matter levels by comparing traditional statistical baselines (SARIMA) against machine learning regression models (Random Forest)?
+- To what extent do seasonal patterns, day-of-week cycles, and temporal lags influence short-term air quality trends over time?
+- How do meteorological variables (such as temperature, humidity, and wind) drive fluctuations and pollution spikes in hourly $\text{PM}_{2.5}$ levels?
+
+Through time-series modeling, performance evaluation, and comparative visualization, we aim to uncover the primary drivers of air pollution fluctuations and evaluate predictive capabilities to support public health insights and environmental monitoring.
+
+### Analysis
+
+**Loading Libraries**
+
+::: {.panel-tabset}
+## R
+```{r load-libraries_r, results = "hide", warning = FALSE, message = FALSE}
+
+# Core libraries
+library(httr)
+library(jsonlite)
+library(dplyr)
+library(lubridate)
+
+
+# Plots & tables
+library(patchwork)
+library(ggplot2)
+library(gt)               
+library(kableExtra)       
+       
+```
+
+## Python
+```{python load-libraries_py, results = "hide", warning = FALSE, message = FALSE}
+
+# Data and Plotting
+import datetime
+import pandas as pd
+import numpy as np
+import requests
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+# Models and Evaluation
+from statsmodels.tsa.arima.model import ARIMA
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import root_mean_squared_error
+from sklearn.ensemble import IsolationForest
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+from statsmodels.tsa.seasonal import seasonal_decompose
+from pmdarima import auto_arima
+```
+:::
+
+#### 1. Data Loading & Processing
+
+First, we need to load our data from the Open Meteo API. We select parameters for Vancouver, BC over the past 3 years. This JSON request then needs to be parsed into a dataframe format, and we will add a few temporal features relating to hour, day of the week, and weekday versus weekend. 
+
+::: {.panel-tabset}
+## R
+```{r load_data_r}
+
+# Define parameters for Vancouver, BC over last 3 years
+latitude <- 49.2827
+longitude <- -123.1207
+start_date <- "2023-09-01"
+end_date <- "2026-09-01"
+
+# Open-Meteo Air Quality Historical API endpoint
+url <- "https://air-quality-api.open-meteo.com/v1/air-quality"
+
+# Construct request with query parameters
+response <- GET(
+  url, 
+  query = list(
+    latitude = latitude,
+    longitude = longitude,
+    hourly = paste(c("pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide", "us_aqi"), collapse = ","),
+    start_date = start_date,
+    end_date = end_date
+  )
+)
+
+# Parse response content directly into R data structures
+data <- content(response, as = "parsed", simplifyVector = TRUE)
+
+# Parse into a data frame
+df <- data.frame(
+  time = ymd_hm(data$hourly$time),
+  pm10 = data$hourly$pm10,
+  pm2_5 = data$hourly$pm2_5,
+  nitrogen_dioxide = data$hourly$nitrogen_dioxide,
+  us_aqi = data$hourly$us_aqi
+) |> arrange(time)
+
+# Add temporal and calendar features
+df <- df |> 
+  mutate(
+    hour = hour(time),
+    day_of_week = wday(time, label = TRUE, abbr = FALSE), # gives full names like "Monday"
+    is_weekend = day_of_week %in% c("Saturday", "Sunday")
+  )
+
+print(head(df))
+
+```
+
+## Python
+```{python load_data_py}
+
+# Define parameters for Vancouver, BC over last 3 years
+latitude = 49.2827
+longitude = -123.1207
+start_date = "2023-09-01"
+end_date = "2026-09-01"
+
+# Open-Meteo Air Quality Historical API endpoint
+url = "https://air-quality-api.open-meteo.com/v1/air-quality"
+
+params = {
+    "latitude": latitude,
+    "longitude": longitude,
+    "hourly": ["pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide", "us_aqi"],
+    "start_date": start_date,
+    "end_date": end_date
+    
+}
+
+# Fetch data via JSON REST request
+response = requests.get(url, params=params)
+data = response.json()
+
+# Parse into a Pandas DataFrame
+hourly_data = data["hourly"]
+df = pd.DataFrame(
+    {
+        "time": pd.to_datetime(hourly_data["time"]),
+        "pm10": hourly_data["pm10"],
+        "pm2_5": hourly_data["pm2_5"],
+        "nitrogen_dioxide": hourly_data["nitrogen_dioxide"],
+        "us_aqi": hourly_data["us_aqi"],
+    }
+)
+df.set_index("time", inplace=True)
+
+# Add temporal and calendar features
+df["hour"] = df.index.hour
+df["day_of_week"] = df.index.day_name()
+df["is_weekend"] = df.index.dayofweek >= 5
+
+print(df.head())
+
+```
+:::
+
+#### 2. Exploratory Data Analysis
+
+Let's visualize a 2 week period to get an idea of the cyclicity in our air pollution. 
+
+::: {.panel-tabset}
+## R
+```{r two_week_r}
+
+# 1. Slice the data frame for the target date range
+sample_slice <- df |> 
+  filter(time >= ymd("2024-04-01") & time <= ymd("2024-04-15"))
+
+# 2. Create the plot using ggplot2
+ggplot(sample_slice, aes(x = time)) +
+  # Plot Nitrogen Dioxide
+  geom_line(aes(y = nitrogen_dioxide, color = "Nitrogen Dioxide (NO2)"), linewidth = 0.7) +
+  # Plot PM2.5 with transparency
+  geom_line(aes(y = pm2_5, color = "PM2.5 (Fine Particles) - μg/m³"), linewidth = 0.7, alpha = 0.8) +
+  # Assign custom manual colors to match your Python labels
+  scale_color_manual(values = c(
+    "Nitrogen Dioxide (NO2)" = "darkorange", 
+    "PM2.5 (Fine Particles) - μg/m³" = "turquoise3"
+  )) +
+  # Format x-axis to show day name and date (e.g., "Mon, Apr 01") with 1-day breaks
+  scale_x_datetime(
+    date_breaks = "1 day",
+    date_labels = "%a, %b %d"
+  ) +
+  # Labels and title
+  labs(
+    title = "Vancouver Air Quality: Daily Ticks",
+    x = "Day",
+    y = "Concentration (μg/m³)",
+    color = NULL # Removes legend title
+  ) +
+  # Theme styling, grid lines, and rotated x-axis labels
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "top",
+    panel.grid.major = element_line(linetype = "dashed")
+  )
+
+```
+
+## Python
+```{python two_week_py}
+
+sample_slice = df.loc["2024-04-01":"2024-04-15"]
+
+fig, ax = plt.subplots(figsize=(14, 6))
+
+ax.plot(
+    sample_slice.index,
+    sample_slice["nitrogen_dioxide"],
+    label="Nitrogen Dioxide (NO2)",
+    color="darkorange",
+    linewidth=1.2,
+)
+
+# Plot PM2.5 on the same timeline
+ax.plot(
+    sample_slice.index,
+    sample_slice["pm2_5"],
+    label="PM2.5 (Fine Particles) - μg/m³",
+    color="teal",
+    linewidth=1.2,
+    alpha=0.8,
+)
+
+# Format the x-axis to show day name and date (e.g., "Sat, Aug 01")
+ax.xaxis.set_major_formatter(mdates.DateFormatter("%a, %b %d"))
+ax.xaxis.set_major_locator(
+    mdates.DayLocator(interval=1)
+)  # Place a tick every 1 day
+
+plt.xticks(rotation=45)
+ax.set_title("Vancouver Air Quality: Daily Ticks", fontsize=14, fontweight="bold")
+ax.set_xlabel("Day", fontsize=12, labelpad=10)
+ax.set_ylabel("Concentration (μg/m³)", fontsize=12)
+
+ax.legend(loc="upper left")
+ax.grid(True, linestyle="--", alpha=0.5)
+
+fig.autofmt_xdate(rotation=45, ha="right")
+fig.subplots_adjust(bottom=0.28, left=0.08, right=0.95, top=0.9)
+
+plt.show()
+
+```
+:::
+
+We can see that there are daily spikes in both particulate matter and nitrogen dioxide, but with fairly high variability between days. 
+
+Next let's take a look at a random weekday and weekend to compare the two. 
+
+::: {.panel-tabset}
+## R
+```{r weekday_vs_weekend_r}
+
+# 1. Define two target dates
+date_1 <- ymd("2024-04-01") # Weekday (Monday)
+date_2 <- ymd("2024-04-07") # Weekend (Sunday)
+
+# 2. Filter data for each date and extract the hour
+df_1 <- df |> filter(as_date(time) == date_1) |> mutate(hour = hour(time))
+df_2 <- df |> filter(as_date(time) == date_2) |> mutate(hour = hour(time))
+
+# 3. Compute shared Y-axis limits across both days for a uniform scale
+combined_data <- bind_rows(df_1, df_2)
+max_val <- max(c(combined_data$nitrogen_dioxide, combined_data$pm2_5, combined_data$pm10), na.rm = TRUE)
+y_limits <- c(0, max_val * 1.05) # 5% buffer at the top
+
+# --- PLOT 1: Weekday ---
+p1 <- ggplot(df_1, aes(x = hour)) +
+  geom_line(aes(y = nitrogen_dioxide, color = "NO2 (μg/m³)"), linewidth = 1) +
+  geom_point(aes(y = nitrogen_dioxide, color = "NO2 (μg/m³)"), shape = 16, size = 2) +
+  geom_line(aes(y = pm2_5, color = "PM2.5 (μg/m³)"), linewidth = 1) +
+  geom_point(aes(y = pm2_5, color = "PM2.5 (μg/m³)"), shape = 15, size = 2) +
+  geom_line(aes(y = pm10, color = "PM10 (μg/m³)"), linewidth = 1) +
+  geom_point(aes(y = pm10, color = "PM10 (μg/m³)"), shape = 15, size = 2) +
+  scale_color_manual(values = c(
+    "NO2 (μg/m³)" = "orange", 
+    "PM2.5 (μg/m³)" = "turquoise3", 
+    "PM10 (μg/m³)" = "pink"
+  )) +
+  scale_x_continuous(breaks = seq(0, 22, by = 2)) +
+  scale_y_continuous(limits = y_limits) +
+  labs(
+    title = paste("Weekday Pollution (", date_1, ")", sep = ""),
+    x = "Hour of Day (Local Time)",
+    y = "Concentration (μg/m³)",
+    color = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid.major = element_line(linetype = "dashed")
+  )
+
+# --- PLOT 2: Weekend ---
+p2 <- ggplot(df_2, aes(x = hour)) +
+  geom_line(aes(y = nitrogen_dioxide, color = "NO2 (μg/m³)"), linewidth = 1) +
+  geom_point(aes(y = nitrogen_dioxide, color = "NO2 (μg/m³)"), shape = 16, size = 2) +
+  geom_line(aes(y = pm2_5, color = "PM2.5 (μg/m³)"), linewidth = 1) +
+  geom_point(aes(y = pm2_5, color = "PM2.5 (μg/m³)"), shape = 15, size = 2) +
+  geom_line(aes(y = pm10, color = "PM10 (μg/m³)"), linewidth = 1) +
+  geom_point(aes(y = pm10, color = "PM10 (μg/m³)"), shape = 15, size = 2) +
+  scale_color_manual(values = c(
+    "NO2 (μg/m³)" = "orange", 
+    "PM2.5 (μg/m³)" = "turquoise3", 
+    "PM10 (μg/m³)" = "pink"
+  )) +
+  scale_x_continuous(breaks = seq(0, 22, by = 2)) +
+  scale_y_continuous(limits = y_limits) +
+  labs(
+    title = paste("Weekend Pollution (", date_2, ")", sep = ""),
+    x = "Hour of Day (Local Time)",
+    y = "Concentration (μg/m³)",
+    color = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid.major = element_line(linetype = "dashed")
+  )
+
+# --- Combine Side-by-Side with Shared Legend ---
+p1 + p2 + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+
+```
+
+## Python
+```{python weekday_vs_weekend_py}
+
+# 1. Define two target dates
+date_1 = "2024-04-01" # Weekday
+date_2 = "2024-04-07" # Weekend
+
+# 2. Create side-by-side subplots with a shared y-axis
+fig, axes = plt.subplots(1, 2, figsize=(14, 5), sharey=True)
+
+# --- PLOT 1: Weekday ---
+df_1 = df.loc[date_1]
+axes[0].plot(
+    df_1.index.hour,
+    df_1["nitrogen_dioxide"],
+    marker="o",
+    linewidth=2,
+    label="NO2 ($\\mu g/m^3$)",
+    color="orange",
+)
+axes[0].plot(
+    df_1.index.hour,
+    df_1["pm2_5"],
+    marker="s",
+    linewidth=2,
+    label="PM2.5 ($\\mu g/m^3$)",
+    color="teal",
+)
+axes[0].plot(
+    df_1.index.hour,
+    df_1["pm10"],
+    marker="s",
+    linewidth=2,
+    label="PM10 ($\\mu g/m^3$)",
+    color="pink",
+)
+
+axes[0].set_title(f"Weekday Pollution ({date_1})", fontweight="bold")
+axes[0].set_xlabel("Hour of Day (Local Time)")
+axes[0].set_ylabel("Concentration ($\\mu g/m^3$)")
+axes[0].set_xticks(range(0, 24, 2))
+axes[0].grid(True, linestyle="--", alpha=0.6)
+axes[0].legend()
+
+
+# --- PLOT 2: Weekend ---
+df_2 = df.loc[date_2]
+axes[1].plot(
+    df_2.index.hour,
+    df_2["nitrogen_dioxide"],
+    marker="o",
+    linewidth=2,
+    label="NO2 ($\\mu g/m^3$)",
+    color="orange",
+)
+axes[1].plot(
+    df_2.index.hour,
+    df_2["pm2_5"],
+    marker="s",
+    linewidth=2,
+    label="PM2.5 ($\\mu g/m^3$)",
+    color="teal",
+)
+axes[1].plot(
+    df_2.index.hour,
+    df_2["pm10"],
+    marker="s",
+    linewidth=2,
+    label="PM10 ($\\mu g/m^3$)",
+    color="pink",
+)
+
+axes[1].set_title(f"Weekend Pollution ({date_2})", fontweight="bold")
+axes[1].set_xlabel("Hour of Day (Local Time)")
+axes[1].set_xticks(range(0, 24, 2))
+axes[1].grid(True, linestyle="--", alpha=0.6)
+axes[1].legend()
+
+plt.tight_layout()
+plt.show()
+
+```
+:::
+
+We can see that the weekday concentration of nitrogen dioxide is higher than the weekend. For particulate matter, the concentrations start at about the same level, but drop on the weekend by the end of the day. These plots show only two specific days. Let's investigate multiple weekdays and among weekends to get a sense for the variability day by day. 
+
+::: {.panel-tabset}
+## R
+```{r day_variability_r}
+
+# 1. Define date range and pollutant
+pollutant <- "pm2_5"
+pollutant_label <- "PM2.5 (μg/m³)"
+
+# 2. Slice date range (Jan to Apr 2024) and filter out incomplete days (< 18 hours)
+valid_days <- df |> 
+  filter(time >= ymd("2024-01-01") & time <= ymd("2024-04-30")) |> 
+  mutate(date = as_date(time), hour = hour(time)) |> 
+  group_by(date) |> 
+  filter(n() >= 18) |> 
+  ungroup()
+
+# Split into weekday and weekend datasets
+wkday_df <- valid_days |> filter(!is_weekend)
+wknd_df <- valid_days |> filter(is_weekend)
+
+# Calculate hourly means for the overlay lines
+wkday_mean <- wkday_df |> 
+  group_by(hour) |> 
+  summarise(mean_val = mean(.data[[pollutant]], na.rm = TRUE))
+
+wknd_mean <- wknd_df |> 
+  group_by(hour) |> 
+  summarise(mean_val = mean(.data[[pollutant]], na.rm = TRUE))
+
+# Compute shared Y-axis limits across all valid data for a uniform scale
+y_limits <- c(0, max(valid_days[[pollutant]], na.rm = TRUE) * 1.05)
+
+# --- PLOT 1: Weekday Variability ---
+p1 <- ggplot() +
+  # Background individual daily curves
+  geom_line(data = wkday_df, aes(x = hour, y = .data[[pollutant]], group = date), 
+            color = "turquoise3", alpha = 0.25, linewidth = 0.8) +
+  # Bold monthly mean overlay
+  geom_line(data = wkday_mean, aes(x = hour, y = mean_val, color = "Monthly Mean"), 
+            linewidth = 1.2) +
+  scale_color_manual(values = c("Monthly Mean" = "black")) +
+  scale_x_continuous(breaks = seq(0, 22, by = 2)) +
+  scale_y_continuous(limits = y_limits) +
+  labs(
+    title = "PM2.5 Weekday Variability",
+    x = "Hour of Day (Local Time)",
+    y = paste("Concentration (", pollutant_label, ")", sep = ""),
+    color = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 13),
+    panel.grid.major = element_line(linetype = "dashed"),
+    legend.position = c(0.82, 0.9)
+  )
+
+# --- PLOT 2: Weekend Variability ---
+p2 <- ggplot() +
+  # Background individual daily curves (slightly higher alpha as in your script)
+  geom_line(data = wknd_df, aes(x = hour, y = .data[[pollutant]], group = date), 
+            color = "turquoise3", alpha = 0.35, linewidth = 0.8) +
+  # Bold monthly mean overlay
+  geom_line(data = wknd_mean, aes(x = hour, y = mean_val, color = "Monthly Mean"), 
+            linewidth = 1.2) +
+  scale_color_manual(values = c("Monthly Mean" = "black")) +
+  scale_x_continuous(breaks = seq(0, 22, by = 2)) +
+  scale_y_continuous(limits = y_limits) +
+  labs(
+    title = "PM2.5 Weekend Variability",
+    x = "Hour of Day (Local Time)",
+    y = NULL, # Omit y-axis label since y-axis is shared
+    color = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 13),
+    panel.grid.major = element_line(linetype = "dashed"),
+    legend.position = c(0.82, 0.9)
+  )
+
+# --- Combine Side-by-Side ---
+p1 + p2
+
+```
+
+## Python
+```{python day_variability_py}
+
+month_df = df.loc["2024-01":"2024-04"]
+
+# 2. Choose the pollutant to inspect
+pollutant = "pm2_5"
+pollutant_label = "PM2.5 ($\\mu g/m^3$)"
+
+# 3. Create side-by-side subplots with a shared y-axis
+fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
+
+# Lists to hold daily data for calculating the overall monthly mean later
+weekday_groups = []
+weekend_groups = []
+
+# 4. Loop through each unique calendar day in the month
+for date_val, group in month_df.groupby(month_df.index.date):
+  if len(group) < 18:  # Skip incomplete days if any
+    continue
+
+  hours = group.index.hour
+  values = group[pollutant].values
+  is_wknd = group["is_weekend"].iloc[0]
+
+  if not is_wknd:
+    # Plot individual weekday curve with low opacity (alpha)
+    axes[0].plot(hours, values, color="teal", alpha=0.25, linewidth=1)
+    weekday_groups.append(group)
+  else:
+    # Plot individual weekend curve with low opacity
+    axes[1].plot(hours, values, color="teal", alpha=0.35, linewidth=1)
+    weekend_groups.append(group)
+
+# 5. Overlay the bold monthly average line for context
+if weekday_groups:
+  wkday_all = pd.concat(weekday_groups)
+  wkday_mean = wkday_all.groupby(wkday_all.index.hour)[pollutant].mean()
+  axes[0].plot(
+      wkday_mean.index,
+      wkday_mean.values,
+      color="black",
+      linewidth=2.5,
+      label="Monthly Mean",
+  )
+
+if weekend_groups:
+  wknd_all = pd.concat(weekend_groups)
+  wknd_mean = wknd_all.groupby(wknd_all.index.hour)[pollutant].mean()
+  axes[1].plot(
+      wknd_mean.index,
+      wknd_mean.values,
+      color="black",
+      linewidth=2.5,
+      label="Monthly Mean",
+  )
+
+# Formatting Subplot 0: Weekdays
+axes[0].set_title(
+    f"PM2.5 Weekday Variability",
+    fontsize=13,
+    fontweight="bold",
+)
+axes[0].set_xlabel("Hour of Day (Local Time)", fontsize=11)
+axes[0].set_ylabel(f"Concentration ({pollutant_label})", fontsize=11)
+axes[0].set_xticks(range(0, 24, 2))
+axes[0].grid(True, linestyle="--", alpha=0.5)
+axes[0].legend(loc="upper right")
+
+# Formatting Subplot 1: Weekends
+axes[1].set_title(
+    f"PM2.5 Weekend Variability",
+    fontsize=13,
+    fontweight="bold",
+)
+axes[1].set_xlabel("Hour of Day (Local Time)", fontsize=11)
+axes[1].set_xticks(range(0, 24, 2))
+axes[1].grid(True, linestyle="--", alpha=0.5)
+axes[1].legend(loc="upper right")
+
+plt.tight_layout()
+plt.show()
+
+```
+:::
+
+We can see that there is high variability day by day, and in fact the monthly mean for weekends is comparable to or even higher than that of weekdays in some hours. Due to the complexity of this data, simple temporal models may struggle to accurately predict pollution levels. 
+
+#### 4. Modelling
+
+##### Baseline Models
+
+
+
+__________________________________________________________________
+::: {.panel-tabset}
+## R
+```{r _r}
+
+
+```
+
+## Python
+```{python _py}
+
+
+```
+:::
+
+
+
+
+
