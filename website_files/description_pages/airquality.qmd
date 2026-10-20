@@ -1,0 +1,63 @@
+---
+title: "Air Quality"
+toc: true
+toc-depth: 4
+toc-location: right
+sidebar: false
+---
+
+<!-- ::: {.callout-note icon="terminal" title="Try it live!"} -->
+<!-- Use Binder to explore and run this dataset and analysis interactively in your browser with `R`. Ideal for students and instructors to run, modify, and test the analysis in a live JupyterLab environment—no setup needed.  -->
+
+<!-- 👉 [Launch on Binder](https://mybinder.org/v2/gh/jadeeechen/diversedata-notebooks/HEAD?urlpath=lab/tree/wildfire.ipynb){target="_blank" rel="noopener"} -->
+
+<!-- ::: -->
+
+## About the Data
+
+This database contains information on air quality across the globe, including particulate matter, greenhouse gases, and more, at hourly resolution. This data is available on Open Meteo, and is compiled from multiple sources, including the Copernicus Atmosphere Monitoring Service (CAMS) ENSEMBLE data provider. The data can be accessed through the [Open Meteo website](https://open-meteo.com/en/docs/air-quality-api) or via API call under the CC BY 4.0 data licence. 
+
+This data was gathered to support user investigation of a wide variety of environmental topics, including weather, air quality, climate change, flooding, and much more. Air quality specifically is an important topic for investigation, as poor air quality can negatively impact public health, safety, and long-term environmental well-being. Vulnerable communities in particular may experience disproportionate exposure to pollutants, and therefore disproportionate harm to their health. Factors like proximity to industrial zones, traffic density, and weather patterns are likely to contribute to disproportionate exposures. Analyzing and understanding variations in air quality helps policymakers, urban planners, and public health officials evaluate the effectiveness of current environmental regulations, and design targeted actions with the hope of minimizing health risks and promoting equitable environmental standards.
+
+
+### Access the Data
+
+<div class="button-container">
+  <a href="https://open-meteo.com/en/docs/air-quality-api" target="_blank" rel="noopener noreferrer" class="download-button">
+    Open Meteo Website
+  </a>
+</div>
+
+### Metadata
+
+<div class="description-grid">
+  <div class="field-label">Data Access</div><div class="field-value">Air Quality API</div>
+  <div class="field-label">Dataset Characteristics</div><div class="field-value">Multivariate</div>
+  <div class="field-label">Subject Area</div><div class="field-value">Environment, Atmosphere, Equity, Health and Safety</div>
+  <div class="field-label">Associated Tasks</div><div class="field-value">Time Series Forecasting, Machine Learning</div>
+  <div class="field-label">Feature Type</div><div class="field-value">Categorical, Numeric</div>
+  <div class="field-label">Has Missing Values?</div><div class="field-value">No</div>
+</div>
+
+### Variables
+
+::: {.table-container}
+::: {.styled-table}
+
+| Variable Name                  | Role     | Type        | Description         | Units         | Missing Values |
+|--------------------------------|----------|-------------|---------------------------------------------------------------------------------------------------|---------------|----------------|
+| `time`         | ID       | Datetime     | Date and time of day    | Datetime          | No             |
+| `pm10`     | Target       | Numeric     | Concentration of particulate matter with diameter smaller than 10 µm (PM10) close to surface (10 meter above ground) | µg/m^3  | No |
+| `pm2_5`  | Target    | Numeric     | Concentration of particulate matter with diameter smaller than 2.5 µm (PM2.5) close to surface (10 meter above ground) | µg/m^3  | No     |
+| `nitrogen_dioxide`    | Target       | Numeric  | Concentration of the atmospheric gas nitrogen dioxide close to surface (10 meter above ground)  | µg/m^3  | No     |
+| `us_aqi`    | Target       | Integer     | United States Air Quality Index (AQI) calculated for different particulate matter and gases individually. The consolidated us_aqi returns the maximum of all individual indices. Ranges from 0-50 (good), 50-100 (moderate), 100-150 (unhealthy for sensitive groups), 150-200 (unhealthy), 200-300 (very unhealthy) and 300-500 (hazardous).    | US AQI      | No             |
+
+:::
+:::
+
+{{< include ../notebooks/airquality.qmd >}} 
+
+## Attribution
+
+Data sourced from [Open Meteo via API](https://open-meteo.com/en/docs/air-quality-api), available under the CC BY 4.0 data license. Open Meteo compiles data from the following sources: METEO FRANCE, Institut national de l'environnement industriel et des risques (Ineris), Aarhus University, Norwegian Meteorological Institute (MET Norway), Jülich Institut für Energie- und Klimaforschung (IEK), Institute of Environmental Protection – National Research Institute (IEP-NRI), Koninklijk Nederlands Meteorologisch Instituut (KNMI), Nederlandse Organisatie voor toegepast-natuurwetenschappelijk onderzoek (TNO), Swedish Meteorological and Hydrological Institute (SMHI), Finnish Meteorological Institute (FMI), Italian National Agency for New Technologies, Energy and Sustainable Economic Development (ENEA) and Barcelona Supercomputing Center (BSC) (2022): CAMS European air quality forecasts, ENSEMBLE data. Copernicus Atmosphere Monitoring Service (CAMS) Atmosphere Data Store (ADS).
+
