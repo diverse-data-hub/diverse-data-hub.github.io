@@ -1,0 +1,7 @@
+<a class="grid-item" data-featured="false" data-tags="r" a href="https://diverse-data-hub.github.io/website_files/description_pages/airquality.html">
+  <img src="/website_files/img/airquality.png" width="20px" height="40px">
+  <h3>Air Quality</h3>
+  <p>
+    This dataset contains hourly information on air quality and pollutants in Vancouver. Collected by Open Meteo, this dataset supports investigation of the cyclicity of air pollution and the capabilities of various time series models in forecasting future pollution. 
+  </p>
+</a>
