@@ -289,7 +289,7 @@ plt.show()
 
 We can see that there are daily spikes in both particulate matter and nitrogen dioxide, but with fairly high variability between days. 
 
-Next let's take a look at a random weekday and weekend to compare the two. 
+Next let's take a look at a random weekday and weekend to compare the two. We expect to see higher pollutant concentrations on the weekday, as there is likely higher traffic related to work commuting. 
 
 ::: {.panel-tabset}
 ## R
@@ -451,7 +451,7 @@ plt.show()
 ```
 :::
 
-We can see that the weekday concentration of nitrogen dioxide is higher than the weekend. For particulate matter, the concentrations start at about the same level, but drop on the weekend by the end of the day. These plots show only two specific days. Let's investigate multiple weekdays and among weekends to get a sense for the variability day by day. 
+We can see that the weekday concentration of nitrogen dioxide is higher than the weekend. For particulate matter, the concentrations start at about the same level, but drop on the weekend by the end of the day. These plots show only two specific days. Let's visualize multiple weekdays and weekends to get a sense for the variability day by day. 
 
 ::: {.panel-tabset}
 ## R
@@ -628,26 +628,1415 @@ We can see that there is high variability day by day, and in fact the monthly me
 
 #### 4. Modelling
 
+Now we'd like to see how well we can model this cyclicity and make predictions for Vancouver air pollution. We will begin with a few simple models to use as our baseline. 
+
 ##### Baseline Models
 
+We need to split our data into a training and a test set for validation. We will use one year for training, and two months for testing.  We will use PM2.5 as our target variable to predict, although this analysis could be performed on any of our pollutants in a similar manner. These initial models are univariate, meaning that they rely solely on the past values of the target variable's values, and don't incorporate any explanatory variables. Therefore, we also need to isolate our target column.
 
-
-__________________________________________________________________
 ::: {.panel-tabset}
 ## R
-```{r _r}
+```{r data_split_r}
 
 
 ```
 
 ## Python
-```{python _py}
+```{python data_split_py}
+
+baseline_slice = df.loc["2024-03-01":"2025-05-31"]
+
+cutoff_date = "2025-03-01"
+
+train_df = baseline_slice.loc[baseline_slice.index < cutoff_date]
+test_df = baseline_slice.loc[baseline_slice.index >= cutoff_date]
+
+print(f"Training set: {train_df.shape[0]} rows")
+print(f"Testing set: {test_df.shape[0]} rows")
+
+# Define target and feature columns
+target_col = "pm2_5"
+
+# Get train and test for target column
+y_train = train_df[target_col]
+y_test = test_df[target_col]
+
+forecast_idx = y_test.index
+
+```
+:::
+
+We will begin with an average forecast which, as its name suggests, predicts the training set's overall average value as a flat line across the entire test horizon. We will also do a naive forecast, meaning for the whole test horizon, we predict the very last value from the training set. We will also create a seasonally adjusted forecast, where we perform seasonal decomposition on our training set and subtract the seasonal component, leaving us with the trend and residual series. We then take the very last value from this seasonally adjusted training set and predict this across the test horizon. All three of these baseline models will create flat lines, so we group them together for simplicity. 
+
+::: {.panel-tabset}
+## R
+```{r baseline_r}
+
+
+```
+
+## Python
+```{python baseline_py}
+
+# Average forecast
+avg_forecast = pd.DataFrame({"y": y_train.mean(), "Label": "Average"}, index=forecast_idx)
+
+# Naive forecast
+naive_forecast = pd.DataFrame({"y": y_train.iloc[-1], "Label": "Naive"}, index=forecast_idx)
+
+# Seasonally-adjusted forecast
+# Perform seasonal decomposition on the training set (period=24 for hourly daily seasonality)
+decomposition = seasonal_decompose(
+    y_train, model="additive", period=24
+)
+
+# Compute the seasonally adjusted series (e.g., subtracting the seasonal component for additive model)
+seasonally_adjusted_train = y_train - decomposition.seasonal
+
+# Take the trend value of the very last observation in the training set
+last_trend_value = seasonally_adjusted_train.iloc[-1]
+
+# Create the seasonally adjusted forecast DataFrame across the forecast_index
+seasonally_adjusted_forecast = pd.DataFrame(
+    {"y": last_trend_value, "Label": "Seasonally Adjusted"},
+    index=forecast_idx,
+)
+
+
+# Plotting
+
+# 1. Combine baselines into one collection
+all_baselines = pd.concat([
+    avg_forecast,
+    naive_forecast,
+    seasonally_adjusted_forecast,
+])
+
+# 2. Define your display windows
+train_history_hours = 24  
+test_forecast_hours = 168 
+
+# Slice history and future test subsets
+train_history = y_train.tail(train_history_hours)
+true_test_subset = y_test.head(test_forecast_hours)
+forecast_subset_index = true_test_subset.index
+
+# 3. Set up the plot canvas
+fig, ax = plt.subplots(figsize=(14, 5.5), dpi=100)
+
+# Plot Historical Training Data (solid dark gray to differentiate from test)
+ax.plot(
+    train_history.index,
+    train_history.values,
+    label="Training History (${PM}_{2.5}$)",
+    color="gray",
+    linewidth=1.2,
+    alpha=0.6,
+)
+
+# Plot True Test Values (solid black)
+ax.plot(
+    true_test_subset.index,
+    true_test_subset.values,
+    label="True Test Values",
+    color="#222222",
+    linewidth=2,
+    alpha=0.8,
+    zorder=5,
+)
+
+# Define styles for each baseline model
+styles = {
+    "Average": {
+      "color": "darkgreen", 
+      "linestyle": "--", 
+      "alpha": 0.7, 
+      "lw": 1.5},
+    "Naive": {
+        "color": "blue",
+        "linestyle": ":",
+        "linewidth": 3,
+        "marker": "o",
+        "markevery": 24,
+        "alpha": 1,
+    },  
+     "Seasonally Adjusted": {
+        "color": "darkorange",
+        "linestyle": "--",
+        "linewidth": 1.5,
+        "alpha": 0.9,
+    },
+}
+
+# Loop through each model label and plot its forecast slice over the test index
+for label, style in styles.items():
+  # Filter by label first, then reset/assign the index to match the test subset
+  model_df = all_baselines[all_baselines["Label"] == label].copy()
+  model_df.index = forecast_idx  # ensure exact alignment
+
+  subset_vals = model_df.loc[forecast_subset_index, "y"]
+
+  ax.plot(
+      forecast_subset_index,
+      subset_vals,
+      label=label,
+      color=style["color"],
+      linestyle=style.get("linestyle", "-"),
+      linewidth=style.get("linewidth", 1.2),
+      alpha=style.get("alpha", 1.0),
+  )
+
+# Add a vertical dashed line to visually separate training history from forecast execution
+transition_time = true_test_subset.index[0]
+ax.axvline(
+    x=transition_time,
+    color="red",
+    linestyle=":",
+    alpha=0.6,
+    label="Forecast Start",
+)
+
+# 4. Formatting the layout
+ax.set_title(
+    "PM₂.₅ Baseline Models: Training History & Test Forecast",
+    fontsize=12,
+    fontweight="bold",
+)
+ax.set_xlabel("Time (Local)", fontsize=10)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
+ax.legend(
+    loc="upper left",
+        frameon=True,
+        facecolor="white",
+        framealpha=0.95,
+        edgecolor="lightgrey",
+        fontsize=10,
+)
+
+fig.autofmt_xdate(rotation=45, ha="right")
+fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+
+plt.show()
+
+
+```
+:::
+
+We can see that these two baseline models predict horizontal lines, which are not accurate reflections of the true test values. 
+
+There are two more baseline models to try. First, we have the seasonal naive forecast. This takes the last 24 hours of our training data, and predicts it to repeat across the forecast index. Second, we have drift forecast. We calculate the slope over the whole training set, and predict a linear trend with that slope for the forecast horizon. 
+
+::: {.panel-tabset}
+## R
+```{r baseline2_r}
+
+
+```
+
+## Python
+```{python baseline2_py}
+
+# Seasonal naive forecast
+# Map the last 24 hours of training data to repeat across the forecast index
+last_season_values = y_train.tail(24).values
+
+# Repeat or align based on hour of day matching
+seasonal_naive_values = [
+    last_season_values[ts.hour] for ts in forecast_idx
+]
+
+seasonal_naive = pd.DataFrame(
+    {"y": seasonal_naive_values, "Label": "Seasonal Naive"},
+    index=forecast_idx,
+)
+
+# Drift
+last_val = y_train.iloc[-1]
+first_val = y_train.iloc[0]
+n_train = len(y_train)
+
+# Calculate average change per step in the training set
+slope = (last_val - first_val) / (n_train - 1)
+
+# Generate drift values growing linearly across the forecast index steps
+steps = np.arange(1, len(forecast_idx) + 1)
+drift_values = last_val + (slope * steps)
+
+drift_forecast = pd.DataFrame(
+    {"y": drift_values, "Label": "Drift"}, index=forecast_idx
+)
+
+
+# Plotting
+# 1. Combine baselines into one collection
+all_baselines = pd.concat([
+    seasonal_naive,
+    drift_forecast
+])
+
+# 2. Define your display windows
+train_history_hours = 24  
+test_forecast_hours = 168 
+
+# Slice history and future test subsets
+train_history = y_train.tail(train_history_hours)
+true_test_subset = y_test.head(test_forecast_hours)
+forecast_subset_index = true_test_subset.index
+
+# 3. Set up the plot canvas
+fig, ax = plt.subplots(figsize=(14, 5.5), dpi=100)
+
+# Plot Historical Training Data (solid dark gray to differentiate from test)
+ax.plot(
+    train_history.index,
+    train_history.values,
+    label="Training History (${PM}_{2.5}$)",
+    color="gray",
+    linewidth=1.2,
+    alpha=0.6,
+)
+
+# Plot True Test Values (solid black)
+ax.plot(
+    true_test_subset.index,
+    true_test_subset.values,
+    label="True Test Values",
+    color="#222222",
+    linewidth=2,
+    alpha=0.8,
+    zorder=5,
+)
+
+# Define styles for each baseline model
+styles = {
+    "Seasonal Naive": {
+        "color": "teal",
+        "linestyle": "-",
+        "linewidth": 1.5,
+        "alpha": 0.7,
+    },
+    "Drift": {
+        "color": "pink",
+        "linestyle": "-.",
+        "linewidth": 2,
+        "alpha": 0.9,
+    },
+}
+
+# Loop through each model label and plot its forecast slice over the test index
+for label, style in styles.items():
+  # Filter by label first, then reset/assign the index to match the test subset
+  model_df = all_baselines[all_baselines["Label"] == label].copy()
+  model_df.index = forecast_idx  # ensure exact alignment
+
+  subset_vals = model_df.loc[forecast_subset_index, "y"]
+
+  ax.plot(
+      forecast_subset_index,
+      subset_vals,
+      label=label,
+      color=style["color"],
+      linestyle=style.get("linestyle", "-"),
+      linewidth=style.get("linewidth", 1.2),
+      alpha=style.get("alpha", 1.0),
+  )
+
+# Add a vertical dashed line to visually separate training history from forecast execution
+transition_time = true_test_subset.index[0]
+ax.axvline(
+    x=transition_time,
+    color="red",
+    linestyle=":",
+    alpha=0.6,
+    label="Forecast Start",
+)
+
+# 4. Formatting the layout
+ax.set_title(
+    "PM₂.₅ Baseline Models: Training History & Test Forecast",
+    fontsize=12,
+    fontweight="bold",
+)
+ax.set_xlabel("Time", fontsize=10)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
+ax.legend(
+    loc="upper left",
+        frameon=True,
+        facecolor="white",
+        framealpha=0.95,
+        edgecolor="lightgrey",
+        fontsize=8,
+)
+
+fig.autofmt_xdate(rotation=45, ha="right")
+fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+
+plt.show()
+
+```
+:::
+
+Our drift forecast has a very slight increasing slope to it, which indicates that there is a slight increase between our first and last values from our training set. The seasonal naive forecast shows the previous 24 hours repeated over time, which has some similarities to the true test values, but still is not very accurate. 
+
+Beyond just visual evaluation, we can also evaluate our predictions numerically using root mean squared error (RMSE) and mean absolute error (MAE). 
+
+::: {.panel-tabset}
+## R
+```{r baseline_error_r}
+
+
+```
+
+## Python
+```{python baseline_error_py}
+
+# Collect all baseline DataFrames
+all_baselines = pd.concat([
+    avg_forecast,
+    naive_forecast,
+    seasonally_adjusted_forecast,
+    seasonal_naive,
+    drift_forecast
+])
+
+evaluation_results = []
+
+# Loop through unique labels present in the combined dataframe
+for label in all_baselines["Label"].unique():
+    # Filter by model label and align with true test values (y_test)
+    model_df = all_baselines[all_baselines["Label"] == label]
+    aligned_preds = model_df.loc[y_test.index, "y"]
+    
+    # Calculate metrics
+    rmse = np.sqrt(mean_squared_error(y_test, aligned_preds))
+    mae = mean_absolute_error(y_test, aligned_preds)
+    
+    evaluation_results.append({
+        "Model": label,
+        "RMSE": rmse,
+        "MAE": mae
+    })
+
+# Convert results into a performance table
+results_df = pd.DataFrame(evaluation_results).reset_index(drop=True)
+
+print("\n--- Baseline Model Performance Evaluation ---")
+print(results_df.to_string(index=False, formatters={"RMSE": "{:.2f}".format, "MAE": "{:.2f}".format}))
+
+```
+:::
+
+With both of these metrics, lower error is better. We can see that the average forecast has the lowest in both metrics, but all models are fairly similar, and not performing very well. Let's try some more advanced models and see if they perform better. 
+
+#### ARIMA/SARIMA Models
+
+ARIMA (Autoregressive Integrated Moving Average) and SARIMA (Seasonal ARIMA) forecast future values using only the target variable's historical patterns. 
+
+* **ARIMA** combines three core mechanics: **Autoregression (AR)** for short-term persistence, **Integration (I)** via differencing to stabilize long-term trends, and **Moving Average (MA)** to incorporate recent forecast errors for self-correction.
+* **SARIMA** extends this framework by adding dedicated seasonal components to capture repeating daily or weekly rhythms.
+
+Because fitting ARIMA on large, multi-month hourly datasets can be computationally intensive, we train our models on the final month of the training set for efficiency.
+
+We begin with a standard **$\text{ARIMA}(1, 1, 1)$** baseline. The parameters $(p, d, q)$ represent:
+
+* **$p = 1$ (AR):** Looks at the immediate past hour to project next steps.
+* **$d = 1$ (I):** Applies one round of differencing to remove long-term trends and stabilize the series.
+* **$q = 1$ (MA):** Factors in one past forecast error to self-correction after sudden spikes or dips.
+
+::: {.panel-tabset}
+## R
+```{r arima_r}
+
+
+```
+
+## Python
+```{python arima_py}
+
+train_subset = y_train.tail(28 * 24).asfreq("h")
+
+arima_model = ARIMA(train_subset, order=(1, 1, 1)).fit()
+
+# Forecast over a test slice of y_test 
+steps_to_forecast = len(y_test.head(168))  # Forecasting first week of test
+arima_preds = arima_model.forecast(steps=steps_to_forecast)
+arima_preds.index = y_test.head(steps_to_forecast).index
+
+arima_rmse = np.sqrt(
+    mean_squared_error(y_test.head(steps_to_forecast), arima_preds)
+)
+arima_mae = mean_absolute_error(y_test.head(steps_to_forecast), arima_preds)
+
+print(f"ARIMA(1,1,1) (1-week test) -> RMSE: {arima_rmse:.2f},"
+      f" MAE: {arima_mae:.2f}")
+
+```
+:::
+
+We can see that the errors are about on par with those of our best baseline models, indicating that we haven't made much improvement. Let's next try a SARIMA model, incorporating seasonality into our predictions. We again will use a standard SARIMA(1,1,1)x(1,1,1,24), where the order for all components is 1. The first parentheses represent the non-seasonal part (the same as the ARIMA model), while the second represent the seasonal part, using a 24 hour cycle. 
+
+::: {.panel-tabset}
+## R
+```{r sarima_r}
+
+
+```
+
+## Python
+```{python sarima_py}
+
+# Fit SARIMA with daily seasonality (s=24)
+# order = (p, d, q) -> non-seasonal components
+# seasonal_order = (P, D, Q, s) -> seasonal components with period s=24 hours
+sarima_model = SARIMAX(
+    train_subset,
+    order=(1, 1, 1),
+    seasonal_order=(1, 1, 1, 24),
+    enforce_stationarity=False,
+    enforce_invertibility=False,
+)
+sarima_fitted = sarima_model.fit(disp=False)
+
+# Forecast over the same 1-week test slice
+steps_to_forecast = len(y_test.head(168))
+sarima_preds = sarima_fitted.forecast(steps=steps_to_forecast)
+sarima_preds.index = y_test.head(steps_to_forecast).index
+
+# Evaluate SARIMA Performance
+sarima_rmse = np.sqrt(
+    mean_squared_error(y_test.head(steps_to_forecast), sarima_preds)
+)
+sarima_mae = mean_absolute_error(y_test.head(steps_to_forecast), sarima_preds)
+
+print(
+    f"SARIMA(1,1,1)x(1,1,1,24) (1-week test) -> RMSE: {sarima_rmse:.2f},"
+    f" MAE: {sarima_mae:.2f}"
+)
+
+```
+:::
+
+We can see that the errors are much higher, indicating that this added complexity did not help improve our predictions.
+
+Let's also try an Auto-ARIMA model, where we allow the model to select the orders for our components by which model performs best on the training data. 
+
+::: {.panel-tabset}
+## R
+```{r auto_arima_r}
+
+
+```
+
+## Python
+```{python auto_arima_py}
+
+# Fit Auto-ARIMA with daily seasonality (m=24)
+# Setting stepwise=True speeds up the search considerably
+auto_model = auto_arima(
+    train_subset,
+    seasonal=True,
+    m=24,  # Hourly daily cycle
+    d=None,  # Let it automatically test/determine differencing order
+    max_p=3,
+    max_q=3,
+    max_P=2,
+    max_Q=2,
+    trace=True,
+    error_action="ignore",
+    suppress_warnings=True,
+    stepwise=True,
+)
+
+print("\nBest Model Found:", auto_model.order, auto_model.seasonal_order)
+
+# Forecast over the test slice
+steps_to_forecast = len(y_test.head(168))
+auto_preds, confint = auto_model.predict(
+    n_periods=steps_to_forecast, return_conf_int=True
+)
+auto_preds = pd.Series(auto_preds, index=y_test.head(steps_to_forecast).index)
+
+# Evaluate Auto-ARIMA Performance
+auto_rmse = np.sqrt(
+    mean_squared_error(y_test.head(steps_to_forecast), auto_preds)
+)
+auto_mae = mean_absolute_error(y_test.head(steps_to_forecast), auto_preds)
+
+print(f"Auto-SARIMA (1-week test) -> RMSE: {auto_rmse:.2f}, MAE: {auto_mae:.2f}")
+
+```
+:::
+
+We can see that Auto-ARIMA selected ARIMA(1, 1, 3) (1, 0, 1, 24). Let's compare the errors from our three ARIMA models. 
+
+::: {.panel-tabset}
+## R
+```{r arima_error_r}
+
+
+```
+
+## Python
+```{python arima_error_py}
+
+# Dictionary mapping model names to their prediction arrays/series
+models = {
+    "ARIMA (1,1,1)": arima_preds,
+    "SARIMA (1,1,1)x(1,1,1,24)": sarima_preds,
+    "Auto ARIMA": auto_preds
+}
+
+results = []
+
+for name, preds in models.items():
+    # Calculate RMSE and MAE (using y_test.head(steps_to_forecast) as true test values)
+    rmse = np.sqrt(mean_squared_error(y_test.head(steps_to_forecast), preds))
+    mae = mean_absolute_error(y_test.head(steps_to_forecast), preds)
+    
+    results.append({
+        "Model": name, 
+        "RMSE": round(rmse, 2), 
+        "MAE": round(mae, 2)
+    })
+
+# Convert to a DataFrame for clean tabular printing
+results_df = pd.DataFrame(results)
+print("\n--- Model Performance Comparison ---")
+print(results_df.to_string(index=False))
+
+```
+:::
+
+By looking at the RMSE and MAE however across our three ARIMA models, we can see that the standard ARIMA model performed the best, indicating that the more complex models here may be over-fitting to the training data, and therefore struggling on the test data. 
+
+Let's visualize our predictions for these three models, to get an intuitive understanding of how they are performing. 
+
+::: {.panel-tabset}
+## R
+```{r arima_viz_r}
+
+
+```
+
+## Python
+```{python arima_viz_py}
+
+# Define models dictionary specifically for ARIMA/SARIMA
+arima_forecasts = {
+    "ARIMA(1,1,1)": arima_preds,
+    "Auto-ARIMA": auto_preds,
+    "SARIMA(1,1,1)x(1,1,1,24)": sarima_preds,
+}
+
+# Styles for the dedicated plot
+arima_styles = {
+    "ARIMA(1,1,1)": {
+        "color": "#ff7f0e",  # muted orange
+        "linestyle": ":",
+        "linewidth": 1,
+        "alpha": 0.8,
+    },
+    "Auto-ARIMA": {
+        "color": "#1f77b4",  # classic blue
+        "linestyle": "--",
+        "linewidth": 1,
+        "alpha": 0.8,
+    },
+    "SARIMA(1,1,1)x(1,1,1,24)": {
+        "color": "#2ca02c",  # forest green 
+        "linestyle": "-",
+        "linewidth": 1.5,
+        "alpha": 0.9,
+    },
+}
+
+# Set up canvas
+fig, ax = plt.subplots(figsize=(14, 5.5), dpi=100)
+
+train_history_hours = 48
+test_forecast_hours = 168
+
+train_history = y_train.tail(train_history_hours)
+true_test_subset = y_test.head(test_forecast_hours)
+
+# Plot History and True Test Data
+ax.plot(
+    train_history.index,
+    train_history.values,
+    label="Training History",
+    color="black",
+    linewidth=1.2,
+)
+ax.plot(
+    true_test_subset.index,
+    true_test_subset.values,
+    label="True Test Values",
+    color="black",
+    linewidth=1.5,
+    zorder=10
+)
+
+# Loop and plot ARIMA/SARIMA models
+for label, pred_series in arima_forecasts.items():
+  subset_vals = pred_series.reindex(true_test_subset.index)
+  style = arima_styles.get(label, {})
+
+  ax.plot(
+      true_test_subset.index,
+      subset_vals,
+      label=label,
+      color=style.get("color"),
+      linestyle=style.get("linestyle", "-"),
+      linewidth=style.get("linewidth", 1.5),
+      alpha=style.get("alpha", 1.0),
+      zorder=3,
+  )
+
+# Vertical line separating train from test
+ax.axvline(
+    x=true_test_subset.index[0],
+    color="#d62728",
+    linestyle="--",
+    linewidth=1.5,
+    alpha=0.7,
+    label="Forecast Start",
+)
+
+# Formatting
+ax.set_title(
+    "PM₂.₅ Forecasting: ARIMA vs. SARIMA vs. ML Models",
+    fontsize=12,
+    fontweight="bold",
+)
+ax.set_xlabel("Time", fontsize=10)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
+ax.legend(loc="upper left",
+    frameon=True,
+    facecolor="white",
+    framealpha=0.95,
+    edgecolor="lightgrey",
+    fontsize=8,)
+
+
+fig.autofmt_xdate(rotation=45, ha="right")
+fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+
+plt.show()
+
+```
+:::
+
+We can visually see that the both the Auto-ARIMA and the SARIMA models contain an overall increasing trend, which does not align well with the true test values. The ARIMA model, although it does not contain the small scale cyclicity that the more complex models do, better matches the overall trend of the data. This shows us that complex data, like this air pollution dataset, may have more intricacies and complexities than simple time series models can capture. 
+
+Another approach is to use SARIMAX, where we add explanatory variables to our SARIMA model. Weather and atmospheric changes can have a large impact on the longevity of air pollution, therefore these might be useful explanatory variables to incorporate into our modelling. We can pull weather information from Open Meteo as well and join it to our air pollution dataset. 
+
+::: {.panel-tabset}
+## R
+```{r weather_r}
+
+
+```
+
+## Python
+```{python weather_py}
+
+# Load weather data for the same time frame
+
+# 1. Define location and time window
+latitude = 49.2827
+longitude = -123.1207
+start_date = "2024-03-01"
+end_date = "2025-05-31"
+
+# 2. Query Open-Meteo's Archive API for daily aggregations
+url = "https://archive-api.open-meteo.com/v1/archive"
+params = {
+    "latitude": latitude,
+    "longitude": longitude,
+    "start_date": start_date,
+    "end_date": end_date,
+    "hourly": ["temperature_2m", "relative_humidity_2m", "precipitation", "cloud_cover", "wind_speed_10m", "wind_speed_100m"],
+}
+
+response = requests.get(url, params=params)
+data = response.json()
+
+# 3. Parse daily payload into a Pandas DataFrame
+hourly_data = data["hourly"]
+hourly_df = pd.DataFrame(hourly_data)
+
+hourly_df["time"] = pd.to_datetime(hourly_df["time"])
+
+# Set date as the index
+hourly_df.set_index("time", inplace=True)
+
+# Join the weather data to the air quality data on the index
+combined_df = pd.merge(
+    df,
+    hourly_df,
+    how = 'inner',
+    on = 'time'
+)
+
+combined_df.head()
+
+```
+:::
+
+Next let's train and test our SARIMAX model, using the following as explanatory variables: 
+
+* Temperature at 2m height
+* Relative humidity at 2m
+* Precipitation
+* Cloud cover
+* Wind speed at 10m height
+* Wind speed at 100m height
+
+::: {.panel-tabset}
+## R
+```{r sarimax_r}
+
+
+```
+
+## Python
+```{python sarimax_py}
+
+# List weather/temperature feature columns
+target_col = "pm2_5"
+
+exog_cols = [
+    "temperature_2m", 
+    "relative_humidity_2m", 
+    "precipitation", 
+    "cloud_cover", 
+    "wind_speed_10m",
+    "wind_speed_100m"
+]
+
+slice = combined_df.loc["2024-03-01":"2025-05-31"]
+cutoff_date = "2025-03-01"
+
+train_df = slice.loc[slice.index < cutoff_date]
+test_df = slice.loc[slice.index >= cutoff_date]
+
+X_train = train_df[exog_cols]
+y_train = train_df[target_col]
+
+X_test = test_df[exog_cols]
+y_test = test_df[target_col]
+
+# Training slices (e.g., last 28 days of training data for fast fitting)
+train_window = 28 * 24
+y_train_subset = y_train.tail(train_window).asfreq("h")
+X_train_subset = X_train.tail(train_window).asfreq("h")
+
+# Test forecast slice (e.g., first 168 hours of test data)
+test_window = 168
+y_test_subset = y_test.head(test_window).asfreq("h")
+X_test_subset = X_test.head(test_window).asfreq("h")
+
+# 2. Fit SARIMAX with increased maxiter to allow convergence
+sarimax_model = SARIMAX(
+    endog=y_train_subset,
+    exog=X_train_subset,
+    order=(1, 1, 1),
+    seasonal_order=(1, 1, 1, 24),
+    enforce_stationarity=False,
+    enforce_invertibility=False,
+)
+
+# Bump up maxiter to give the optimizer enough room to converge
+sarimax_fitted = sarimax_model.fit(disp=False, maxiter=200)
+
+# 3. Forecast using the test exogenous features
+sarimax_preds = sarimax_fitted.forecast(
+    steps=len(y_test_subset), exog=X_test_subset
+)
+sarimax_preds = pd.Series(sarimax_preds, index=y_test_subset.index)
+
+# 3. Evaluate the new SARIMAX performance
+sarimax_rmse = np.sqrt(mean_squared_error(y_test_subset, sarimax_preds))
+sarimax_mae = mean_absolute_error(y_test_subset, sarimax_preds)
+
+print(
+    f"SARIMAX with Weather (1-week test) -> RMSE: {sarimax_rmse:.2f},"
+    f" MAE: {sarimax_mae:.2f}"
+)
+
+```
+:::
+
+Let's visualize our SARIMAX results along with the ARIMA and SARIMA models. 
+
+::: {.panel-tabset}
+## R
+```{r sarimax_viz_r}
+
+
+```
+
+## Python
+```{python sarimax_viz_py}
+
+# Define your models dictionary specifically for ARIMA/SARIMA
+arima_forecasts = {
+    "ARIMA(1,1,1)": arima_preds,
+    "Auto-ARIMA": auto_preds,
+    "SARIMA(1,1,1)x(1,1,1,24)": sarima_preds,
+    "SARIMAX": sarimax_preds,
+}
+
+# Styles for the dedicated plot
+arima_styles = {
+    "ARIMA(1,1,1)": {
+        "color": "firebrick",
+        "linestyle": "--",
+        "linewidth": 1.75,
+        "alpha": 0.85,
+    },
+    "Auto-ARIMA": {
+        "color": "purple",
+        "linestyle": "--",
+        "linewidth": 1.75,
+        "alpha": 0.85,
+    },
+    "SARIMA(1,1,1)x(1,1,1,24)": {
+        "color": "#2ca02c",  # green
+        "linestyle": "--",
+        "linewidth": 1.75,
+        "alpha": 0.85,
+    },
+    "SARIMAX": {
+        "color": "#1f77b4",  # blue
+        "linestyle": "-.",
+        "linewidth": 1.75,
+        "alpha": 0.85,
+    },
+}
+
+# Set up canvas
+fig, ax = plt.subplots(figsize=(14, 5.5), dpi=100)
+
+train_history_hours = 24
+test_forecast_hours = 168
+
+train_history = y_train.tail(train_history_hours)
+true_test_subset = y_test.head(test_forecast_hours)
+
+# Plot History and True Test Data
+ax.plot(
+    train_history.index,
+    train_history.values,
+    label="Training History (Last 24h)",
+    color="gray",
+    linewidth=1.2,
+    alpha=0.6,
+)
+ax.plot(
+    true_test_subset.index,
+    true_test_subset.values,
+    label="True Test Values",
+    color="#222222",
+    linewidth=2,
+    alpha=0.8,
+    zorder=5,
+)
+
+# Loop and plot ARIMA/SARIMA models
+for label, pred_series in arima_forecasts.items():
+  subset_vals = pred_series.loc[true_test_subset.index]
+  style = arima_styles.get(label, {})
+
+  ax.plot(
+      true_test_subset.index,
+      subset_vals,
+      label=label,
+      color=style.get("color"),
+      linestyle=style.get("linestyle", "-"),
+      linewidth=style.get("linewidth", 1.5),
+      alpha=style.get("alpha", 1.0),
+  )
+
+# Vertical line separating train from test
+ax.axvline(
+    x=true_test_subset.index[0],
+        color="#d62728",
+        linestyle=":",
+        linewidth=1.5,
+        alpha=0.7,
+        label="Forecast Start",
+)
+
+# Formatting
+ax.set_title(
+    "PM₂.₅ Forecasting: ARIMA vs. SARIMA vs. SARIMAX Models",
+    fontsize=12,
+    fontweight="bold",
+)
+ax.set_xlabel("Time", fontsize=10)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
+ax.legend(loc="upper left",
+    frameon=True,
+    facecolor="white",
+    framealpha=0.95,
+    edgecolor="lightgrey",
+    fontsize=8,)
+
+fig.autofmt_xdate(rotation=45, ha="right")
+fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+
+plt.show()
+
+```
+:::
+
+We can see from the visualization that the SARIMAX predictions are almost identical to the SARIMA predictions, and that the RMSE and MAE are still quite high for SARIMAX. This indicates that adding these explanatory weather variables did not help our SARIMA model, and the limitations therefore may be with the model itself, rather than the amount of information it has to work with. We can pivot away from traditional time series models, and instead try machine learning for our air pollution prediction task. 
+
+#### Machine Learning
+
+While classical statistical models do well at capturing simpler temporal structures, machine learning algorithms can be more flexible, allowing them to capture complex, non-linear relationships and multi-variable interactions. However, we need to do a bit of feature engineering to set up our time series data in a way that standard tabular machine learning models can understand. To do this, we introduce lags, which are historical observations of our target variable shifted back by specific time intervals (such as the immediate past hour $t-1$ or the corresponding hour from the previous day $t-24$). 
+
+::: {.panel-tabset}
+## R
+```{r ml_df_r}
+
+
+```
+
+## Python
+```{python ml_df_py}
+
+# 1. Feature Engineering function that incorporates target lags and time features
+def build_ml_dataset(df_subset, target_col, max_lags=24):
+  df = pd.DataFrame({"y": df_subset[target_col]})
+
+  # Add lag features for the target (past 1 to 24 hours)
+  for lag in range(1, max_lags + 1):
+    df[f"lag_{lag}"] = df["y"].shift(lag)
+
+  # Add calendar/time features from index
+  df["hour"] = df.index.hour
+  df["day_of_week"] = df.index.dayofweek
+  df["is_weekend"] = (df.index.dayofweek >= 5).astype(int)
+
+  # Drop rows with NaN values created by lagging
+  df = df.dropna()
+
+  y_out = df["y"]
+  X_out = df.drop(columns=["y"])
+  return X_out, y_out
+
+
+target_col = "pm2_5"
+
+# 2. Build ML feature matrices for train and test periods
+X_train_ml, y_train_ml = build_ml_dataset(
+    train_df, target_col, max_lags=24
+)
+X_test_ml, y_test_ml = build_ml_dataset(
+    test_df, target_col, max_lags=24
+)
+
+# 3. Take the train and test subsets
+train_window = 28 * 24
+X_tr_sub = X_train_ml.tail(train_window).asfreq("h")
+y_tr_sub = y_train_ml.tail(train_window).asfreq("h")
+
+test_window = 168
+X_te_sub = X_test_ml.loc[X_test_ml.index.isin(y_test.head(test_window).index)].asfreq("h")
+y_te_sub = y_test_ml.loc[y_test_ml.index.isin(y_test.head(test_window).index)].asfreq("h")
+
+```
+:::
+
+Next, let's train and evaluate our machine learning model on the train and test sets. We will use a Random Forest Regressor. A random forest is built on decision trees, which work like a series of flowchart-style yes/no questions to step-by-step narrow down a predicted value. While a single decision tree is intuitive, it is prone to overfitting and can easily get thrown off by noisy environmental data. 
+
+A random forest solves this weakness by combining dozens or hundreds of individual decision trees into a collective "forest". Each tree is trained on a slightly different random subset of the data and features, and then the final forecast is simply the average of all the individual trees' predictions. This teamwork smooths out individual errors, making the model remarkably robust and well-suited for capturing complex, non-linear interactions.
+
+::: {.panel-tabset}
+## R
+```{r forest_r}
+
+
+```
+
+## Python
+```{python forest_py}
+
+# 4. Train the Random Forest Regressor
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_model.fit(X_tr_sub, y_tr_sub)
+
+# 5. Predict and Evaluate
+rf_preds = pd.Series(rf_model.predict(X_te_sub), index=X_te_sub.index)
+
+rf_rmse = np.sqrt(mean_squared_error(y_te_sub, rf_preds))
+rf_mae = mean_absolute_error(y_te_sub, rf_preds)
+
+print(
+    f"Random Forest ML Pipeline (1-week test) -> RMSE: {rf_rmse:.2f},"
+    f" MAE: {rf_mae:.2f}"
+)
+
+```
+:::
+
+Let's visually compare our random forest to the ARIMA/SARIMA models. 
+
+::: {.panel-tabset}
+## R
+```{r forest_viz_r}
+
+
+```
+
+## Python
+```{python forest_viz_py}
+
+# Define your models dictionary specifically for ARIMA/SARIMA
+arima_forecasts = {
+    "ARIMA(1,1,1)": arima_preds,
+    "Auto-ARIMA": auto_preds,
+    "SARIMA(1,1,1)x(1,1,1,24)": sarima_preds,
+    "SARIMAX": sarimax_preds,
+    "Random Forest": rf_preds,
+}
+
+# Styles for the dedicated plot
+arima_styles = {
+    "ARIMA(1,1,1)": {
+        "color": "firebrick",
+        "linestyle": "--",
+        "linewidth": 1.75,
+        "alpha": 0.85,
+    },
+    "Auto-ARIMA": {
+        "color": "purple",
+        "linestyle": "--",
+        "linewidth": 1.75,
+        "alpha": 0.85,
+    },
+    "SARIMA(1,1,1)x(1,1,1,24)": {
+        "color": "#2ca02c",  # green
+        "linestyle": "--",
+        "linewidth": 1.75,
+        "alpha": 0.85,
+    },
+    "SARIMAX": {
+        "color": "#1f77b4",  # blue
+        "linestyle": "-.",
+        "linewidth": 1.75,
+        "alpha": 0.85,
+    },
+    "Random Forest": {
+        "color": "#9467bd",  # purple 
+        "linestyle": "-",
+        "linewidth": 2,
+        "alpha": 0.9,
+    },
+}
+
+# Set up canvas
+fig, ax = plt.subplots(figsize=(14, 5.5), dpi=100)
+
+train_history_hours = 24
+test_forecast_hours = 168
+
+train_history = y_train.tail(train_history_hours)
+true_test_subset = y_test.head(test_forecast_hours)
+
+# Plot History and True Test Data
+ax.plot(
+    train_history.index,
+    train_history.values,
+    label="Training History",
+    color="black",
+    linewidth=1.2,
+)
+ax.plot(
+    true_test_subset.index,
+    true_test_subset.values,
+    label="True Test Values",
+    color="black",
+    linewidth=2,
+    zorder=10
+)
+
+# Loop and plot ARIMA/SARIMA models
+for label, pred_series in arima_forecasts.items():
+  subset_vals = pred_series.reindex(true_test_subset.index)
+  style = arima_styles.get(label, {})
+
+  ax.plot(
+      true_test_subset.index,
+      subset_vals,
+      label=label,
+      color=style.get("color"),
+      linestyle=style.get("linestyle", "-"),
+      linewidth=style.get("linewidth", 1.5),
+      alpha=style.get("alpha", 1.0),
+      zorder=3,
+  )
+
+# Vertical line separating train from test
+ax.axvline(
+    x=true_test_subset.index[0],
+    color="#d62728",
+    linestyle="--",
+    linewidth=1.5,
+    alpha=0.7,
+    label="Forecast Start",
+)
+
+# Formatting
+ax.set_title(
+    "PM₂.₅ Forecasting: ARIMA vs. SARIMA vs. ML Models",
+    fontsize=14,
+    fontweight="bold",
+)
+ax.set_xlabel("Time", fontsize=10)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
+ax.legend(loc="upper left",
+    frameon=True,
+    facecolor="white",
+    framealpha=0.95,
+    edgecolor="lightgrey",
+    fontsize=8,)
+
+fig.autofmt_xdate(rotation=45, ha="right")
+fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+plt.show()
+
+```
+:::
+
+The random forest model did amazingly! It has the lowest RMSE and MAE (2.49 and 1.80 respectively) of any model we have tried, and visually very closely follows the true test values. By using lagged features like $t-1$ and $t-24$, the model successfully combined short-term momentum with daily cyclical awareness, allowing it to track sharp diurnal pollution spikes that simpler statistical models tended to smooth out. 
+
+We have one more possible improvement to attempt, which is to give our random forest model the weather features as well, and see if additional environmental context improves these predictions even further. 
+
+::: {.panel-tabset}
+## R
+```{r ml_weather_r}
+
+
+```
+
+## Python
+```{python ml_weather_py}
+
+# 1. Feature Engineering function that incorporates target lags, time features, AND weather exogenous features
+def build_ml_dataset_weather(df_subset, target_col, exog_cols, max_lags=24):
+  # Copy subset to avoid SettingWithCopy warnings
+  df = df_subset[exog_cols].copy()
+  df["y"] = df_subset[target_col]
+
+  # Add lag features for the target (past 1 to 24 hours)
+  for lag in range(1, max_lags + 1):
+    df[f"lag_{lag}"] = df["y"].shift(lag)
+
+  # Add calendar/time features from index
+  df["hour"] = df.index.hour
+  df["day_of_week"] = df.index.dayofweek
+  df["is_weekend"] = (df.index.dayofweek >= 5).astype(int)
+
+  # Drop rows with NaN values created by lagging
+  df = df.dropna()
+
+  y_out = df["y"]
+  X_out = df.drop(columns=["y"])
+  return X_out, y_out
+
+
+# 2. Build ML feature matrices for train and test periods
+X_train_ml, y_train_ml = build_ml_dataset_weather(
+    train_df, target_col, exog_cols, max_lags=24
+)
+X_test_ml, y_test_ml = build_ml_dataset_weather(
+    test_df, target_col, exog_cols, max_lags=24
+)
+
+# 3. Take the train and test subsets
+train_window = 28 * 24
+X_tr_sub = X_train_ml.tail(train_window).asfreq("h")
+y_tr_sub = y_train_ml.tail(train_window).asfreq("h")
+
+test_window = 168
+X_te_sub = X_test_ml.loc[X_test_ml.index.isin(y_test.head(test_window).index)].asfreq("h")
+y_te_sub = y_test_ml.loc[y_test_ml.index.isin(y_test.head(test_window).index)].asfreq("h")
 
 
 ```
 :::
 
 
+::: {.panel-tabset}
+## R
+```{r ml_weather_train_r}
+
+
+```
+
+## Python
+```{python ml_weather_train_py}
+
+# 4. Train the Random Forest Regressor
+rf_model_weather = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_model_weather.fit(X_tr_sub, y_tr_sub)
+
+# 5. Predict and Evaluate
+rf_preds_weather = pd.Series(rf_model_weather.predict(X_te_sub), index=X_te_sub.index)
+
+rf_rmse_weather = np.sqrt(mean_squared_error(y_te_sub, rf_preds_weather))
+rf_mae_weather = mean_absolute_error(y_te_sub, rf_preds_weather)
+
+print(
+    f"Random Forest ML Pipeline (1-week test) -> RMSE: {rf_rmse_weather:.2f},"
+    f" MAE: {rf_mae_weather:.2f}"
+)
+
+```
+:::
+
+::: {.panel-tabset}
+## R
+```{r ml_weather_viz_r}
+
+
+```
+
+## Python
+```{python ml_weather_viz_py}
+
+# Define models dictionary
+forecasts = {
+    "SARIMA": sarima_preds,
+    "SARIMAX": sarimax_preds,
+    "Random Forest": rf_preds,
+    "Random Forest + Weather": rf_preds_weather
+}
+
+# Styles
+model_styles = {
+    "SARIMA": {
+        "color": "#2ca02c",  # green
+        "linestyle": "--",
+        "linewidth": 1.75,
+        "alpha": 0.85,
+    },
+    "SARIMAX": {
+        "color": "#1f77b4",  # blue
+        "linestyle": "-.",
+        "linewidth": 1.75,
+        "alpha": 0.85,
+    },
+    "Random Forest": {
+        "color": "#9467bd",  # purple
+        "linestyle": "-",
+        "linewidth": 2.2, 
+        "alpha": 0.85,
+    },
+    "Random Forest + Weather": {
+        "color": "#F03405",  # 
+        "linestyle": "-.",
+        "linewidth": 1.75, 
+        "alpha": 0.9,
+    }
+}
+
+# Set up canvas with clean proportions
+fig, ax = plt.subplots(figsize=(14, 5.5), dpi=100)
+
+train_history_hours = 24  
+test_forecast_hours = 168
+
+train_history = y_train.tail(train_history_hours)
+true_test_subset = y_test.head(test_forecast_hours)
+
+# Plot Training History subtly (lighter grey)
+ax.plot(
+    train_history.index,
+    train_history.values,
+    label="Training History (Last 24h)",
+    color="gray",
+    linewidth=1.2,
+    alpha=0.6,
+)
+
+# Plot True Test Values as a bold, clean reference line
+ax.plot(
+    true_test_subset.index,
+    true_test_subset.values,
+    label="True Test Values",
+    color="#222222",
+    linewidth=2,
+    alpha=0.8,
+    zorder=5,
+)
+
+# Loop and plot all models with reindexing to handle lag offsets smoothly
+for label, pred_series in forecasts.items():
+  aligned_preds = pred_series.reindex(true_test_subset.index)
+  style = model_styles.get(label, {})
+
+  ax.plot(
+      true_test_subset.index,
+      aligned_preds,
+      label=label,
+      color=style.get("color"),
+      linestyle=style.get("linestyle", "-"),
+      linewidth=style.get("linewidth", 1.5),
+      alpha=style.get("alpha", 1.0),
+  )
+
+# Vertical line separating train from test
+ax.axvline(
+    x=true_test_subset.index[0],
+    color="#d62728",
+    linestyle=":",
+    linewidth=1.5,
+    alpha=0.7,
+    label="Forecast Start",
+)
+
+# Formatting and aesthetics
+ax.set_title(
+    "Vancouver PM₂.₅ Forecasting: Statistical vs. Machine Learning Models",
+    fontsize=13,
+    fontweight="bold",
+    pad=12,
+)
+ax.set_xlabel("Time", fontsize=10)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
+ax.legend(loc="upper left",
+    frameon=True,
+    facecolor="white",
+    framealpha=0.95,
+    edgecolor="lightgrey",
+    fontsize=8,)
+
+fig.autofmt_xdate(rotation=45, ha="right")
+fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+plt.show()
+
+```
+:::
+
+There is a slight improvement in RMSE and MAE with the addition of weather explanatory variables (2.49 to 2.45 and 1.80 to 1.75 respectively), but visually, we cannot see much difference between the two random forest predictions. This indicates that, while adding extra context may help a little, really it is the flexibility and power of the random forests that is responsible for our accurate predictions here. 
+
+### Discussion
+
+This case study set out to analyze and forecast hourly air quality ($\text{PM}_{2.5}$) in Vancouver, exploring how different modeling approaches handle complex environmental data. We began with simple baselines (e.g. mean and drift), then moved to classical statistical models like $\text{ARIMA}(1, 1, 1)$ and automated SARIMA configurations, before ending off with a machine learning Random Forest Regressor with lagged features (e.g. $t-1$ and $t-24$). Our findings revealed a clear hierarchy in performance: while classical statistical models provided a stable and interpretable foundation, the Random Forest model outperformed them all, achieving the lowest out-of-sample error metrics (an RMSE of 2.49 and an MAE of 1.80) and visually tracking true test values with good precision. We also tested adding external weather variables to our models, and observed a slight additional improvement in our results.
+
+The Random Forest model's success stems from its unique blend of ensemble learning and feature engineering, which allows it to capture complex, non-linear interactions and short-term momentum without being derailed by environmental noise. It excelled particularly at capturing sharp diurnal pollution spikes that simpler models tended to smooth out. However, this high predictive accuracy comes with a trade-off: unlike the transparent parameters of ARIMA, the random forest operates more as a "black box," offering less insight into the exact mathematical weights of individual drivers, therefore limiting their interpretability.
+
+Despite this limitation, this case study underscores the vital role of robust time-series modeling in environmental science. By accurately anticipating pollution dynamics, agencies and urban planners can gain actionable foresight to issue timely public health advisories, track localized emission trends, and design data-driven strategies for cleaner air.
 
 
 
