@@ -55,12 +55,13 @@ Through time-series modeling, performance evaluation, and comparative visualizat
 ## R
 ```{r load-libraries_r, results = "hide", warning = FALSE, message = FALSE}
 
-# Core libraries
+# Core/Model libraries
 library(httr)
 library(jsonlite)
 library(dplyr)
 library(lubridate)
-
+library(forecast)
+library(randomForest)
 
 # Plots & tables
 library(patchwork)
@@ -235,7 +236,8 @@ ggplot(sample_slice, aes(x = time)) +
     plot.title = element_text(face = "bold", size = 14),
     axis.text.x = element_text(angle = 45, hjust = 1),
     legend.position = "top",
-    panel.grid.major = element_line(linetype = "dashed")
+    panel.grid.major = element_line(linetype = "dashed"),
+    panel.border = element_rect(color = "darkgrey", fill = NA, linewidth = 0.8) 
   )
 
 ```
@@ -332,7 +334,8 @@ p1 <- ggplot(df_1, aes(x = hour)) +
   theme_minimal() +
   theme(
     plot.title = element_text(face = "bold"),
-    panel.grid.major = element_line(linetype = "dashed")
+    panel.grid.major = element_line(linetype = "dashed"),
+    panel.border = element_rect(color = "darkgrey", fill = NA, linewidth = 0.8) 
   )
 
 # --- PLOT 2: Weekend ---
@@ -359,7 +362,8 @@ p2 <- ggplot(df_2, aes(x = hour)) +
   theme_minimal() +
   theme(
     plot.title = element_text(face = "bold"),
-    panel.grid.major = element_line(linetype = "dashed")
+    panel.grid.major = element_line(linetype = "dashed"),
+    panel.border = element_rect(color = "darkgrey", fill = NA, linewidth = 0.8) 
   )
 
 # --- Combine Side-by-Side with Shared Legend ---
@@ -506,7 +510,8 @@ p1 <- ggplot() +
   theme(
     plot.title = element_text(face = "bold", size = 13),
     panel.grid.major = element_line(linetype = "dashed"),
-    legend.position = c(0.82, 0.9)
+    legend.position = c(0.82, 0.9),
+    panel.border = element_rect(color = "darkgrey", fill = NA, linewidth = 0.8) 
   )
 
 # --- PLOT 2: Weekend Variability ---
@@ -530,7 +535,8 @@ p2 <- ggplot() +
   theme(
     plot.title = element_text(face = "bold", size = 13),
     panel.grid.major = element_line(linetype = "dashed"),
-    legend.position = c(0.82, 0.9)
+    legend.position = c(0.82, 0.9),
+    panel.border = element_rect(color = "darkgrey", fill = NA, linewidth = 0.8) 
   )
 
 # --- Combine Side-by-Side ---
@@ -638,6 +644,27 @@ We need to split our data into a training and a test set for validation. We will
 ## R
 ```{r data_split_r}
 
+# Slice the baseline period
+baseline_slice <- df |>
+  filter(time >= "2024-03-01" & time <= "2025-05-31")
+
+cutoff_date <- as.Date("2025-03-01")
+
+# Split into train and test
+train_df <- baseline_slice |> filter(time < cutoff_date)
+test_df <- baseline_slice |> filter(time >= cutoff_date)
+
+cat("Training set:", nrow(train_df), "rows\n")
+cat("Testing set:", nrow(test_df), "rows\n")
+
+# Define target column
+target_col <- "pm2_5"
+
+# Extract target vectors
+y_train <- train_df[[target_col]]
+y_test <- test_df[[target_col]]
+
+forecast_idx <- test_df$time
 
 ```
 
@@ -672,6 +699,129 @@ We will begin with an average forecast which, as its name suggests, predicts the
 ## R
 ```{r baseline_r}
 
+# 1. Compute Forecasts
+# Average forecast
+avg_forecast <- data.frame(
+  time = forecast_idx,
+  y = mean(y_train, na.rm = TRUE),
+  Label = "Average"
+)
+
+# Naive forecast (using the last value of y_train)
+naive_forecast <- data.frame(
+  time = forecast_idx,
+  y = tail(y_train, 1),
+  Label = "Naive"
+)
+
+# Seasonally-adjusted forecast (period = 24 for hourly daily seasonality)
+ts_train <- ts(y_train, frequency = 24)
+decomposition <- decompose(ts_train, type = "additive")
+
+# Seasonally adjusted series (subtracting the seasonal component)
+seasonally_adjusted_train <- y_train - decomposition$seasonal
+last_trend_value <- tail(seasonally_adjusted_train, 1)
+
+seasonally_adjusted_forecast <- data.frame(
+  time = forecast_idx,
+  y = as.numeric(last_trend_value), # Ensure it's a clean scalar for recycling
+  Label = "Seasonally Adjusted"
+)
+
+# Combine all baselines into one data frame
+all_baselines <- bind_rows(avg_forecast, naive_forecast, seasonally_adjusted_forecast)
+
+# 2. Define display windows and slice subsets
+train_history_hours <- 24  
+test_forecast_hours <- 168 
+
+# Slice history and future test subsets for visualization
+train_history_df <- train_df |> 
+  tail(train_history_hours) |> 
+  select(time, y = !!sym(target_col)) |> 
+  mutate(Series = "Training History")
+
+true_test_subset <- test_df |> 
+  head(test_forecast_hours) |> 
+  select(time, y = !!sym(target_col)) |> 
+  mutate(Series = "True Test Values")
+
+forecast_subset_index <- true_test_subset$time
+transition_time <- forecast_subset_index[1]
+
+# Filter baselines to match the exact forecast subset index window
+plot_baselines <- all_baselines |> 
+  filter(time %in% forecast_subset_index) |> 
+  mutate(Series = Label)
+
+# 3. Plotting with explicit legend ordering
+ggplot() +
+  # Plot Training History
+  geom_line(
+    data = train_history_df, 
+    aes(x = time, y = y, color = Series), 
+    linewidth = 1, 
+    alpha = 0.6
+  ) +
+  # Plot True Test Values (Zoomed subset)
+  geom_line(
+    data = true_test_subset, 
+    aes(x = time, y = y, color = Series), 
+    linewidth = 1.2, 
+    alpha = 0.9
+  ) +
+  # Plot Baseline Forecasts restricted to the subset window
+  geom_line(
+    data = plot_baselines,
+    aes(x = time, y = y, color = Label, linetype = Label),
+    linewidth = 1,
+    alpha = 0.8
+  ) +
+  # Vertical transition line
+  geom_vline(
+    xintercept = transition_time, 
+    color = "red", 
+    linetype = "dotted", 
+    linewidth = 0.8, 
+    alpha = 0.6
+  ) +
+  # Custom colors with explicit breaks order
+  scale_color_manual(
+    name = NULL,
+    breaks = c("Training History", "True Test Values", "Average", "Naive", "Seasonally Adjusted"),
+    values = c(
+      "Training History" = "gray",
+      "True Test Values" = "#222222",
+      "Average" = "darkgreen",
+      "Naive" = "blue",
+      "Seasonally Adjusted" = "darkorange"
+    )
+  ) +
+  scale_linetype_manual(
+    name = NULL,
+    values = c(
+      "Average" = "dashed",
+      "Naive" = "dotted",
+      "Seasonally Adjusted" = "dashed"
+    ),
+    guide = "none"
+  ) +
+  labs(
+    title = expression(bold(paste(PM[2.5], " Baseline Models: Training History & Test Forecast"))),
+    x = "Time",
+    y = expression(paste(PM[2.5], " (", mu, "g/m"^3, ")"))
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(size = 12),
+    legend.position = "bottom",
+    legend.box = "horizontal",
+    legend.margin = margin(t = 0, r = 0, b = 0, l = 0),
+    legend.background = element_rect(fill = "white", color = NA),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(color = "darkgrey", fill = NA, linewidth = 0.8) 
+  ) +
+  guides(color = guide_legend(nrow = 2, override.aes = list(linetype = c("solid", "solid", "dashed", "dotted", "dashed"))))
 
 ```
 
@@ -802,7 +952,7 @@ ax.set_title(
     fontsize=12,
     fontweight="bold",
 )
-ax.set_xlabel("Time (Local)", fontsize=10)
+ax.set_xlabel("Time", fontsize=10)
 ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
 ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
 ax.legend(
@@ -831,6 +981,130 @@ There are two more baseline models to try. First, we have the seasonal naive for
 ## R
 ```{r baseline2_r}
 
+# 1. Compute Seasonal Naive and Drift Forecasts
+# Seasonal Naive: Map the last 24 hours of training data to repeat based on hour of day
+last_season_values <- tail(y_train, 24)
+
+# Extract hour (0-23) for each forecast index and index into the last 24 values (R is 1-indexed, so add 1 to hour)
+seasonal_naive_values <- last_season_values[(hour(forecast_idx) %% 24) + 1]
+
+seasonal_naive <- data.frame(
+  time = forecast_idx,
+  y = as.numeric(seasonal_naive_values),
+  Label = "Seasonal Naive"
+)
+
+# Drift Forecast
+last_val <- tail(y_train, 1)
+first_val <- head(y_train, 1)
+n_train <- length(y_train)
+
+# Calculate average change per step in the training set
+slope <- (last_val - first_val) / (n_train - 1)
+
+# Generate drift values growing linearly across the forecast index steps (1 to length)
+steps <- seq_along(forecast_idx)
+drift_values <- last_val + (slope * steps)
+
+drift_forecast <- data.frame(
+  time = forecast_idx,
+  y = as.numeric(drift_values),
+  Label = "Drift"
+)
+
+# Combine baselines into one collection
+all_baselines <- bind_rows(seasonal_naive, drift_forecast)
+
+# 2. Define display windows and slice subsets
+train_history_hours <- 24  
+test_forecast_hours <- 168 
+
+# Slice history and future test subsets for visualization
+train_history_df <- train_df |> 
+  tail(train_history_hours) |> 
+  select(time, y = !!sym(target_col)) |> 
+  mutate(Series = "Training History")
+
+true_test_subset <- test_df |> 
+  head(test_forecast_hours) |> 
+  select(time, y = !!sym(target_col)) |> 
+  mutate(Series = "True Test Values")
+
+forecast_subset_index <- true_test_subset$time
+transition_time <- forecast_subset_index[1]
+
+# Filter baselines to match the exact forecast subset index window
+plot_baselines <- all_baselines |> 
+  filter(time %in% forecast_subset_index)
+
+# 3. Plotting with ggplot2
+ggplot() +
+  # Plot Training History
+  geom_line(
+    data = train_history_df, 
+    aes(x = time, y = y, color = Series, linetype = Series), 
+    linewidth = 1, 
+    alpha = 0.6
+  ) +
+  # Plot True Test Values (Zoomed subset)
+  geom_line(
+    data = true_test_subset, 
+    aes(x = time, y = y, color = Series, linetype = Series), 
+    linewidth = 1.2, 
+    alpha = 0.9
+  ) +
+  # Plot Baseline Forecasts restricted to the subset window
+  geom_line(
+    data = plot_baselines,
+    aes(x = time, y = y, color = Label, linetype = Label),
+    linewidth = 1,
+    alpha = 0.8
+  ) +
+  # Vertical transition line
+  geom_vline(
+    xintercept = transition_time, 
+    color = "red", 
+    linetype = "dotted", 
+    linewidth = 0.8, 
+    alpha = 0.6
+  ) +
+  # Custom colors mapping (using turquoise3 as requested)
+  scale_color_manual(
+    name = NULL,
+    breaks = c("Training History", "True Test Values", "Seasonal Naive", "Drift"),
+    values = c(
+      "Training History" = "gray",
+      "True Test Values" = "#222222",
+      "Seasonal Naive" = "turquoise3",
+      "Drift" = "hotpink3"
+    )
+  ) +
+  scale_linetype_manual(
+    name = NULL,
+    values = c(
+      "Training History" = "solid",
+      "True Test Values" = "solid",
+      "Seasonal Naive" = "solid",
+      "Drift" = "dotdash"
+    ),
+    guide = "none"
+  ) +
+  labs(
+    title = expression(bold(paste(PM[2.5], " Baseline Models: Training History & Test Forecast"))),
+    x = "Time",
+    y = expression(paste(PM[2.5], " (", mu, "g/m"^3, ")"))
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", size = 12),
+    legend.position = "bottom",
+    legend.box = "horizontal",
+    legend.margin = margin(t = 0, r = 0, b = 0, l = 0),
+    legend.background = element_rect(fill = "white", color = NA),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(color = "darkgrey", fill = NA, linewidth = 0.8) 
+  ) +
+  guides(color = guide_legend(nrow = 2, override.aes = list(linetype = c("solid", "solid", "solid", "dotdash"))))
 
 ```
 
@@ -986,6 +1260,46 @@ Beyond just visual evaluation, we can also evaluate our predictions numerically 
 ## R
 ```{r baseline_error_r}
 
+# 1. Collect all baseline DataFrames into one collection
+all_baselines <- bind_rows(
+  avg_forecast,
+  naive_forecast,
+  seasonally_adjusted_forecast,
+  seasonal_naive,
+  drift_forecast
+)
+
+# 2. Evaluate model performance across unique labels
+evaluation_results <- list()
+
+for (lbl in unique(all_baselines$Label)) {
+  # Filter by model label and align predictions with y_test based on timestamp
+  model_df <- all_baselines |> filter(Label == lbl)
+  
+  # Align predictions with y_test index (using time matching)
+  aligned_preds <- model_df$y[match(forecast_idx, model_df$time)]
+  
+  # Calculate RMSE and MAE (ignoring any potential NAs)
+  residuals <- y_test - aligned_preds
+  rmse <- sqrt(mean(residuals^2, na.rm = TRUE))
+  mae <- mean(abs(residuals), na.rm = TRUE)
+  
+  evaluation_results[[lbl]] <- data.frame(
+    Model = lbl,
+    RMSE = rmse,
+    MAE = mae
+  )
+}
+
+# 3. Combine into a final performance results data frame
+results_df <- bind_rows(evaluation_results) |> 
+  mutate(
+    RMSE = round(RMSE, 2),
+    MAE = round(MAE, 2)
+  )
+
+cat("\n--- Baseline Model Performance Evaluation ---\n")
+print(results_df, row.names = FALSE)
 
 ```
 
@@ -1049,6 +1363,29 @@ We begin with a standard **$\text{ARIMA}(1, 1, 1)$** baseline. The parameters $(
 ## R
 ```{r arima_r}
 
+# Get train subset
+train_subset_vals <- tail(y_train, 28 * 24)
+
+# Fit the model
+arima_model <- arima(train_subset_vals, order = c(1, 1, 1))
+
+# Forecast over a test slice of y_test (first week / 168 steps)
+steps_to_forecast <- length(head(y_test, 168))
+forecast_obj <- predict(arima_model, n.ahead = steps_to_forecast)
+arima_preds <- forecast_obj$pred
+
+# Align index with the first 168 steps of test data
+forecast_subset_test <- head(test_df, steps_to_forecast)
+arima_preds_time <- forecast_subset_test$time
+arima_preds_vals <- as.numeric(arima_preds)
+
+# Calculate evaluation metrics
+actuals <- head(y_test, steps_to_forecast)
+residuals <- actuals - arima_preds_vals
+arima_rmse <- sqrt(mean(residuals^2, na.rm = TRUE))
+arima_mae <- mean(abs(residuals), na.rm = TRUE)
+
+cat(sprintf("ARIMA(1,1,1) (1-week test) -> RMSE: %.2f, MAE: %.2f\n", arima_rmse, arima_mae))
 
 ```
 
@@ -1081,6 +1418,30 @@ We can see that the errors are about on par with those of our best baseline mode
 ## R
 ```{r sarima_r}
 
+steps_to_forecast <- length(head(y_test, 168))
+
+# Fit SARIMA with daily seasonality (s=24) using base R arima()
+# order = c(p, d, q), seasonal = list(order = c(P, D, Q), period = s)
+sarima_model <- arima(
+  train_subset_vals, 
+  order = c(1, 1, 1), 
+  seasonal = list(order = c(1, 1, 1), period = 24)
+)
+
+# Generate forecasts
+forecast_obj <- predict(sarima_model, n.ahead = steps_to_forecast)
+sarima_preds <- forecast_obj$pred
+
+# Align predictions and evaluate performance
+forecast_subset_test <- head(test_df, steps_to_forecast)
+sarima_preds_vals <- as.numeric(sarima_preds)
+
+actuals <- head(y_test, steps_to_forecast)
+residuals <- actuals - sarima_preds_vals
+sarima_rmse <- sqrt(mean(residuals^2, na.rm = TRUE))
+sarima_mae <- mean(abs(residuals), na.rm = TRUE)
+
+cat(sprintf("SARIMA(1,1,1)x(1,1,1,24) (1-week test) -> RMSE: %.2f, MAE: %.2f\n", sarima_rmse, sarima_mae))
 
 ```
 
@@ -1126,6 +1487,40 @@ Let's also try an Auto-ARIMA model, where we allow the model to select the order
 ## R
 ```{r auto_arima_r}
 
+# Fit Auto-ARIMA with daily seasonality (m=24)
+# auto.arima handles seasonal search when seasonal = TRUE and frequency = 24
+# First convert train_subset_vals into a ts object with frequency 24
+train_ts <- ts(train_subset_vals, frequency = 24)
+
+auto_model <- auto.arima(
+  train_ts,
+  seasonal = TRUE,
+  d = NA,          # Let it automatically select differencing order
+  max.p = 3,
+  max.q = 3,
+  max.P = 2,
+  max.Q = 2,
+  trace = TRUE,
+  stepwise = TRUE
+)
+
+cat("\nBest Model Found:", arimaorder(auto_model), "\n")
+
+# Forecast over the test slice (1-week / 168 steps)
+steps_to_forecast <- length(head(y_test, 168))
+forecast_obj <- forecast(auto_model, h = steps_to_forecast)
+auto_preds <- forecast_obj$mean
+
+# Evaluate Auto-ARIMA Performance
+forecast_subset_test <- head(test_df, steps_to_forecast)
+auto_preds_vals <- as.numeric(auto_preds)
+
+actuals <- head(y_test, steps_to_forecast)
+residuals <- actuals - auto_preds_vals
+auto_rmse <- sqrt(mean(residuals^2, na.rm = TRUE))
+auto_mae <- mean(abs(residuals), na.rm = TRUE)
+
+cat(sprintf("Auto-SARIMA (1-week test) -> RMSE: %.2f, MAE: %.2f\n", auto_rmse, auto_mae))
 
 ```
 
@@ -1175,6 +1570,37 @@ We can see that Auto-ARIMA selected ARIMA(1, 1, 3) (1, 0, 1, 24). Let's compare 
 ## R
 ```{r arima_error_r}
 
+# 1. List/Dictionary mapping model names to their prediction values
+models <- list(
+  "ARIMA (1,1,1)" = arima_preds_vals,
+  "SARIMA (1,1,1)x(1,1,1,24)" = sarima_preds_vals,
+  "Auto ARIMA" = auto_preds_vals
+)
+
+results <- list()
+
+# 2. Loop through each model name and prediction vector
+actuals <- head(y_test, steps_to_forecast)
+
+for (name in names(models)) {
+  preds <- models[[name]]
+  
+  residuals <- actuals - preds
+  rmse <- sqrt(mean(residuals^2, na.rm = TRUE))
+  mae <- mean(abs(residuals), na.rm = TRUE)
+  
+  results[[name]] <- data.frame(
+    Model = name,
+    RMSE = round(rmse, 2),
+    MAE = round(mae, 2)
+  )
+}
+
+# 3. Convert to a data frame for clean tabular printing
+results_df <- bind_rows(results)
+
+cat("\n--- Model Performance Comparison ---\n")
+print(results_df, row.names = FALSE)
 
 ```
 
@@ -1217,6 +1643,112 @@ Let's visualize our predictions for these three models, to get an intuitive unde
 ## R
 ```{r arima_viz_r}
 
+# 1. Prepare dataframes for plotting
+train_history_hours <- 48
+test_forecast_hours <- 168
+
+train_history_df <- train_df |> 
+  tail(train_history_hours) |> 
+  select(time, y = !!sym(target_col)) |> 
+  mutate(Series = "Training History")
+
+true_test_subset <- test_df |> 
+  head(test_forecast_hours) |> 
+  select(time, y = !!sym(target_col)) |> 
+  mutate(Series = "True Test Values")
+
+forecast_subset_index <- true_test_subset$time
+transition_time <- forecast_subset_index[1]
+
+# Combine ARIMA predictions into a data frame matching the test subset
+arima_forecasts_df <- bind_rows(
+  data.frame(time = forecast_subset_index, 
+             y = as.numeric(head(arima_preds, test_forecast_hours)), 
+             Label = "ARIMA(1,1,1)"),
+  data.frame(time = forecast_subset_index, 
+             y = as.numeric(head(auto_preds, test_forecast_hours)), 
+             Label = "Auto-ARIMA"),
+  data.frame(time = forecast_subset_index, 
+             y = as.numeric(head(sarima_preds, test_forecast_hours)), 
+             Label = "SARIMA(1,1,1)x(1,1,1,24)")
+)
+
+# 2. Plotting with ggplot2
+ggplot() +
+  # Plot Training History
+  geom_line(
+    data = train_history_df, 
+    aes(x = time, y = y, color = Series, linetype = Series), 
+    linewidth = 1, 
+    alpha = 0.8
+  ) +
+  # Plot True Test Values
+  geom_line(
+    data = true_test_subset, 
+    aes(x = time, y = y, color = Series, linetype = Series), 
+    linewidth = 1.2, 
+    alpha = 0.9
+  ) +
+  # Plot ARIMA / SARIMA Forecasts
+  geom_line(
+    data = arima_forecasts_df,
+    aes(x = time, y = y, color = Label, linetype = Label),
+    linewidth = 1,
+    alpha = 0.8
+  ) +
+  # Vertical transition line
+  geom_vline(
+    xintercept = transition_time, 
+    color = "#d62728", 
+    linetype = "dashed", 
+    linewidth = 1.2, 
+    alpha = 0.7
+  ) +
+  # Custom colors mapping
+  scale_color_manual(
+    name = NULL,
+    breaks = c("Training History", 
+               "True Test Values", 
+               "ARIMA(1,1,1)", 
+               "Auto-ARIMA", 
+               "SARIMA(1,1,1)x(1,1,1,24)"),
+    values = c(
+      "Training History" = "gray",
+      "True Test Values" = "black",
+      "ARIMA(1,1,1)" = "#ff7f0e",
+      "Auto-ARIMA" = "#1f77b4",
+      "SARIMA(1,1,1)x(1,1,1,24)" = "#2ca02c"
+    )
+  ) +
+  scale_linetype_manual(
+    name = NULL,
+    values = c(
+      "Training History" = "solid",
+      "True Test Values" = "solid",
+      "ARIMA(1,1,1)" = "dotted",
+      "Auto-ARIMA" = "dashed",
+      "SARIMA(1,1,1)x(1,1,1,24)" = "solid"
+    ),
+    guide = "none"
+  ) +
+  labs(
+    title = expression(bold(paste(PM[2.5], " Forecasting: ARIMA vs. SARIMA vs. ML Models"))),
+    x = "Time",
+    y = expression(paste(PM[2.5], " (", mu, "g/m"^3, ")"))
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", size = 12),
+    legend.position = "bottom",
+    legend.box = "horizontal",
+    legend.margin = margin(t = 0, r = 0, b = 0, l = 0),
+    legend.background = element_rect(fill = "white", color = NA),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(color = "darkgrey", fill = NA, linewidth = 0.8) 
+  ) +
+  guides(color = guide_legend(nrow = 2, 
+                              override.aes = list(
+                                linetype = c("solid", "solid", "dotted", "dashed", "solid"))))
 
 ```
 
@@ -1337,6 +1869,43 @@ Another approach is to use SARIMAX, where we add explanatory variables to our SA
 ## R
 ```{r weather_r}
 
+# 1. Define location and time window
+latitude <- 49.2827
+longitude <- -123.1207
+start_date <- "2024-03-01"
+end_date <- "2025-05-31"
+
+# 2. Query Open-Meteo's Archive API using query parameters list
+url <- "https://archive-api.open-meteo.com/v1/archive"
+params <- list(
+  latitude = latitude,
+  longitude = longitude,
+  start_date = start_date,
+  end_date = end_date,
+  hourly = c("temperature_2m", "relative_humidity_2m", "precipitation", "cloud_cover", "wind_speed_10m", "wind_speed_100m")
+)
+
+# fromJSON handles query lists natively when constructed via httr or passed correctly,
+# or we can build the URL string safely using paste()
+query_string <- paste0(
+  url, "?latitude=", latitude,
+  "&longitude=", longitude,
+  "&start_date=", start_date,
+  "&end_date=", end_date,
+  "&hourly=temperature_2m,relative_humidity_2m,precipitation,cloud_cover,wind_speed_10m,wind_speed_100m"
+)
+
+data <- fromJSON(query_string)
+
+# 3. Parse hourly payload into a data frame (using ymd_hm for ISO strings with 'T')
+hourly_df <- as.data.frame(data$hourly) |> 
+  mutate(time = ymd_hm(time))
+
+# Join the weather data to the air quality data on the time column
+combined_df <- df |> 
+  inner_join(hourly_df, by = "time")
+
+head(combined_df)
 
 ```
 
@@ -1399,6 +1968,59 @@ Next let's train and test our SARIMAX model, using the following as explanatory 
 ## R
 ```{r sarimax_r}
 
+# 1. List weather/temperature feature columns and set up train/test slices
+target_col <- "pm2_5"
+
+exog_cols <- c(
+  "temperature_2m", 
+  "relative_humidity_2m", 
+  "precipitation", 
+  "cloud_cover", 
+  "wind_speed_10m",
+  "wind_speed_100m"
+)
+
+cutoff_date <- as.POSIXct("2025-03-01", tz = "UTC") 
+
+slice_df <- combined_df |> 
+  filter(time >= as.POSIXct("2024-03-01", tz = "UTC") & time <= as.POSIXct("2025-05-31", tz = "UTC"))
+
+train_df <- slice_df |> filter(time < cutoff_date)
+test_df <- slice_df |> filter(time >= cutoff_date)
+
+# Training subsets (last 28 days)
+train_window <- 28 * 24
+train_subset_df <- train_df |> tail(train_window)
+
+y_train_subset <- train_subset_df[[target_col]]
+X_train_subset <- as.matrix(train_subset_df |> select(all_of(exog_cols)))
+
+# Test forecast subsets (first 168 hours)
+test_window <- 168
+test_subset_df <- test_df |> head(test_window)
+
+y_test_subset <- test_subset_df[[target_col]]
+X_test_subset <- as.matrix(test_subset_df |> select(all_of(exog_cols)))
+
+# 2. Fit SARIMAX (using xreg for exogenous variables in base R arima)
+sarimax_model <- arima(
+  x = y_train_subset,
+  order = c(1, 1, 1),
+  seasonal = list(order = c(1, 1, 1), period = 24),
+  xreg = X_train_subset
+)
+
+# 3. Forecast using the test exogenous features
+forecast_obj <- predict(sarimax_model, n.ahead = length(y_test_subset), newxreg = X_test_subset)
+sarimax_preds <- forecast_obj$pred
+
+# Evaluate the SARIMAX performance
+sarimax_preds_vals <- as.numeric(sarimax_preds)
+residuals <- y_test_subset - sarimax_preds_vals
+sarimax_rmse <- sqrt(mean(residuals^2, na.rm = TRUE))
+sarimax_mae <- mean(abs(residuals), na.rm = TRUE)
+
+cat(sprintf("SARIMAX with Weather (1-week test) -> RMSE: %.2f, MAE: %.2f\n", sarimax_rmse, sarimax_mae))
 
 ```
 
@@ -1476,6 +2098,111 @@ Let's visualize our SARIMAX results along with the ARIMA and SARIMA models.
 ## R
 ```{r sarimax_viz_r}
 
+# 1. Prepare dataframes for plotting
+train_history_hours <- 24
+test_forecast_hours <- 168
+
+train_history_df <- train_df |> 
+  tail(train_history_hours) |> 
+  select(time, y = !!sym(target_col)) |> 
+  mutate(Series = "Training History")
+
+true_test_subset <- test_df |> 
+  head(test_forecast_hours) |> 
+  select(time, y = !!sym(target_col)) |> 
+  mutate(Series = "True Test Values")
+
+forecast_subset_index <- true_test_subset$time
+transition_time <- forecast_subset_index[1]
+
+# Combine all ARIMA, SARIMA, and SARIMAX predictions into a data frame
+arima_forecasts_df <- bind_rows(
+  data.frame(time = forecast_subset_index, 
+             y = as.numeric(head(arima_preds, test_forecast_hours)), 
+             Label = "ARIMA(1,1,1)"),
+  data.frame(time = forecast_subset_index, 
+             y = as.numeric(head(auto_preds, test_forecast_hours)), 
+             Label = "Auto-ARIMA"),
+  data.frame(time = forecast_subset_index, 
+             y = as.numeric(head(sarima_preds, test_forecast_hours)), 
+             Label = "SARIMA(1,1,1)x(1,1,1,24)"),
+  data.frame(time = forecast_subset_index, 
+             y = as.numeric(head(sarimax_preds, test_forecast_hours)), 
+             Label = "SARIMAX")
+)
+
+# 2. Plotting with ggplot2
+ggplot() +
+  # Plot Training History
+  geom_line(
+    data = train_history_df, 
+    aes(x = time, y = y, color = Series, linetype = Series), 
+    linewidth = 1, 
+    alpha = 0.6
+  ) +
+  # Plot True Test Values
+  geom_line(
+    data = true_test_subset, 
+    aes(x = time, y = y, color = Series, linetype = Series), 
+    linewidth = 1.4, 
+    alpha = 0.8
+  ) +
+  # Plot Model Forecasts
+  geom_line(
+    data = arima_forecasts_df,
+    aes(x = time, y = y, color = Label, linetype = Label),
+    linewidth = 1,
+    alpha = 0.85
+  ) +
+  # Vertical transition line
+  geom_vline(
+    xintercept = transition_time, 
+    color = "#d62728", 
+    linetype = "dotted", 
+    linewidth = 0.8, 
+    alpha = 0.7
+  ) +
+  # Custom colors mapping
+  scale_color_manual(
+    name = NULL,
+    breaks = c("Training History", "True Test Values", "ARIMA(1,1,1)", "Auto-ARIMA", "SARIMA(1,1,1)x(1,1,1,24)", "SARIMAX"),
+    values = c(
+      "Training History" = "gray",
+      "True Test Values" = "#222222",
+      "ARIMA(1,1,1)" = "#ff7f0e",
+      "Auto-ARIMA" = "#1f77b4",
+      "SARIMA(1,1,1)x(1,1,1,24)" = "#2ca02c",
+      "SARIMAX" = "#4A148C"
+    )
+  ) +
+  scale_linetype_manual(
+    name = NULL,
+    values = c(
+      "Training History" = "solid",
+      "True Test Values" = "solid",
+      "ARIMA(1,1,1)" = "dotted",
+      "Auto-ARIMA" = "dashed",
+      "SARIMA(1,1,1)x(1,1,1,24)" = "solid",
+      "SARIMAX" = "dotdash"
+    ),
+    guide = "none"
+  ) +
+  labs(
+    title = expression(bold(paste(PM[2.5], " Forecasting: ARIMA vs. SARIMA vs. SARIMAX Models"))),
+    x = "Time",
+    y = expression(paste(PM[2.5], " (", mu, "g/m"^3, ")"))
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", size = 12),
+    legend.position = "bottom",
+    legend.box = "horizontal",
+    legend.margin = ggplot2::margin(t = 0, r = 0, b = 0, l = 0),
+    legend.background = element_rect(fill = "white", color = NA),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(color = "darkgrey", fill = NA, linewidth = 0.8)
+  ) +
+  guides(color = guide_legend(nrow = 2, override.aes = list(linetype = c("solid", "solid", "dashed", "dashed", "dashed", "dotdash"))))
 
 ```
 
@@ -1493,25 +2220,25 @@ arima_forecasts = {
 # Styles for the dedicated plot
 arima_styles = {
     "ARIMA(1,1,1)": {
-        "color": "firebrick",
+        "color": "#ff7f0e",
         "linestyle": "--",
-        "linewidth": 1.75,
+        "linewidth": 1.5,
         "alpha": 0.85,
     },
     "Auto-ARIMA": {
-        "color": "purple",
+        "color": "#1f77b4",
         "linestyle": "--",
-        "linewidth": 1.75,
+        "linewidth": 1.5,
         "alpha": 0.85,
     },
     "SARIMA(1,1,1)x(1,1,1,24)": {
         "color": "#2ca02c",  # green
-        "linestyle": "--",
+        "linestyle": "-",
         "linewidth": 1.75,
         "alpha": 0.85,
     },
     "SARIMAX": {
-        "color": "#1f77b4",  # blue
+        "color": "#4A148C",  # blue
         "linestyle": "-.",
         "linewidth": 1.75,
         "alpha": 0.85,
@@ -1605,6 +2332,58 @@ While classical statistical models do well at capturing simpler temporal structu
 ## R
 ```{r ml_df_r}
 
+# 1. Feature Engineering function that incorporates target lags and time features
+build_ml_dataset <- function(df_subset, target_col, max_lags = 24) {
+  # Create base data frame with time and target
+  df <- df_subset |> 
+    select(time, y = !!sym(target_col))
+  
+  # Add lag features for the target (past 1 to 24 hours) using dplyr::lag
+  for (lag in 1:max_lags) {
+    col_name <- paste0("lag_", lag)
+    df[[col_name]] <- lag(df$y, n = lag)
+  }
+  
+  # Add calendar/time features from time column
+  df <- df |> 
+    mutate(
+      hour = hour(time),
+      day_of_week = wday(time, week_start = 1) - 1, # 0-indexed day of week (Monday = 0)
+      is_weekend = if_else(day_of_week >= 5, 1, 0)
+    ) |> 
+    na.omit() # Drop rows with NaN/NA values created by lagging
+  
+  y_out <- df$y
+  X_out <- df |> select(-time, -y)
+  
+  list(X = X_out, y = y_out, time = df$time)
+}
+
+target_col <- "pm2_5"
+
+# 2. Build ML feature matrices for train and test periods
+train_ml <- build_ml_dataset(train_df, target_col, max_lags = 24)
+X_train_ml <- train_ml$X
+y_train_ml <- train_ml$y
+train_time <- train_ml$time
+
+test_ml <- build_ml_dataset(test_df, target_col, max_lags = 24)
+X_test_ml <- test_ml$X
+y_test_ml <- test_ml$y
+test_time <- test_ml$time
+
+# 3. Take the train and test subsets
+train_window <- 28 * 24
+X_tr_sub <- tail(X_train_ml, train_window)
+y_tr_sub <- tail(y_train_ml, train_window)
+
+test_window <- 168
+test_subset_index <- head(test_df$time, test_window)
+
+# Filter test subset matching the first 168 hours of test data
+test_mask <- test_time %in% test_subset_index
+X_te_sub <- X_test_ml[test_mask, ]
+y_te_sub <- y_test_ml[test_mask]
 
 ```
 
@@ -1662,6 +2441,23 @@ A random forest solves this weakness by combining dozens or hundreds of individu
 ## R
 ```{r forest_r}
 
+# 4. Train the Random Forest Regressor
+# Set seed for reproducibility (equivalent to random_state=42)
+set.seed(42)
+rf_model <- randomForest(
+  x = X_tr_sub, 
+  y = y_tr_sub, 
+  ntree = 100
+)
+
+# 5. Predict and Evaluate
+rf_preds <- predict(rf_model, newdata = X_te_sub)
+
+residuals <- y_te_sub - rf_preds
+rf_rmse <- sqrt(mean(residuals^2, na.rm = TRUE))
+rf_mae <- mean(abs(residuals), na.rm = TRUE)
+
+cat(sprintf("Random Forest ML Pipeline (1-week test) -> RMSE: %.2f, MAE: %.2f\n", rf_rmse, rf_mae))
 
 ```
 
@@ -1692,6 +2488,128 @@ Let's visually compare our random forest to the ARIMA/SARIMA models.
 ## R
 ```{r forest_viz_r}
 
+# 1. Prepare dataframes for plotting
+train_history_hours <- 24  
+test_forecast_hours <- 168
+
+train_history_df <- train_df |> 
+  tail(train_history_hours) |> 
+  select(time, y = !!sym(target_col)) |> 
+  mutate(Series = "Training History")
+
+true_test_subset <- test_df |> 
+  head(test_forecast_hours) |> 
+  select(time, y = !!sym(target_col)) |> 
+  mutate(Series = "True Test Values")
+
+forecast_subset_index <- true_test_subset$time
+transition_time <- forecast_subset_index[1]
+
+# Helper for statistical models (starts immediately at index 1)
+safe_forecast_vector <- function(preds, n = test_forecast_hours) {
+  vals <- as.numeric(preds)
+  if (length(vals) < n) {
+    c(vals, rep(NA, n - length(vals)))
+  } else {
+    head(vals, n)
+  }
+}
+
+# Helper for ML models that need to start 24 hours later due to lags
+safe_ml_forecast_vector <- function(preds, lag_offset = 24, n = test_forecast_hours) {
+  vals <- as.numeric(preds)
+  # Pad the front with NA for the lag window, then append predictions
+  padded_vals <- c(rep(NA, lag_offset), vals)
+  if (length(padded_vals) < n) {
+    c(padded_vals, rep(NA, n - length(padded_vals)))
+  } else {
+    head(padded_vals, n)
+  }
+}
+
+# Combine all model predictions into a data frame matching the test subset
+all_forecasts_df <- bind_rows(
+  data.frame(time = forecast_subset_index, y = safe_forecast_vector(arima_preds_vals), Label = "ARIMA(1,1,1)"),
+  data.frame(time = forecast_subset_index, y = safe_forecast_vector(auto_preds_vals), Label = "Auto-ARIMA"),
+  data.frame(time = forecast_subset_index, y = safe_forecast_vector(sarima_preds_vals), Label = "SARIMA(1,1,1)x(1,1,1,24)"),
+  data.frame(time = forecast_subset_index, y = safe_forecast_vector(sarimax_preds), Label = "SARIMAX"),
+  data.frame(time = forecast_subset_index, y = safe_ml_forecast_vector(rf_preds), Label = "Random Forest")
+)
+
+# 2. Plotting with ggplot2 (linewidths reduced by 0.5)
+ggplot() +
+  # Plot Training History
+  geom_line(
+    data = train_history_df, 
+    aes(x = time, y = y, color = Series, linetype = Series), 
+    linewidth = 1, 
+    alpha = 0.8
+  ) +
+  # Plot True Test Values
+  geom_line(
+    data = true_test_subset, 
+    aes(x = time, y = y, color = Series, linetype = Series), 
+    linewidth = 1.2, 
+    alpha = 0.8
+  ) +
+  # Plot Model Forecasts
+  geom_line(
+    data = all_forecasts_df,
+    aes(x = time, y = y, color = Label, linetype = Label),
+    linewidth = 1,
+    alpha = 0.85
+  ) +
+  # Vertical transition line
+  geom_vline(
+    xintercept = transition_time, 
+    color = "#d62728", 
+    linetype = "dashed", 
+    linewidth = 0.8, 
+    alpha = 0.7
+  ) +
+  # Custom colors mapping
+  scale_color_manual(
+    name = NULL,
+    breaks = c("Training History", "True Test Values", "ARIMA(1,1,1)", "Auto-ARIMA", "SARIMA(1,1,1)x(1,1,1,24)", "SARIMAX", "Random Forest"),
+    values = c(
+      "Training History" = "gray",
+      "True Test Values" = "black",
+      "ARIMA(1,1,1)" = "#ff7f0e",
+      "Auto-ARIMA" = "#1f77b4",
+      "SARIMA(1,1,1)x(1,1,1,24)" = "#2ca02c",
+      "SARIMAX" = "#4A148C",
+      "Random Forest" = "#9467bd"
+    )
+  ) +
+  scale_linetype_manual(
+    name = NULL,
+    values = c(
+      "Training History" = "solid",
+      "True Test Values" = "solid",
+      "ARIMA(1,1,1)" = "dotted",
+      "Auto-ARIMA" = "dashed",
+      "SARIMA(1,1,1)x(1,1,1,24)" = "solid",
+      "SARIMAX" = "dotdash",
+      "Random Forest" = "solid"
+    ),
+    guide = "none"
+  ) +
+  labs(
+    title = expression(bold(paste(PM[2.5], " Forecasting: ARIMA vs. SARIMA vs. ML Models"))),
+    x = "Time",
+    y = expression(paste(PM[2.5], " (", mu, "g/m"^3, ")"))
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "bottom",
+    legend.box = "horizontal",
+    legend.margin = ggplot2::margin(t = 0, r = 0, b = 0, l = 0),
+    legend.background = element_rect(fill = "white", color = NA),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(color = "darkgrey", fill = NA, linewidth = 0.8)
+  ) +
+  guides(color = guide_legend(nrow = 2, override.aes = list(linetype = c("solid", "solid", "dashed", "dashed", "dashed", "dotdash", "solid"))))
 
 ```
 
@@ -1710,25 +2628,25 @@ arima_forecasts = {
 # Styles for the dedicated plot
 arima_styles = {
     "ARIMA(1,1,1)": {
-        "color": "firebrick",
+        "color": "#ff7f0e",
         "linestyle": "--",
         "linewidth": 1.75,
         "alpha": 0.85,
     },
     "Auto-ARIMA": {
-        "color": "purple",
+        "color": "#1f77b4",
         "linestyle": "--",
         "linewidth": 1.75,
         "alpha": 0.85,
     },
     "SARIMA(1,1,1)x(1,1,1,24)": {
         "color": "#2ca02c",  # green
-        "linestyle": "--",
+        "linestyle": "-",
         "linewidth": 1.75,
         "alpha": 0.85,
     },
     "SARIMAX": {
-        "color": "#1f77b4",  # blue
+        "color": "#4A148C",  # blue
         "linestyle": "-.",
         "linewidth": 1.75,
         "alpha": 0.85,
@@ -1824,6 +2742,56 @@ We have one more possible improvement to attempt, which is to give our random fo
 ## R
 ```{r ml_weather_r}
 
+# 1. Feature Engineering function incorporating target lags, time features, AND weather exogenous features
+build_ml_dataset_weather <- function(df_subset, target_col, exog_cols, max_lags = 24) {
+  # Select target, time, and weather exog columns
+  df <- df_subset |> 
+    select(time, y = !!sym(target_col), all_of(exog_cols))
+  
+  # Add lag features for the target (past 1 to 24 hours) using dplyr::lag
+  for (lag in 1:max_lags) {
+    col_name <- paste0("lag_", lag)
+    df[[col_name]] <- lag(df$y, n = lag)
+  }
+  
+  # Add calendar/time features from time column
+  df <- df |> 
+    mutate(
+      hour = hour(time),
+      day_of_week = wday(time, week_start = 1) - 1, # 0-indexed day of week (Monday = 0)
+      is_weekend = if_else(day_of_week >= 5, 1, 0)
+    ) |> 
+    na.omit() # Drop rows with NA values created by lagging
+  
+  y_out <- df$y
+  X_out <- df |> select(-time, -y)
+  
+  list(X = X_out, y = y_out, time = df$time)
+}
+
+# 2. Build ML feature matrices for train and test periods
+train_ml_w <- build_ml_dataset_weather(train_df, target_col, exog_cols, max_lags = 24)
+X_train_ml <- train_ml_w$X
+y_train_ml <- train_ml_w$y
+train_time <- train_ml_w$time
+
+test_ml_w <- build_ml_dataset_weather(test_df, target_col, exog_cols, max_lags = 24)
+X_test_ml <- test_ml_w$X
+y_test_ml <- test_ml_w$y
+test_time <- test_ml_w$time
+
+# 3. Take the train and test subsets
+train_window <- 28 * 24
+X_tr_sub <- tail(X_train_ml, train_window)
+y_tr_sub <- tail(y_train_ml, train_window)
+
+test_window <- 168
+test_subset_index <- head(test_df$time, test_window)
+
+# Filter test subset matching the first 168 hours of test data
+test_mask <- test_time %in% test_subset_index
+X_te_sub <- X_test_ml[test_mask, ]
+y_te_sub <- y_test_ml[test_mask]
 
 ```
 
@@ -1879,6 +2847,23 @@ y_te_sub = y_test_ml.loc[y_test_ml.index.isin(y_test.head(test_window).index)].a
 ## R
 ```{r ml_weather_train_r}
 
+# 4. Train the Random Forest Regressor
+# Set seed for reproducibility (equivalent to random_state=42)
+set.seed(42)
+rf_model_weather <- randomForest(
+  x = X_tr_sub, 
+  y = y_tr_sub, 
+  ntree = 100
+)
+
+# 5. Predict and Evaluate
+rf_preds_weather <- predict(rf_model_weather, newdata = X_te_sub)
+
+residuals_weather <- y_te_sub - rf_preds_weather
+rf_rmse_weather <- sqrt(mean(residuals_weather^2, na.rm = TRUE))
+rf_mae_weather <- mean(abs(residuals_weather), na.rm = TRUE)
+
+cat(sprintf("Random Forest ML Pipeline (1-week test) -> RMSE: %.2f, MAE: %.2f\n", rf_rmse_weather, rf_mae_weather))
 
 ```
 
@@ -1907,6 +2892,86 @@ print(
 ## R
 ```{r ml_weather_viz_r}
 
+# Combine all model predictions into a data frame matching the test subset with correct offsets
+all_forecasts_df <- bind_rows(
+  data.frame(time = forecast_subset_index, y = safe_forecast_vector(sarima_preds_vals), Label = "SARIMA"),
+  data.frame(time = forecast_subset_index, y = safe_forecast_vector(sarimax_preds), Label = "SARIMAX"),
+  data.frame(time = forecast_subset_index, y = safe_ml_forecast_vector(rf_preds, lag_offset = 24), Label = "Random Forest"),
+  data.frame(time = forecast_subset_index, y = safe_ml_forecast_vector(rf_preds_weather, lag_offset = 24), Label = "Random Forest + Weather")
+)
+
+# 2. Plotting with ggplot2
+ggplot() +
+  # Plot Training History subtly
+  geom_line(
+    data = train_history_df, 
+    aes(x = time, y = y, color = Series, linetype = Series), 
+    linewidth = 0.7, 
+    alpha = 0.6
+  ) +
+  # Plot True Test Values as a bold reference line
+  geom_line(
+    data = true_test_subset, 
+    aes(x = time, y = y, color = Series, linetype = Series), 
+    linewidth = 1, 
+    alpha = 0.8
+  ) +
+  # Plot Model Forecasts
+  geom_line(
+    data = all_forecasts_df,
+    aes(x = time, y = y, color = Label, linetype = Label),
+    linewidth = 1,
+    alpha = 0.85
+  ) +
+  # Vertical transition line separating train from test
+  geom_vline(
+    xintercept = transition_time, 
+    color = "#d62728", 
+    linetype = "dotted", 
+    linewidth = 0.8, 
+    alpha = 0.7
+  ) +
+  # Custom colors mapping
+  scale_color_manual(
+    name = NULL,
+    breaks = c("Training History", "True Test Values", "SARIMA", "SARIMAX", "Random Forest", "Random Forest + Weather"),
+    values = c(
+      "Training History" = "gray",
+      "True Test Values" = "#222222",
+      "SARIMA" = "#2ca02c",
+      "SARIMAX" = "#4A148C",
+      "Random Forest" = "#9467bd",
+      "Random Forest + Weather" = "#F57F17"
+    )
+  ) +
+  scale_linetype_manual(
+    name = NULL,
+    values = c(
+      "Training History" = "solid",
+      "True Test Values" = "solid",
+      "SARIMA" = "solid",
+      "SARIMAX" = "dotdash",
+      "Random Forest" = "solid",
+      "Random Forest + Weather" = "dotdash"
+    ),
+    guide = "none"
+  ) +
+  labs(
+    title = expression(bold(paste("Vancouver ", PM[2.5], " Forecasting: Statistical vs. Machine Learning Models"))),
+    x = "Time",
+    y = expression(paste(PM[2.5], " (", mu, "g/m"^3, ")"))
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", size = 13, margin = ggplot2::margin(b = 10)),
+    legend.position = "bottom",
+    legend.box = "horizontal",
+    legend.margin = ggplot2::margin(t = 0, r = 0, b = 0, l = 0),
+    legend.background = element_rect(fill = "white", color = NA),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(color = "darkgrey", fill = NA, linewidth = 0.8)
+  ) +
+  guides(color = guide_legend(nrow = 2, override.aes = list(linetype = c("solid", "solid", "solid", "dotdash", "solid", "dotdash"))))
 
 ```
 
@@ -1925,12 +2990,12 @@ forecasts = {
 model_styles = {
     "SARIMA": {
         "color": "#2ca02c",  # green
-        "linestyle": "--",
+        "linestyle": "-",
         "linewidth": 1.75,
         "alpha": 0.85,
     },
     "SARIMAX": {
-        "color": "#1f77b4",  # blue
+        "color": "#4A148C",  # blue
         "linestyle": "-.",
         "linewidth": 1.75,
         "alpha": 0.85,
@@ -1938,14 +3003,14 @@ model_styles = {
     "Random Forest": {
         "color": "#9467bd",  # purple
         "linestyle": "-",
-        "linewidth": 2.2, 
+        "linewidth": 2, 
         "alpha": 0.85,
     },
     "Random Forest + Weather": {
-        "color": "#F03405",  # 
+        "color": "#F57F17",   
         "linestyle": "-.",
         "linewidth": 1.75, 
-        "alpha": 0.9,
+        "alpha": 1,
     }
 }
 
