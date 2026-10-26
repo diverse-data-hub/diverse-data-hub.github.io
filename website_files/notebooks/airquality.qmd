@@ -604,11 +604,11 @@ if weekend_groups:
 # Formatting Subplot 0: Weekdays
 axes[0].set_title(
     f"PM2.5 Weekday Variability",
-    fontsize=13,
+    fontsize=14,
     fontweight="bold",
 )
-axes[0].set_xlabel("Hour of Day (Local Time)", fontsize=11)
-axes[0].set_ylabel(f"Concentration ({pollutant_label})", fontsize=11)
+axes[0].set_xlabel("Hour of Day", fontsize=13)
+axes[0].set_ylabel(f"Concentration ({pollutant_label})", fontsize=13)
 axes[0].set_xticks(range(0, 24, 2))
 axes[0].grid(True, linestyle="--", alpha=0.5)
 axes[0].legend(loc="upper right")
@@ -949,11 +949,13 @@ ax.axvline(
 # 4. Formatting the layout
 ax.set_title(
     "PM₂.₅ Baseline Models: Training History & Test Forecast",
-    fontsize=12,
+    fontsize=16,
     fontweight="bold",
 )
-ax.set_xlabel("Time", fontsize=10)
-ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.set_xlabel("Time", fontsize=16)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=16)
+ax.tick_params(axis='x', labelsize=14)
+ax.tick_params(axis='y', labelsize=14)
 ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
 ax.legend(
     loc="upper left",
@@ -961,11 +963,11 @@ ax.legend(
         facecolor="white",
         framealpha=0.95,
         edgecolor="lightgrey",
-        fontsize=10,
+        fontsize=14,
 )
 
 fig.autofmt_xdate(rotation=45, ha="right")
-fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+fig.subplots_adjust(bottom=0.28, left=0.12, right=0.95, top=0.90)
 
 plt.show()
 
@@ -1229,11 +1231,13 @@ ax.axvline(
 # 4. Formatting the layout
 ax.set_title(
     "PM₂.₅ Baseline Models: Training History & Test Forecast",
-    fontsize=12,
+    fontsize=16,
     fontweight="bold",
 )
-ax.set_xlabel("Time", fontsize=10)
-ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.set_xlabel("Time", fontsize=16)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=16)
+ax.tick_params(axis='x', labelsize=14)
+ax.tick_params(axis='y', labelsize=14)
 ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
 ax.legend(
     loc="upper left",
@@ -1241,11 +1245,11 @@ ax.legend(
         facecolor="white",
         framealpha=0.95,
         edgecolor="lightgrey",
-        fontsize=8,
+        fontsize=14,
 )
 
 fig.autofmt_xdate(rotation=45, ha="right")
-fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+fig.subplots_adjust(bottom=0.28, left=0.12, right=0.95, top=0.90)
 
 plt.show()
 
@@ -1836,25 +1840,28 @@ ax.axvline(
     label="Forecast Start",
 )
 
-# Formatting
+# 4. Formatting the layout
 ax.set_title(
-    "PM₂.₅ Forecasting: ARIMA vs. SARIMA vs. ML Models",
-    fontsize=12,
+    "PM₂.₅ Baseline Models: Training History & Test Forecast",
+    fontsize=16,
     fontweight="bold",
 )
-ax.set_xlabel("Time", fontsize=10)
-ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.set_xlabel("Time", fontsize=16)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=16)
+ax.tick_params(axis='x', labelsize=14)
+ax.tick_params(axis='y', labelsize=14)
 ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
-ax.legend(loc="upper left",
-    frameon=True,
-    facecolor="white",
-    framealpha=0.95,
-    edgecolor="lightgrey",
-    fontsize=8,)
-
+ax.legend(
+    loc="upper left",
+        frameon=True,
+        facecolor="white",
+        framealpha=0.95,
+        edgecolor="lightgrey",
+        fontsize=14,
+)
 
 fig.autofmt_xdate(rotation=45, ha="right")
-fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+fig.subplots_adjust(bottom=0.28, left=0.12, right=0.95, top=0.90)
 
 plt.show()
 
@@ -2298,24 +2305,28 @@ ax.axvline(
         label="Forecast Start",
 )
 
-# Formatting
+# 4. Formatting the layout
 ax.set_title(
-    "PM₂.₅ Forecasting: ARIMA vs. SARIMA vs. SARIMAX Models",
-    fontsize=12,
+    "PM₂.₅ Baseline Models: Training History & Test Forecast",
+    fontsize=16,
     fontweight="bold",
 )
-ax.set_xlabel("Time", fontsize=10)
-ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.set_xlabel("Time", fontsize=16)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=16)
+ax.tick_params(axis='x', labelsize=14)
+ax.tick_params(axis='y', labelsize=14)
 ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
-ax.legend(loc="upper left",
-    frameon=True,
-    facecolor="white",
-    framealpha=0.95,
-    edgecolor="lightgrey",
-    fontsize=8,)
+ax.legend(
+    loc="upper left",
+        frameon=True,
+        facecolor="white",
+        framealpha=0.95,
+        edgecolor="lightgrey",
+        fontsize=14,
+)
 
 fig.autofmt_xdate(rotation=45, ha="right")
-fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+fig.subplots_adjust(bottom=0.28, left=0.12, right=0.95, top=0.90)
 
 plt.show()
 
@@ -2711,24 +2722,29 @@ ax.axvline(
     label="Forecast Start",
 )
 
-# Formatting
+# 4. Formatting the layout
 ax.set_title(
-    "PM₂.₅ Forecasting: ARIMA vs. SARIMA vs. ML Models",
-    fontsize=14,
+    "PM₂.₅ Baseline Models: Training History & Test Forecast",
+    fontsize=16,
     fontweight="bold",
 )
-ax.set_xlabel("Time", fontsize=10)
-ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.set_xlabel("Time", fontsize=16)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=16)
+ax.tick_params(axis='x', labelsize=14)
+ax.tick_params(axis='y', labelsize=14)
 ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
-ax.legend(loc="upper left",
-    frameon=True,
-    facecolor="white",
-    framealpha=0.95,
-    edgecolor="lightgrey",
-    fontsize=8,)
+ax.legend(
+    loc="upper left",
+        frameon=True,
+        facecolor="white",
+        framealpha=0.95,
+        edgecolor="lightgrey",
+        fontsize=14,
+)
 
 fig.autofmt_xdate(rotation=45, ha="right")
-fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+fig.subplots_adjust(bottom=0.28, left=0.12, right=0.95, top=0.90)
+
 plt.show()
 
 ```
@@ -3069,25 +3085,29 @@ ax.axvline(
     label="Forecast Start",
 )
 
-# Formatting and aesthetics
+# 4. Formatting the layout
 ax.set_title(
-    "Vancouver PM₂.₅ Forecasting: Statistical vs. Machine Learning Models",
-    fontsize=13,
+    "PM₂.₅ Baseline Models: Training History & Test Forecast",
+    fontsize=16,
     fontweight="bold",
-    pad=12,
 )
-ax.set_xlabel("Time", fontsize=10)
-ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=10)
+ax.set_xlabel("Time", fontsize=16)
+ax.set_ylabel(r"$\text{PM}_{2.5}$ ($\mu\text{g/m}^3$)", fontsize=16)
+ax.tick_params(axis='x', labelsize=14)
+ax.tick_params(axis='y', labelsize=14)
 ax.grid(True, linestyle=":", alpha=0.6, color="darkgrey")
-ax.legend(loc="upper left",
-    frameon=True,
-    facecolor="white",
-    framealpha=0.95,
-    edgecolor="lightgrey",
-    fontsize=8,)
+ax.legend(
+    loc="upper left",
+        frameon=True,
+        facecolor="white",
+        framealpha=0.95,
+        edgecolor="lightgrey",
+        fontsize=14,
+)
 
 fig.autofmt_xdate(rotation=45, ha="right")
-fig.subplots_adjust(bottom=0.22, left=0.10, right=0.95, top=0.90)
+fig.subplots_adjust(bottom=0.28, left=0.12, right=0.95, top=0.90)
+
 plt.show()
 
 ```
