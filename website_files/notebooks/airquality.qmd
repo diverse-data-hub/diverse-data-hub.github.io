@@ -693,7 +693,13 @@ forecast_idx = y_test.index
 ```
 :::
 
-We will begin with an average forecast which, as its name suggests, predicts the training set's overall average value as a flat line across the entire test horizon. We will also do a naive forecast, meaning for the whole test horizon, we predict the very last value from the training set. We will also create a seasonally adjusted forecast, where we perform seasonal decomposition on our training set and subtract the seasonal component, leaving us with the trend and residual series. We then take the very last value from this seasonally adjusted training set and predict this across the test horizon. All three of these baseline models will create flat lines, so we group them together for simplicity. 
+We will begin with the following simple baseline models: 
+
+* **Average forecast**: predicts the average value of the whole training set
+* **Naive forecast**: predicts the very last value of the training set. 
+* **Seasonally adjusted forecast**: first we perform seasonal decomposition on our training set and subtract the seasonal component, leaving us with the trend and residual series. This model then predicts the very last value of that seasonally adjusted training set. 
+
+All three of these baseline models will create flat lines, so we group them together for simplicity. 
 
 ::: {.panel-tabset}
 ## R
@@ -975,9 +981,12 @@ plt.show()
 ```
 :::
 
-We can see that these two baseline models predict horizontal lines, which are not accurate reflections of the true test values. 
+We can see that these three baseline models predict horizontal lines, which are not accurate reflections of the true test values. 
 
-There are two more baseline models to try. First, we have the seasonal naive forecast. This takes the last 24 hours of our training data, and predicts it to repeat across the forecast index. Second, we have drift forecast. We calculate the slope over the whole training set, and predict a linear trend with that slope for the forecast horizon. 
+There are two more baseline models to try:
+
+* **Seasonal naive forecast**: We take the last 24 hours of our training data, and predict it to repeat across the forecast index. 
+* **Drift forecast**: We calculate the slope between the first and last value of the training set, and predict a linear trend with that slope across the forecast index. 
 
 ::: {.panel-tabset}
 ## R
