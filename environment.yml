@@ -18,5 +18,7 @@ dependencies:
   - scikit-learn=1.7
   - matplotlib=3.10.1
   - tabulate=0.9
+  - pmdarima=2.1.1
+  - sktime=0.40.1
   - pip:
       - diversedata==1.1.0
