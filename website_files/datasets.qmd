@@ -11,6 +11,7 @@
 {{< include grid_items/globalrights.qmd >}}
 {{< include grid_items/labourforcewithdisabilities.qmd >}}
 {{< include grid_items/postgradincome.qmd >}}
+{{< include grid_items/twentynewsgroups.qmd >}}
 
 :::
 
