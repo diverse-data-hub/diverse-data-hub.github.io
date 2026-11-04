@@ -1,0 +1,64 @@
+---
+title: "20 Newsgroups"
+toc: true
+toc-depth: 4
+toc-location: right
+sidebar: false
+---
+
+## About the Data
+
+The **20 Newsgroups** dataset is a canonical collection of approximately 20,000 Usenet discussion forum messages partitioned almost evenly across 20 different newsgroups. Originally collected by Ken Lang in 1995 for the Newsweeder system and popularized in benchmark machine learning literature by Tom Mitchell, it has served for decades as a fundamental testbed for text classification, topic modeling, clustering, and natural language processing (NLP) techniques.
+
+The corpus spans seven broad topic domains: **Computers & Tech**, **Recreation & Vehicles**, **Sports**, **Science**, **Politics**, **Religion & Beliefs**, and **Miscellaneous / For Sale**. Within these domains, the dataset captures nuanced topic boundaries—ranging from closely related discussions (such as IBM PC hardware versus Macintosh hardware, or baseball versus hockey) to polarized public discourse surrounding politics and religion.
+
+From an educational and diversity perspective, 20 Newsgroups provides a transparent window into early decentralized online communities. It captures uncurated, authentic user-generated text containing not only topical arguments but also technical artifacts, email routing headers, quoted reply chains, author signatures, and colloquial argumentation styles. Analyzing this dataset illuminates critical challenges in real-world data science: how metadata and conversational noise can distort algorithmic predictions, the trade-offs inherent in text preprocessing decisions, and how lexical algorithms handle overlapping terminologies and sub-community dialects.
+
+### Download
+
+<div class="button-container">
+  <a href="https://archive.ics.uci.edu/dataset/113/twenty+" target="_blank" class="download-button">
+    Download Dataset
+  </a>
+</div>
+
+### Metadata
+
+<div class="description-grid">
+  <div class="field-label">Dataset Name</div><div class="field-value">20 Newsgroups</div>
+  <div class="field-label">Dataset Characteristics</div><div class="field-value">Text, Multivariate</div>
+  <div class="field-label">Subject Area</div><div class="field-value">Natural Language Processing, Social Discourse</div>
+  <div class="field-label">Associated Tasks</div><div class="field-value">Classification, Clustering, Topic Modeling</div>
+  <div class="field-label">Feature Type</div><div class="field-value">Categorical, Text</div>
+  <div class="field-label">Instances</div><div class="field-value">19,997 records</div>
+  <div class="field-label">Features</div><div class="field-value">7</div>
+  <div class="field-label">Has Missing Values?</div><div class="field-value">No</div>
+</div>
+
+### Variables
+
+::: {.table-container}
+::: {.styled-table}
+
+| Variable Name     | Role      | Type        | Description                                                                 | Missing Values |
+|-------------------|-----------|-------------|-----------------------------------------------------------------------------|----------------|
+| `doc_ID`          | ID        | Categorical | Unique document identifier (original Usenet file number)                    | No             |
+| `category`        | Target    | Categorical | Original newsgroup category name (e.g., `alt.atheism`, `sci.space`)         | No             |
+| `macro_category`  | Feature   | Categorical | High-level topic domain (e.g., Computers & Tech, Religion & Beliefs)        | No             |
+| `topic`           | Feature   | Categorical | Clean, human-interpretable category title (e.g., Atheism, Space, Hockey)    | No             |
+| `text`            | Feature   | Text        | Unmodified post text including routing headers, quotes, and body            | No             |
+| `clean_text`      | Feature   | Text        | Post text with headers, quoted reply lines, and reply intros removed        | No             |
+| `nlp_clean_text`  | Feature   | Text        | Tokenized, lowercased, and lemmatized post tokens with stopwords filtered   | No             |
+
+:::
+:::
+
+{{< include ../notebooks/twentynewsgroups.qmd >}} 
+
+## Attribution
+
+Data sourced from the [UCI Machine Learning Repository: Twenty Newsgroups](https://archive.ics.uci.edu/dataset/113/twenty+), licensed under a [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) license.
+
+Lang, K. (1995). Newsweeder: Learning to filter netnews. *Proceedings of the Twelfth International Conference on Machine Learning*, 331–339.
+
+Mitchell, T. (1997). *Machine Learning*. McGraw-Hill, New York.
