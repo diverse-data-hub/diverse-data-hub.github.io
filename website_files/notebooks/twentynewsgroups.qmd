@@ -17,7 +17,7 @@ if (Sys.getenv("GITHUB_ACTIONS") == "true") {
 
 Each record in this dataset corresponds to an individual Usenet discussion forum post and includes the following features and metadata:
 
--   **Identifier** (`doc_ID`) – Unique document file name or number preserved from the original Usenet newsgroup archive.
+-   **Identifier** (`doc_ID`) – ID number preserved from the original Usenet newsgroup archive within its category. 
 -   **Original Category** (`category`) – The specific Usenet newsgroup hierarchically labeled by netnews taxonomy (e.g., `alt.atheism`, `comp.graphics`, `rec.sport.hockey`, `sci.space`).
 -   **Raw Text** (`text`) – Unmodified message content containing technical Usenet routing paths, sender email addresses, timestamps, quoted reply chains, and sign-offs.
 
@@ -27,13 +27,13 @@ This dataset supports investigations into:
 
 -   **Natural Language Processing & Text Classification:** Benchmarking classical and modern machine learning algorithms (Multinomial Naive Bayes, Support Vector Machines, Logistic Regression, neural networks) on high-dimensional sparse text data.
 -   **Impact of Text Preprocessing Decisions:** Systematically evaluating how stripping structural artifacts (headers, quoted replies, signatures) affects model accuracy and lexical feature importance versus retaining raw metadata.
--   **Unsupervised Semantic Discovery:** Evaluating whether unsupervised clustering algorithms (such as K-Means, hierarchical clustering, and LDA topic modeling) naturally uncover the human-defined categories or organize documents according to writing style and shared conversational filler.
+-   **Unsupervised Text Clustering:** Evaluating whether unsupervised clustering algorithms (such as K-Means, hierarchical clustering, and LDA topic modeling) naturally uncover the human-defined categories or organize documents according to writing style and shared conversational filler.
 
 ## Case Study
 
 ### Objective
 
-Text classification can help organize large volumes of unstructured information, but the quality and reliability of predictions depend heavily on how text is prepared. In this dataset, raw posts contain both topic-related discussions and structural elements such as email headers, sender affiliations, subject lines, and quoted replies. These elements may inadvertently reveal information about the original newsgroup category, allowing a model to achieve high classification performance by exploiting metadata rather than learning meaningful semantic patterns from the discussion itself.
+Text classification can help organize large volumes of unstructured information, but the quality and reliability of predictions depend heavily on how text is prepared. In this dataset, raw posts contain both topic-related discussions and structural elements such as email headers, sender affiliations, subject lines, and quoted replies. These elements may inadvertently reveal information about the original newsgroup category, allowing a model to achieve high classification accuracy by exploiting metadata rather than learning meaningful topical patterns from the discussion itself.
 
 In this case study, we will focus on several key questions:
 
@@ -207,7 +207,7 @@ for header in headers:
 ```
 :::
 
-Checking the distribution across categories shows a balanced design with 1,000 documents per category (with 997 in `soc.religion.christian`). We also confirm there are no empty posts, though 531 cross-posted messages produce duplicate raw bodies.
+Checking the distribution across categories shows a largely balanced distribution, with approximately 1,000 documents per category (with 997 in `soc.religion.christian`). We also confirm there are no empty posts and identify 531 exact duplicate raw text records.
 
 ::: {.panel-tabset}
 ## R
@@ -235,14 +235,14 @@ Before cleaning, let's take a look at an individual document:
 ## R
 
 ```{r inspect_document_r}
-cat("Category:", df$category[1], "\n")
+cat("Category:", df$category[3], "\n")
 cat(substr(df$text[3], 1, 2000), "\n")
 ```
 
 ## Python
 
 ```{python inspect_document_py}
-print("Category:", df.loc[0, "category"])
+print("Category:", df.loc[2, "category"])
 print(df.loc[2, "text"][:2000])
 ```
 :::
@@ -393,7 +393,12 @@ remove_reply_intros <- function(text) {
 }
 
 clean_post <- function(text) {
-  text |> remove_headers() |> remove_quoted_lines() |> remove_reply_intros() |> str_trim()
+  text <- str_replace_all(text, "\r\n?", "\n")
+  text |>
+    remove_headers() |>
+    remove_quoted_lines() |>
+    remove_reply_intros() |>
+    str_trim()
 }
 
 df <- df |>
@@ -425,6 +430,7 @@ def remove_reply_introductions(text):
     return "\n".join(cleaned)
 
 def clean_newsgroup_post(text):
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
     text = remove_headers(text)
     text = remove_quoted_lines(text)
     text = remove_reply_introductions(text)
@@ -442,7 +448,7 @@ df['percent_removed'] = (1 - df['clean_length'] / df['raw_length']) * 100
 
 **Effect of Text Cleaning**
 
-We examine the percentage of characters removed per post. Across the corpus, cleaning removes an average of **55%** of the characters from each file, demonstrating that more than half of the raw bytes consist of metadata and quotation artifacts.
+Across the corpus, cleaning removes an average of 55% of the characters from each post, highlighting the substantial amount of structural and conversational content present in the original Usenet messages.
 
 ::: {.panel-tabset}
 ## R
@@ -475,27 +481,37 @@ plt.show()
 
 **Comparing Raw and Cleaned Text**
 
-Inspecting a sample post before and after cleaning illustrates the elimination of routing headers, sender metadata, and reply quotes:
+Let's inspect a sample post before and after cleaning illustrates the elimination of routing headers, sender metadata, and reply quotes.
+
+**Raw post:**
+::: {.panel-tabset}
+## R
+
+```{r inspect_raw_r}
+sample_text <- df$text[3]
+cat(substr(sample_text, 1, 1500), "\n\n")
+```
+
+## Python
+
+```{python inspect_raw_py}
+print(df.loc[2, "text"][:1500])
+```
+:::
+
+**Cleaned post:**
 
 ::: {.panel-tabset}
 ## R
 
 ```{r inspect_cleaned_r}
-sample_text <- df$text[3]
 sample_clean <- df$clean_text[3]
-
-cat("RAW POST:\n")
-cat(substr(sample_text, 1, 1500), "\n\n")
-cat("CLEANED POST:\n")
 cat(substr(sample_clean, 1, 1500), "\n")
 ```
 
 ## Python
 
 ```{python inspect_cleaned_py}
-print("RAW POST:")
-print(df.loc[2, "text"][:1500])
-print("CLEANED POST:")
 print(df.loc[2, "clean_text"][:1500])
 ```
 :::
@@ -507,7 +523,7 @@ To normalize the vocabulary for machine learning, we apply token-level preproces
 - **Case Normalization:** Lowercasing all characters.
 - **Tokenization & Punctuation Filtering:** Extracting alphabetic tokens of three or more characters (`\b[a-zA-Z]{3,}\b`), filtering out punctuation and single-letter abbreviations.
 - **Stopword Removal:** Eliminating ubiquitous English grammatical words (*the, is, at, which*).
-- **Lemmatization:** Converting words to their morphological base form (e.g., *played* $\rightarrow$ *play*, *cities* $\rightarrow$ *city*).
+- **Lemmatization**: Converting words to their morphological base form (e.g., cities $\rightarrow$ city, cars $\rightarrow$ car).
 
 ::: {.panel-tabset}
 ## R
@@ -570,7 +586,7 @@ When we call `fit()`, the model learns statistical patterns from the training do
 
 Prior Probability: The probability of each category before considering the document's contents. For example, if 5% of the training documents belong to the Space category, the model estimates a prior probability of 5% for that category.
 
-Feature Likelihoods: The model estimates how strongly each word is associated with each category. For example, words such as "orbit" and "moon" are likely to receive higher feature weights for the Space category than for the Hockey category.
+Feature Likelihoods: The model estimates how strongly each word is associated with each category. For example, words such as "orbit" and "moon" are likely to have higher estimated likelihoods under the Space category than under the Hockey category.
 
 **The Prediction Phase**
 
@@ -590,17 +606,14 @@ $$
 
 In other words, the model:
 
-Starts with the prior probability of a category.
-
-Considers how likely each word in the document is to occur within that category.
-
-Combines these likelihoods to calculate a score for each category.
-
-It repeats this process across all 20 categories and predicts the category with the highest resulting score.
+- Starts with the prior probability of a category.
+- Considers the contribution of each word feature based on the patterns learned from documents in that category.
+- Combines these contributions to calculate a score for each category.
+- Repeats this process across all 20 categories and predicts the category with the highest resulting score.
 
 For example, if a post contains words such as "ice", "puck", and "goal", these features may collectively produce a higher score for the Hockey category than for the Space category.
 
-In practice, our implementation uses Multinomial Naive Bayes with TF-IDF features. Rather than simply counting word occurrences, the model uses the TF-IDF values as feature weights when calculating its category scores.
+In this case study, documents are represented using TF-IDF rather than raw word counts. Each term is assigned a non-negative weight based on its frequency within a document and how informative it is across the corpus. These weights are used as input features by the Multinomial Naive Bayes classifier to estimate the likelihood of each topic. The probability equation above provides a simplified illustration of how the model combines evidence from individual terms. Since TF-IDF values are weighted features rather than literal word counts, the equation is intended to explain the underlying classification principle rather than represent every calculation performed by the implementation.
 
 **Why is it called "Naive"?**
 
@@ -791,7 +804,7 @@ For example, the raw posts contain several features that can reveal the target c
 - **Subject lines:** These frequently contain keywords that directly indicate the discussion topic.
 - **Sender and organization information:** Email domains and affiliations (e.g., `cmu.edu`, `nasa.gov`, `mit.edu`) may be associated with particular topics.
 
-When we evaluate the raw model on cleaned test posts, accuracy drops from 88% to 73%. This suggests that the model relied, at least in part, on structural information that was removed during preprocessing.
+When we evaluate the raw model on cleaned test posts, accuracy drops from 88% to 73%. This suggests that the raw model relied, at least in part, on structural information that was removed during preprocessing, and that its performance is sensitive to changes in the text representation.
 
 This illustrates an important distinction: higher predictive accuracy does not necessarily mean a model has learned more meaningful patterns. A model can perform well by exploiting shortcuts in the data rather than learning the underlying subject matter.
 
@@ -961,11 +974,11 @@ plt.show()
 
 #### 6. Modelling - Can Clustering Discover Topics Without Labels?
 
-In supervised learning, models rely on human-defined labels. In this section, we test whether an unsupervised clustering algorithm can organize posts into meaningful semantic groups without any label guidance.
+Unlike supervised learning, which relies on human-defined labels to train a model, unsupervised learning attempts to identify patterns and structure within data without predefined categories. In this section, we investigate whether a clustering algorithm can group discussion posts based on similarities in their textual content, without using the original topic labels during training.
 
-We transform the cleaned text into a 5,000-dimensional TF-IDF matrix and fit a **K-Means algorithm** with $k = 20$.
+We first transform the cleaned text into a TF-IDF matrix containing up to 5,000 features, then apply K-Means clustering with $k = 20$.
 
-**Note:** We set $k = 20$, matching the number of original newsgroups, to explore how the unsupervised algorithm organizes the documents at a comparable level of granularity. However, K-Means does not have access to these labels during training and is not constrained to reproduce the original categories.
+Note: We set $k = 20$, matching the number of original newsgroups, to explore how the algorithm organizes documents at a comparable level of granularity. However, the original category labels are not provided to the algorithm during training, and K-Means is not constrained to reproduce the predefined categories.
 
 ::: {.panel-tabset}
 ## R
@@ -997,7 +1010,9 @@ order_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
 ```
 :::
 
-We can view the top 10 terms per cluster to see ... 
+**Examining the Top Terms per Cluster**
+
+After fitting the model, we can examine the terms with the highest weights in each cluster's centroid. These terms provide an indication of the vocabulary that characterizes each group and can help us interpret the themes the algorithm has identified.
 
 ::: {.panel-tabset}
 ## R
@@ -1019,7 +1034,9 @@ for i in range(len(kmeans.cluster_centers_)):
 ```
 :::
 
-We can also see the size for each cluster to understanding of how substantial each discovered group is ...
+**Examining Cluster Sizes**
+
+We can also examine the number of documents assigned to each cluster. This helps us understand how the dataset is distributed across the discovered groups and whether the algorithm produces relatively balanced clusters or a mixture of large and small groups.
 
 ::: {.panel-tabset}
 ## R
@@ -1038,37 +1055,13 @@ print(cluster_sizes)
 ```
 :::
 
-# Checks
-
-```{python checks_py, warning = FALSE, message = FALSE}
-from sklearn.metrics import adjusted_rand_score
-
-ari = adjusted_rand_score(
-    r_cluster_assignments,
-    python_cluster_assignments
-)
-
-print(f"Adjusted Rand Index: {ari:.4f}")
-
-# check whether your TF-IDF inputs are equivalent
-
-print("R matrix shape:", X_tfidf_r.shape)
-print("Python matrix shape:", X_tfidf_py.shape)
-
-print("Same feature names:",
-      list(feature_names_r) == list(feature_names_py))
-
-print("Same document count:",
-      len(r_cluster_assignments) == len(python_cluster_assignments))
-```
-
 **Comparing Discovered Clusters to Predefined Labels**
 
-Although K-Means does not use the original topic labels during training, we can use them afterward to interpret the discovered clusters. We cross-tabulate the cluster assignments against both the seven macro-categories and the twenty specific topics.
+Although K-Means does not use the original topic labels during training, we can use them afterward to interpret the discovered groupings. We cross-tabulate the cluster assignments against both the seven macro-categories and the twenty specific topics.
 
 The heatmaps show the proportion of documents within each cluster belonging to each original category. Each row represents one discovered cluster, with darker cells indicating a greater concentration of documents from a particular category.
 
-If a cluster is dominated by one category, it suggests that K-Means has identified a relatively distinct group of documents. However, clusters containing multiple categories may indicate overlapping vocabulary, shared themes, or differences between the way the algorithm groups documents and how humans define topics.
+Clusters dominated by one category suggest that the algorithm has identified a relatively distinct group of documents. In contrast, clusters containing multiple categories may reflect shared vocabulary, overlapping subject matter, or differences between how the algorithm groups documents and how humans define topics.
 
 **Heatmap 1: K-Means Clusters vs. Macro Categories**
 
@@ -1086,7 +1079,7 @@ ggplot(crosstab_macro_r, aes(x = Macro, y = factor(Cluster, levels = 19:0), fill
   labs(
     title = "K-Means Clusters vs. Macro Categories",
     x = "Original Macro Category",
-    y = "Discovered Cluster (0–19)",
+    y = "Discovered Cluster",
     fill = "Proportion"
   ) +
   theme_minimal(base_size = 10) +
@@ -1104,13 +1097,15 @@ crosstab_macro = pd.crosstab(df['cluster'], df['macro_category'], normalize='ind
 plt.figure(figsize=(10, 6))
 sns.heatmap(crosstab_macro, cmap="Blues", annot=False, linewidths=0.5, linecolor='lightgray')
 plt.title("K-Means Clusters vs. Macro Categories", fontsize=13, fontweight="bold", pad=12)
-plt.ylabel("Discovered Cluster (0–19)", fontsize=10)
+plt.ylabel("Discovered Cluster", fontsize=10)
 plt.xlabel("Original Macro Category", fontsize=10)
 plt.xticks(rotation=35, ha='right')
 plt.tight_layout()
 plt.show()
 ```
 :::
+
+The macro-category heatmaps reveal that some discovered groups are concentrated within particular broad domains, suggesting that certain subject areas have distinctive vocabulary. However, other groups contain documents from multiple macro-categories, indicating that the boundaries between some topics are less distinct when represented through word usage alone. Overall, the results suggest that K-Means can identify broad thematic patterns in the discussion posts, but does not consistently separate documents according to the seven human-defined domains.
 
 **Heatmap 2: K-Means Clusters vs. Specific Topics**
 
@@ -1128,7 +1123,7 @@ ggplot(crosstab_topic_r, aes(x = Topic, y = factor(Cluster, levels = 19:0), fill
   labs(
     title = "K-Means Clusters vs. Specific Topics",
     x = "Original Specific Topic",
-    y = "Discovered Cluster (0–19)",
+    y = "Discovered Cluster",
     fill = "Proportion"
   ) +
   theme_minimal(base_size = 10) +
@@ -1146,7 +1141,7 @@ crosstab_topic = pd.crosstab(df['cluster'], df['topic'], normalize='index')
 plt.figure(figsize=(12, 7))
 sns.heatmap(crosstab_topic, cmap="Blues", annot=False, linewidths=0.5, linecolor='lightgray')
 plt.title("K-Means Clusters vs. Specific Topics", fontsize=13, fontweight="bold", pad=12)
-plt.ylabel("Discovered Cluster (0–19)", fontsize=10)
+plt.ylabel("Discovered Cluster", fontsize=10)
 plt.xlabel("Original Specific Topic", fontsize=10)
 plt.xticks(rotation=45, ha='right', fontsize=8)
 plt.tight_layout()
@@ -1154,21 +1149,28 @@ plt.show()
 ```
 :::
 
-(short summary)
-Unsupervised algorithms discover patterns based on the representation of the data, not necessarily the categories or meanings that humans expect.
+At the more granular level, the specific-topic heatmaps reveal a mixture of distinct and overlapping groupings. Some discovered groups are strongly associated with individual newsgroups, suggesting that their vocabulary is sufficiently distinctive for the algorithm to separate them. Others contain posts from multiple related topics, while some original topics are distributed across several groups. This suggests that K-Means does not necessarily reproduce the original newsgroup boundaries. Instead, it may group posts according to shared terminology or divide broader discussions into smaller groups based on differences in their vocabulary.
+
+**Comparing the R and Python Workflows**
+
+The parallel R and Python workflows reveal several similar thematic patterns, including groupings associated with sports, cryptography, computer hardware, and political discussions. Both workflows use scikit-learn's K-Means implementation, with the same clustering parameters. However, the exact cluster assignments and their composition differ between the two results. Rather than comparing cluster numbers directly, we focus on whether both workflows uncover similar broad themes and relationships between topics.
+
+**Interpreting the Discovered Patterns**
+
+The centroid terms reveal several recognizable topical groupings across both implementations. Discussions about sports, computer hardware, automobiles, firearms, cryptography, and Armenian–Turkish relations appear in both, often with similar top terms. Religious discussions also emerge in both, although the R implementation separates some of these discussions more distinctly than Python. These recurring patterns suggest that posts with distinctive vocabularies can form coherent groups without relying on the original topic labels.
+
+However, the discovered groupings do not always align with human-defined categories. Related discussions may be combined because they share vocabulary, while broader subject areas may be split into smaller groups. For example, R identifies separate groupings around file formats, software applications, and computer hardware, whereas Python organizes some of these discussions differently. Both implementations also capture general conversational language, article references, and requests for help, suggesting that clusters can reflect communication patterns as well as topical similarities.
+
+The cluster sizes vary considerably across both implementations, ranging from fewer than 100 documents in some groups to several thousand in the largest. In particular, both produce a large cluster dominated by general terms such as one, would, get, and like. This may indicate that many posts share common vocabulary that does not clearly distinguish one topic from another. Overall, the results demonstrate that TF-IDF and K-Means can uncover meaningful thematic patterns in unstructured text, but the resulting groups reflect similarities in word usage rather than necessarily reproducing human-defined categories. The similarities between the R and Python results suggest that some broad patterns are reasonably consistent, while differences in cluster composition highlight the ambiguity involved in grouping text without predefined labels.
 
 ---
 
-### Discussion
+### Conclusion
 
-This analysis illustrates the core strengths and limitations of both supervised and unsupervised text mining workflows:
+This case study explored how text preprocessing influences the ability of machine learning models to classify and organize unstructured discussion posts. Through supervised classification, we found that retaining raw Usenet text can produce deceptively high accuracy, partly because structural metadata provides shortcuts that reveal information about the original categories. After removing headers, quoted replies, and other structural artifacts, the Multinomial Naive Bayes model achieved approximately 73% accuracy across the twenty specific topics. However, accuracy increased to approximately 86% when predictions were evaluated across the seven broader categories. This suggests that even when the model struggles to distinguish between closely related topics, it can still recognize their broader thematic domains.
 
-- **Supervised Classification (Multinomial Naive Bayes)** succeeds when given clean, domain-specific vocabularies. Stripping metadata produced an accuracy jump from 4% to 75%. However, because Naive Bayes assumes word independence, it struggles to separate categories that share lexicons (such as `Atheism` and `Christianity`), confusing their intent because their word counts overlap.
-- **Unsupervised Clustering (K-Means)** uncovers latent structure without manual labels, effectively splitting single categories into specific sub-debates (such as the two political conflicts in the Middle East newsgroup) and isolating distinct author styles. However, it is vulnerable to conversational filler and fragments broad topics into sub-component clusters based on lexical co-occurrence.
+The unsupervised clustering analysis provided a complementary perspective. Without access to the original category labels, K-Means identified several recognizable topical groupings, including sports, computer hardware, automobiles, cryptography, and political discussions. However, the discovered clusters did not consistently align with the predefined categories. Some combined related discussions, while others captured general conversational language or communication patterns rather than specific subjects. Both the R and Python workflows revealed similar broad patterns, although their exact cluster compositions should be interpreted in the context of their underlying preprocessing and implementation.
 
-**Potential Improvements & Next Steps**
+Together, these findings highlight the importance of thoughtful text preprocessing and careful model evaluation. High classification accuracy does not necessarily indicate that a model has learned meaningful relationships, particularly when structural features can act as shortcuts. Similarly, unsupervised clustering can reveal useful patterns in unstructured text, but the resulting groupings depend on how documents are represented and do not necessarily reflect human-defined topics.
 
-1.  **N-Gram Modeling:** Expanding the vectorizer with `ngram_range=(1, 2)` or `(1, 3)` captures meaningful phrases (e.g., *operating system*, *middle east*, *first down*), providing immediate context beyond unigrams.
-2.  **Advanced Supervised Models:** Training Support Vector Machines (Linear SVM) or Logistic Regression classifiers often improves boundary delineation in high-dimensional text settings.
-3.  **Contextual Embeddings:** Utilizing transformer models (such as BERT or Sentence-BERT) enables representation of word context, separating theological advocacy from philosophical critique.
-4.  **Dimensionality Reduction & Visualization:** Applying t-SNE or UMAP to project the 5,000-dimensional TF-IDF vectors into 2D space allows interactive visual exploration of cluster separation and overlap.
+Ultimately, this case study demonstrates that the quality of text analysis depends not only on the choice of machine learning algorithm, but also on how the underlying data is represented and interpreted.
