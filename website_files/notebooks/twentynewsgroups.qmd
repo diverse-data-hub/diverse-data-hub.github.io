@@ -965,6 +965,8 @@ In supervised learning, models rely on human-defined labels. In this section, we
 
 We transform the cleaned text into a 5,000-dimensional TF-IDF matrix and fit a **K-Means algorithm** with $k = 20$.
 
+**Note:** We set $k = 20$, matching the number of original newsgroups, to explore how the unsupervised algorithm organizes the documents at a comparable level of granularity. However, K-Means does not have access to these labels during training and is not constrained to reproduce the original categories.
+
 ::: {.panel-tabset}
 ## R
 
@@ -979,13 +981,6 @@ df$cluster <- kmeans_r$fit_predict(X_tfidf)
 
 feat_names_r <- tfidf_vec_r$get_feature_names_out()
 order_centroids_r <- kmeans_r$cluster_centers_
-
-cat("Top 10 Terms per K-Means Cluster:\n")
-cat(strrep("=", 50), "\n")
-for (i in seq_len(nrow(order_centroids_r))) {
-  top_idx <- order(order_centroids_r[i, ], decreasing = TRUE)[1:10]
-  cat(sprintf("Cluster %02d: %s\n", i - 1, paste(feat_names_r[top_idx], collapse = ", ")))
-}
 ```
 
 ## Python
@@ -999,17 +994,81 @@ df["cluster"] = kmeans.fit_predict(X_tfidf)
 
 feature_names = tfidf_vectorizer.get_feature_names_out()
 order_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
+```
+:::
 
-print("Top 10 terms per K-Means Cluster:\n" + "="*50)
+We can view the top 10 terms per cluster to see ... 
+
+::: {.panel-tabset}
+## R
+
+```{r view_top_terms_r, warning = FALSE, message = FALSE}
+cat(strrep("=", 50), "\n")
+for (i in seq_len(nrow(order_centroids_r))) {
+  top_idx <- order(order_centroids_r[i, ], decreasing = TRUE)[1:10]
+  cat(sprintf("Cluster %02d: %s\n", i - 1, paste(feat_names_r[top_idx], collapse = ", ")))
+}
+```
+
+## Python
+
+```{python view_top_terms_py, warning = FALSE, message = FALSE}
 for i in range(len(kmeans.cluster_centers_)):
     top_terms = [feature_names[ind] for ind in order_centroids[i, :10]]
     print(f"Cluster {i:02d}: {', '.join(top_terms)}")
 ```
 :::
 
+We can also see the size for each cluster to understanding of how substantial each discovered group is ...
+
+::: {.panel-tabset}
+## R
+
+```{r cluster_size_r, warning = FALSE, message = FALSE}
+df |>
+  count(cluster) |>
+  arrange(cluster)
+```
+
+## Python
+
+```{python cluster_size_py, warning = FALSE, message = FALSE}
+cluster_sizes = df["cluster"].value_counts().sort_index()
+print(cluster_sizes)
+```
+:::
+
+# Checks
+
+```{python checks_py, warning = FALSE, message = FALSE}
+from sklearn.metrics import adjusted_rand_score
+
+ari = adjusted_rand_score(
+    r_cluster_assignments,
+    python_cluster_assignments
+)
+
+print(f"Adjusted Rand Index: {ari:.4f}")
+
+# check whether your TF-IDF inputs are equivalent
+
+print("R matrix shape:", X_tfidf_r.shape)
+print("Python matrix shape:", X_tfidf_py.shape)
+
+print("Same feature names:",
+      list(feature_names_r) == list(feature_names_py))
+
+print("Same document count:",
+      len(r_cluster_assignments) == len(python_cluster_assignments))
+```
+
 **Comparing Discovered Clusters to Predefined Labels**
 
-We cross-tabulate discovered clusters against macro-categories and specific topics to evaluate how well mathematical clusters mirror human categorization.
+Although K-Means does not use the original topic labels during training, we can use them afterward to interpret the discovered clusters. We cross-tabulate the cluster assignments against both the seven macro-categories and the twenty specific topics.
+
+The heatmaps show the proportion of documents within each cluster belonging to each original category. Each row represents one discovered cluster, with darker cells indicating a greater concentration of documents from a particular category.
+
+If a cluster is dominated by one category, it suggests that K-Means has identified a relatively distinct group of documents. However, clusters containing multiple categories may indicate overlapping vocabulary, shared themes, or differences between the way the algorithm groups documents and how humans define topics.
 
 **Heatmap 1: K-Means Clusters vs. Macro Categories**
 
@@ -1095,13 +1154,8 @@ plt.show()
 ```
 :::
 
-**Analysis of Unsupervised Cluster Patterns**
-
-1.  **Distinct Semantic Clusters:** Several clusters isolate distinct real-world topics. For example, Cluster 03 concentrates overwhelmingly in Sports (*game, team, player, hockey, season, win*), Cluster 02 isolates Space (*space, nasa, gov, shuttle, orbit, launch*), and Cluster 17 captures Cryptography (*key, chip, encryption, clipper, escrow*).
-2.  **The Dominant Personality Artifact:** Cluster 15 maps heavily into `Medicine`. Inspecting its top centroid terms (*dsl, chastity, cadre, geb, skepticism, gordon, pitt*) reveals a classic Usenet artifact: a single prolific contributor, Dr. Gordon Banks (username `geb@dsl.pitt.edu`), posted hundreds of messages to `sci.med`. Because his distinct vocabulary and signature were mathematically dense, K-Means clustered his personal writing style into its own group.
-3.  **Sub-Topic Splitting:** In `Middle East Politics`, the posts split across two distinct clusters: Cluster 10 captures the Israeli/Palestinian debate (*israel, arab, jew, israeli, palestinian*), whereas Cluster 11 isolates the Armenian/Turkish historical debate (*armenian, turkish, armenia, turk, genocide*). Unsupervised clustering split a single human-defined newsgroup into two coherent geopolitical sub-conversations.
-4.  **The Shared Vocabulary Trap:** In `Religion & Beliefs`, Cluster 12 spreads across both `Atheism` and `Christianity` due to shared vocabulary (*god, jesus, bible, christ, church, sin*). Lexical distance measures word overlap, not philosophical stance. Similarly, technical posts across `IBM PC Hardware`, `Mac Hardware`, `MS Windows`, and `X Windows` scatter across several general tech clusters (*window, driver, card, bus, scsi, disk*), demonstrating that vocabulary overlap fragments related categories.
-5.  **Conversational Filler Clusters:** Clusters 00, 01, and 06 exhibit faint horizontal bands across all 20 categories. Their centroids feature conversational verbs and generic internet terminology (*writes, article, university, would, think, time, know*), capturing general conversational style rather than topical substance.
+(short summary)
+Unsupervised algorithms discover patterns based on the representation of the data, not necessarily the categories or meanings that humans expect.
 
 ---
 
