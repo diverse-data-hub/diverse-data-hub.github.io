@@ -21,4 +21,4 @@ dependencies:
   - pmdarima=2.1.1
   - sktime=0.40.1
   - pip:
-      - diversedata==1.1.0
+      - diversedata==1.2.0
