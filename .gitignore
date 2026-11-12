@@ -9,3 +9,4 @@ _site/
 .positai
 .Renviron
 .ipynb_checkpoints/
+data/raw/twenty_newsgroups/20_newsgroups/

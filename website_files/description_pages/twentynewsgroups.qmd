@@ -1,0 +1,58 @@
+---
+title: "Twenty Newsgroups"
+toc: true
+toc-depth: 4
+toc-location: right
+sidebar: false
+---
+
+## About the Data
+
+This dataset contains approximately 20,000 Usenet discussion posts organized into 20 newsgroups covering topics such as computer hardware, science, sports, politics, religion, and vehicles. Originally collected by Ken Lang in 1995 for the Newsweeder system, the dataset provides a collection of real-world, user-generated text spanning a wide range of subjects, writing styles, and conversational patterns.
+
+Classifying text by topic is a common natural language processing (NLP) task that can help organize large collections of documents, categorize incoming messages, and make information easier to retrieve. However, text data often contains more than just the information relevant to the task. In addition to the main discussion, Usenet posts may contain structural metadata such as email headers, sender information, subject lines, quoted replies, and signatures. Although these elements may provide useful contextual information, they can also introduce noise or create misleading associations with the target category. As a result, a model may achieve high classification accuracy by recognizing metadata patterns rather than learning the actual subject matter of a discussion.
+
+This dataset provides an opportunity to investigate how text preprocessing influences model performance and the patterns learned from unstructured text. By comparing classification models trained and evaluated on raw and structurally cleaned posts, we can examine the extent to which metadata contributes to predictive performance and whether removing these shortcuts leads to more meaningful topic classification. We also explore whether unsupervised clustering can independently uncover meaningful topic groupings without access to the original category labels, and how these groupings compare with human-defined topics.
+
+### Access the Data
+
+<div class="button-container">
+  <a href="https://archive.ics.uci.edu/dataset/113/twenty+" target="_blank" class="download-button">
+    Download Dataset
+  </a>
+</div>
+
+### Metadata
+
+<div class="description-grid">
+  <div class="field-label">Dataset Name</div><div class="field-value">20 Newsgroups</div>
+  <div class="field-label">Dataset Characteristics</div><div class="field-value">Text, Multivariate</div>
+  <div class="field-label">Subject Area</div><div class="field-value">Natural Language Processing, Social Discourse</div>
+  <div class="field-label">Associated Tasks</div><div class="field-value">Classification, Clustering, Topic Modeling</div>
+  <div class="field-label">Feature Type</div><div class="field-value">Categorical, Text</div>
+  <div class="field-label">Instances</div><div class="field-value">19,997 records</div>
+  <div class="field-label">Features</div><div class="field-value">3</div>
+  <div class="field-label">Has Missing Values?</div><div class="field-value">No</div>
+</div>
+
+### Variables
+
+::: {.table-container}
+::: {.styled-table}
+
+| Variable Name     | Role      | Type        | Description                                                                 | Missing Values |
+|-------------------|-----------|-------------|-----------------------------------------------------------------------------|----------------|
+| `doc_ID`          | ID        | Categorical | Unique document identifier (original Usenet file number)                    | No             |
+| `category`        | Target    | Categorical | Original newsgroup category name (e.g., `alt.atheism`, `sci.space`)         | No             |
+| `text`            | Feature   | Text        | Unmodified post text including routing headers, quotes, and body            | No             |
+
+:::
+:::
+
+{{< include ../notebooks/twentynewsgroups.qmd >}} 
+
+## Attribution
+
+Data sourced from the [UCI Machine Learning Repository: Twenty Newsgroups](https://archive.ics.uci.edu/dataset/113/twenty+), licensed under a [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) license.
+
+Lang, Ken. "NewsWeeder: Learning to Filter Netnews." Machine Learning Proceedings 1995, edited by Armand Prieditis and Stuart Russell, Morgan Kaufmann, 1995, pp. 331-339. ScienceDirect, https://doi.org/10.1016/B978-1-55860-377-6.50048-7.
