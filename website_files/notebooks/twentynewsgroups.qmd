@@ -75,11 +75,18 @@ from IPython.display import Markdown
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# NLP and Modeling
+# NLP
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
+for resource in ['corpora/wordnet', 'corpora/omw-1.4', 'corpora/stopwords']:
+    try:
+        nltk.data.find(resource)
+    except LookupError:
+        nltk.download(resource.split('/')[1], quiet=True)
+
+# Modeling
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -484,6 +491,7 @@ plt.show()
 Let's inspect a sample post before and after cleaning illustrates the elimination of routing headers, sender metadata, and reply quotes.
 
 **Raw post:**
+
 ::: {.panel-tabset}
 ## R
 
