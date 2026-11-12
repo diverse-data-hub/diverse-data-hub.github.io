@@ -22,4 +22,4 @@ dependencies:
   - sktime=0.40.1
   - nltk=3.10.3
   - pip:
-      - diversedata==1.1.0
+      - diversedata==1.2.0

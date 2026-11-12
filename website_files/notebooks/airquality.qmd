@@ -73,6 +73,7 @@ library(kableExtra)
 
 ## Python
 ```{python load-libraries_py, results = "hide", warning = FALSE, message = FALSE}
+import diversedata as dd
 
 # Data and Plotting
 import datetime
@@ -96,101 +97,129 @@ from pmdarima import auto_arima
 
 #### 1. Data Loading & Processing
 
-First, we need to load our data from the Open Meteo API. We select parameters for Vancouver, BC over the past 3 years. This JSON request then needs to be parsed into a dataframe format, and we will add a few temporal features relating to hour, day of the week, and weekday versus weekend. 
+First, we need to load our data. This website loads the static data from the diversedata package, however live data can be loaded directly from the Open Meteo API, using the commented out code below. To do so, one must set parameters for the location and time of choice, then parse the request into a dataframe format. 
 
 ::: {.panel-tabset}
 ## R
 ```{r load_data_r}
 
+# Diversedata loading
+
+df <- diversedata::airquality 
+
+# preview data
+df  |>
+  head() |>
+  kable()
+
+# Open Meteo API Code
+
 # Define parameters for Vancouver, BC over last 3 years
-latitude <- 49.2827
-longitude <- -123.1207
-start_date <- "2023-09-01"
-end_date <- "2026-09-01"
-
-# Open-Meteo Air Quality Historical API endpoint
-url <- "https://air-quality-api.open-meteo.com/v1/air-quality"
-
-# Construct request with query parameters
-response <- GET(
-  url, 
-  query = list(
-    latitude = latitude,
-    longitude = longitude,
-    hourly = paste(c("pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide", "us_aqi"), collapse = ","),
-    start_date = start_date,
-    end_date = end_date
-  )
-)
-
-# Parse response content directly into R data structures
-data <- content(response, as = "parsed", simplifyVector = TRUE)
-
-# Parse into a data frame
-df <- data.frame(
-  time = ymd_hm(data$hourly$time),
-  pm10 = data$hourly$pm10,
-  pm2_5 = data$hourly$pm2_5,
-  nitrogen_dioxide = data$hourly$nitrogen_dioxide,
-  us_aqi = data$hourly$us_aqi
-) |> arrange(time)
-
-# Add temporal and calendar features
-df <- df |> 
-  mutate(
-    hour = hour(time),
-    day_of_week = wday(time, label = TRUE, abbr = FALSE), # gives full names like "Monday"
-    is_weekend = day_of_week %in% c("Saturday", "Sunday")
-  )
-
-print(head(df))
+# latitude <- 49.2827
+# longitude <- -123.1207
+# start_date <- "2023-09-01"
+# end_date <- "2026-09-01"
+# 
+# # Open-Meteo Air Quality Historical API endpoint
+# url <- "https://air-quality-api.open-meteo.com/v1/air-quality"
+# 
+# # Construct request with query parameters
+# response <- GET(
+#   url, 
+#   query = list(
+#     latitude = latitude,
+#     longitude = longitude,
+#     hourly = paste(c("pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide", "us_aqi"), collapse = ","),
+#     start_date = start_date,
+#     end_date = end_date
+#   )
+# )
+# 
+# # Parse response content directly into R data structures
+# data <- content(response, as = "parsed", simplifyVector = TRUE)
+# 
+# # Parse into a data frame
+# df <- data.frame(
+#   time = ymd_hm(data$hourly$time),
+#   pm10 = data$hourly$pm10,
+#   pm2_5 = data$hourly$pm2_5,
+#   nitrogen_dioxide = data$hourly$nitrogen_dioxide,
+#   us_aqi = data$hourly$us_aqi
+# ) |> arrange(time)
+# 
+# # Add temporal and calendar features
+# df <- df |> 
+#   mutate(
+#     hour = hour(time),
+#     day_of_week = wday(time, label = TRUE, abbr = FALSE), # gives full names like "Monday"
+#     is_weekend = day_of_week %in% c("Saturday", "Sunday")
+#   )
 
 ```
 
 ## Python
 ```{python load_data_py}
 
-# Define parameters for Vancouver, BC over last 3 years
-latitude = 49.2827
-longitude = -123.1207
-start_date = "2023-09-01"
-end_date = "2026-09-01"
+# Diversedata loading
 
-# Open-Meteo Air Quality Historical API endpoint
-url = "https://air-quality-api.open-meteo.com/v1/air-quality"
+df = dd.load_data("airquality")
 
-params = {
-    "latitude": latitude,
-    "longitude": longitude,
-    "hourly": ["pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide", "us_aqi"],
-    "start_date": start_date,
-    "end_date": end_date
-    
-}
-
-# Fetch data via JSON REST request
-response = requests.get(url, params=params)
-data = response.json()
-
-# Parse into a Pandas DataFrame
-hourly_data = data["hourly"]
-df = pd.DataFrame(
-    {
-        "time": pd.to_datetime(hourly_data["time"]),
-        "pm10": hourly_data["pm10"],
-        "pm2_5": hourly_data["pm2_5"],
-        "nitrogen_dioxide": hourly_data["nitrogen_dioxide"],
-        "us_aqi": hourly_data["us_aqi"],
-    }
-)
+df["time"] = pd.to_datetime(df["time"], format="ISO8601")
 df.set_index("time", inplace=True)
 
-# Add temporal and calendar features
-df["hour"] = df.index.hour
-df["day_of_week"] = df.index.day_name()
-df["is_weekend"] = df.index.dayofweek >= 5
+cols_to_factor = [
+  "hour", 
+  "day_of_week",
+    "is_weekend"
+]
+
+df[cols_to_factor] = df[cols_to_factor].astype("category")
 
 print(df.head())
+
+
+
+# Open Meteo API Code
+
+# Define parameters for Vancouver, BC over last 3 years
+# latitude = 49.2827
+# longitude = -123.1207
+# start_date = "2023-09-01"
+# end_date = "2026-09-01"
+# 
+# # Open-Meteo Air Quality Historical API endpoint
+# url = "https://air-quality-api.open-meteo.com/v1/air-quality"
+# 
+# params = {
+#     "latitude": latitude,
+#     "longitude": longitude,
+#     "hourly": ["pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide", "us_aqi"],
+#     "start_date": start_date,
+#     "end_date": end_date
+#     
+# }
+# 
+# # Fetch data via JSON REST request
+# response = requests.get(url, params=params)
+# data = response.json()
+# 
+# # Parse into a Pandas DataFrame
+# hourly_data = data["hourly"]
+# df = pd.DataFrame(
+#     {
+#         "time": pd.to_datetime(hourly_data["time"]),
+#         "pm10": hourly_data["pm10"],
+#         "pm2_5": hourly_data["pm2_5"],
+#         "nitrogen_dioxide": hourly_data["nitrogen_dioxide"],
+#         "us_aqi": hourly_data["us_aqi"],
+#     }
+# )
+# df.set_index("time", inplace=True)
+# 
+# # Add temporal and calendar features
+# df["hour"] = df.index.hour
+# df["day_of_week"] = df.index.day_name()
+# df["is_weekend"] = df.index.dayofweek >= 5
 
 ```
 :::
@@ -1884,89 +1913,101 @@ Another approach is to use SARIMAX, where we add explanatory variables to our SA
 ::: {.panel-tabset}
 ## R
 ```{r weather_r}
+# Load weather data for the same time frame
 
-# 1. Define location and time window
-latitude <- 49.2827
-longitude <- -123.1207
-start_date <- "2024-03-01"
-end_date <- "2025-05-31"
-
-# 2. Query Open-Meteo's Archive API using query parameters list
-url <- "https://archive-api.open-meteo.com/v1/archive"
-params <- list(
-  latitude = latitude,
-  longitude = longitude,
-  start_date = start_date,
-  end_date = end_date,
-  hourly = c("temperature_2m", "relative_humidity_2m", "precipitation", "cloud_cover", "wind_speed_10m", "wind_speed_100m")
-)
-
-# fromJSON handles query lists natively when constructed via httr or passed correctly,
-# or we can build the URL string safely using paste()
-query_string <- paste0(
-  url, "?latitude=", latitude,
-  "&longitude=", longitude,
-  "&start_date=", start_date,
-  "&end_date=", end_date,
-  "&hourly=temperature_2m,relative_humidity_2m,precipitation,cloud_cover,wind_speed_10m,wind_speed_100m"
-)
-
-data <- fromJSON(query_string)
-
-# 3. Parse hourly payload into a data frame (using ymd_hm for ISO strings with 'T')
-hourly_df <- as.data.frame(data$hourly) |> 
-  mutate(time = ymd_hm(time))
-
-# Join the weather data to the air quality data on the time column
-combined_df <- df |> 
-  inner_join(hourly_df, by = "time")
+# From static csv file for stability
+combined_df <- read.csv("../../data/clean/airquality_plusweather.csv")
+combined_df$time <- ymd_hms(combined_df$time)
 
 head(combined_df)
+
+# From Open Meteo API
+# # 1. Define location and time window
+# latitude <- 49.2827
+# longitude <- -123.1207
+# start_date <- "2024-03-01"
+# end_date <- "2025-05-31"
+# 
+# # 2. Query Open-Meteo's Archive API using query parameters list
+# url <- "https://archive-api.open-meteo.com/v1/archive"
+# params <- list(
+#   latitude = latitude,
+#   longitude = longitude,
+#   start_date = start_date,
+#   end_date = end_date,
+#   hourly = c("temperature_2m", "relative_humidity_2m", "precipitation", "cloud_cover", "wind_speed_10m", "wind_speed_100m")
+# )
+# 
+# # fromJSON handles query lists natively when constructed via httr or passed correctly,
+# # or we can build the URL string safely using paste()
+# query_string <- paste0(
+#   url, "?latitude=", latitude,
+#   "&longitude=", longitude,
+#   "&start_date=", start_date,
+#   "&end_date=", end_date,
+#   "&hourly=temperature_2m,relative_humidity_2m,precipitation,cloud_cover,wind_speed_10m,wind_speed_100m"
+# )
+# 
+# data <- fromJSON(query_string)
+# 
+# # 3. Parse hourly payload into a data frame (using ymd_hm for ISO strings with 'T')
+# hourly_df <- as.data.frame(data$hourly) |> 
+#   mutate(time = ymd_hm(time))
+# 
+# # Join the weather data to the air quality data on the time column
+# combined_df <- df |> 
+#   inner_join(hourly_df, by = "time")
+
+
 
 ```
 
 ## Python
 ```{python weather_py}
-
 # Load weather data for the same time frame
 
-# 1. Define location and time window
-latitude = 49.2827
-longitude = -123.1207
-start_date = "2024-03-01"
-end_date = "2025-05-31"
-
-# 2. Query Open-Meteo's Archive API for daily aggregations
-url = "https://archive-api.open-meteo.com/v1/archive"
-params = {
-    "latitude": latitude,
-    "longitude": longitude,
-    "start_date": start_date,
-    "end_date": end_date,
-    "hourly": ["temperature_2m", "relative_humidity_2m", "precipitation", "cloud_cover", "wind_speed_10m", "wind_speed_100m"],
-}
-
-response = requests.get(url, params=params)
-data = response.json()
-
-# 3. Parse daily payload into a Pandas DataFrame
-hourly_data = data["hourly"]
-hourly_df = pd.DataFrame(hourly_data)
-
-hourly_df["time"] = pd.to_datetime(hourly_df["time"])
-
-# Set date as the index
-hourly_df.set_index("time", inplace=True)
-
-# Join the weather data to the air quality data on the index
-combined_df = pd.merge(
-    df,
-    hourly_df,
-    how = 'inner',
-    on = 'time'
-)
+# From static csv file for stability
+combined_df = pd.read_csv("../../data/clean/airquality_plusweather.csv", parse_dates=["time"], index_col="time")
 
 combined_df.head()
+
+
+# From Open Meteo API
+# 1. Define location and time window
+# latitude = 49.2827
+# longitude = -123.1207
+# start_date = "2024-03-01"
+# end_date = "2025-05-31"
+# 
+# # 2. Query Open-Meteo's Archive API for daily aggregations
+# url = "https://archive-api.open-meteo.com/v1/archive"
+# params = {
+#     "latitude": latitude,
+#     "longitude": longitude,
+#     "start_date": start_date,
+#     "end_date": end_date,
+#     "hourly": ["temperature_2m", "relative_humidity_2m", "precipitation", "cloud_cover", "wind_speed_10m", "wind_speed_100m"],
+# }
+# 
+# response = requests.get(url, params=params)
+# data = response.json()
+# 
+# # 3. Parse daily payload into a Pandas DataFrame
+# hourly_data = data["hourly"]
+# hourly_df = pd.DataFrame(hourly_data)
+# 
+# hourly_df["time"] = pd.to_datetime(hourly_df["time"])
+# 
+# # Set date as the index
+# hourly_df.set_index("time", inplace=True)
+# 
+# # Join the weather data to the air quality data on the index
+# combined_df = pd.merge(
+#     df,
+#     hourly_df,
+#     how = 'inner',
+#     on = 'time'
+# )
 
 ```
 :::

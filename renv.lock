@@ -2422,7 +2422,6 @@
       "License": "CC BY 4.0",
       "Encoding": "UTF-8",
       "Roxygen": "list(markdown = TRUE)",
-      "RoxygenNote": "7.3.2",
       "Depends": [
         "R (>= 3.5)"
       ],
@@ -2433,14 +2432,17 @@
       ],
       "VignetteBuilder": "knitr",
       "URL": "https://github.com/diverse-data-hub/diversedata",
-      "Author": "Katie Burak [aut, cre, cph], Elham E Khoda [aut, cph], Azin Piran [aut], Francisco Ramirez [aut], Siddarth Subrahmanian [aut], Stephanie Ta [ctb]",
-      "Maintainer": "Katie Burak <kburak@stat.ubc.ca>",
+      "Config/roxygen2/version": "8.1.0",
+      "RoxygenNote": "7.3.2",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteUsername": "diverse-data-hub",
       "RemoteRepo": "diversedata",
-      "RemoteRef": "main",
-      "RemoteSha": "023bac59697f8152598429a16c8645848a444cff"
+      "RemoteUsername": "diverse-data-hub",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "b27a4d142fdd73a253041939f73dc6a6542d1c94",
+      "NeedsCompilation": "no",
+      "Author": "Katie Burak [aut, cre, cph], Elham E Khoda [aut, cph], Azin Piran [aut], Francisco Ramirez [aut], Siddarth Subrahmanian [aut], Stephanie Ta [ctb]",
+      "Maintainer": "Katie Burak <kburak@stat.ubc.ca>"
     },
     "doBy": {
       "Package": "doBy",
